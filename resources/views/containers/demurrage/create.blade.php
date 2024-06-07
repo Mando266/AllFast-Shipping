@@ -162,110 +162,6 @@
                                 </div>
                             </div>
 
-
-                            <div class="container-fluid">
-                                <div class="row mb-3">
-                                    <div class="col-md-12">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <div class="row align-items-center">
-                                                    <div class="col-md-8">
-                                                        <h5 class="card-title">Period</h5>
-                                                    </div>
-                                                    <div class="col-md-4 text-right">
-                                                        <button type="button" class="btn btn-sm btn-success"
-                                                                id="addSlab">Create Slab
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                                <div class="row mt-3">
-                                                    <div class="col-md-3 offset-md-1">
-                                                        <label for="containersTypesInputHeader"
-                                                               class="text-center w-30">Select Container Type:</label>
-                                                        <select class="selectpicker form-control"
-                                                                id="containersTypesInputHeader"
-                                                                data-live-search="true" name="container_type_id"
-                                                                data-size="10"
-                                                                required>
-                                                            @foreach ($containersTypes as $item)
-                                                                <option value="{{$item->id}}">{{$item->name}}</option>
-                                                            @endforeach
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="table-responsive">
-                                                    <table id="period" class="table table-bordered table-hover">
-                                                        <thead class="thead-light">
-                                                        <tr>
-                                                            <th>Period</th>
-                                                            <th>Rate</th>
-                                                            <th>Calendar Days</th>
-                                                            <th>
-                                                                <a id="add"> Add Period <i class="fas fa-plus"></i></a>
-                                                            </th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        <tr>
-                                                            <td>
-                                                                <input type="text" id="period" name="period[0][period]"
-                                                                       class="form-control period"
-                                                                       autocomplete="off">
-                                                                <input name="period[0][container_type]"
-                                                                       class="container_type" hidden>
-                                                            </td>
-                                                            <td>
-                                                                <input type="text" id="rate" name="period[0][rate]"
-                                                                       class="form-control rate"
-                                                                       autocomplete="off">
-                                                            </td>
-                                                            <td>
-                                                                <input type="text" id="days"
-                                                                       name="period[0][number_off_days]"
-                                                                       class="form-control days" autocomplete="off">
-                                                            </td>
-                                                            <td></td>
-                                                        </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-
-                                <div class="row mb-3">
-                                    <div class="col-md-12">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <h5 class="card-title">Slabs</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="table-responsive">
-                                                    <table id="slabs" class="table table-bordered">
-                                                        <thead>
-                                                        <tr>
-                                                            <th>Equipment Type</th>
-                                                            <th>Status</th>
-                                                            <th>Currency Code</th>
-                                                            <th>Container Status</th>
-                                                            <th>Actions</th>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
                             <div class="row">
                                 <div class="col-md-12 text-center">
                                     <button type="submit"
@@ -288,11 +184,12 @@
         $("#createForm").on('submit', e => functionName(e))
         const functionName = async e => {
             e.preventDefault();
+            const companyId = "{{optional(auth()->user())->company->id}}";
             const portId = $('#port').val();
             const from = $('#validity_from').val();
             const to = $('#validity_to').val();
             const triffType = $('#tariff_type_id').val();
-            let { data: { valid } }  = await axios.get(`/api/validate/demurrage/${portId}/${from}/${to}/${triffType}`)
+            let { data: { valid } }  = await axios.get(`/api/validate/demurrage/${companyId}/${portId}/${from}/${to}/${triffType}`)
             if ( valid === true){
                 swal({
                     title: `There is overlap`,
@@ -303,131 +200,6 @@
             }
         }
     </script>
-    <script>
-        var counter = 0
-        var selectedTypes = []
-        document.addEventListener('DOMContentLoaded', function () {
-            const addSlabButton = document.getElementById('addSlab');
-            const periodTableBody = document.querySelector('#period tbody');
-            const slabsTableBody = document.querySelector('#slabs tbody');
-            const containersTypesInput = document.getElementById('containersTypesInputHeader');
-
-
-            addSlabButton.addEventListener('click', function () {
-                let equipmentType = containersTypesInput.selectedOptions[0].textContent
-                let equipmentTypeValue = containersTypesInput.value;
-                if (selectedTypes.includes(equipmentTypeValue)) {
-                    swal({
-                        title: `A slab was already created for the ${equipmentType} container type.`,
-                        icon: 'error'
-                    });
-                    return;
-                }
-
-                const periodRows = Array.from(periodTableBody.querySelectorAll('tr:not(.d-none)'));
-                let hasEmptyInput = false;
-                let alerted = false;
-                periodRows.forEach(row => {
-                    const periodInput = row.querySelector('.period').value;
-                    const rateInput = row.querySelector('.rate').value;
-                    const daysInput = row.querySelector('.days').value;
-                    if (periodInput === '' || rateInput === '' || daysInput === '') {
-                        // Show a SweetAlert indicating the empty input
-                        swal({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: 'Please fill in all input fields before proceeding!',
-                        });
-
-                        alerted = true;
-                        hasEmptyInput = true;
-                    }
-                    let trimmedInput = periodInput.replace(/\s/g, '');
-                    let periodIsAlpha = /^[a-zA-Z0-9]+$/.test(trimmedInput);
-                    let rateIsNumeric = /^[0-9]+(\.[0-9]+)?$/.test(rateInput);
-                    let daysIsNumeric = /^[0-9]+$/.test(daysInput);
-                    if (!periodIsAlpha) {
-                        swal({
-                            icon: 'error',
-                            title: 'Invalid Input',
-                            text: 'The period input should only contain letters and numbers.',
-                        });
-                        alerted = true;
-                        hasEmptyInput = true;
-                    }
-                    if (!rateIsNumeric) {
-                        swal({
-                            icon: 'error',
-                            title: 'Invalid Input',
-                            text: 'The rate input should only contain numbers.',
-                        });
-                        alerted = true;
-                        hasEmptyInput = true;
-                    }
-                    if (!daysIsNumeric) {
-                        swal({
-                            icon: 'error',
-                            title: 'Invalid Input',
-                            text: 'The days input should only contain numbers.',
-                        });
-                        alerted = true;
-                        hasEmptyInput = true;
-                    }
-                });
-                if (hasEmptyInput || periodRows.length === 0) {
-                    if (!alerted) {
-                        swal({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: 'Please fill in all input fields before proceeding!',
-                        });
-                    }
-                    return;
-                }
-                selectedTypes.push(equipmentTypeValue);
-
-                let count = counter++
-
-                const newRow = document.createElement('tr');
-                newRow.innerHTML = `
-                    <input type="text" class="equipmentType form-control bg-transparent border-0 period" value="${equipmentType}" disabled/>
-                    <input type="hidden" name="equipmentType" value="${equipmentTypeValue}" disabled/>
-                    <td><input type="text" class="status form-control bg-transparent border-0 period" value="Active" disabled/></td>
-                    <td><input type="text" class="currencyCode form-control bg-transparent border-0 period" value="Same As Demurrage" disabled/></td>
-                    <td><input type="text" class="containerStatus form-control bg-transparent border-0 period" value="Same As Demurrage" disabled/></td>
-                    <td>
-                        <button class="removeSlabBtn btn btn-danger" id="${count}"><i class="fa fa-trash"></i></button>
-                    </td>
-                `;
-
-                slabsTableBody.appendChild(newRow);
-
-
-                newRow.querySelector('.removeSlabBtn').addEventListener('click', function (e) {
-                    let rowId = e.target.id;
-                    this.closest('tr').remove();
-                    document.querySelectorAll(`.row-${rowId}`).forEach(row => row.remove());
-
-                    const equipmentTypeToRemove = newRow.querySelector('.equipmentType').value;
-                    const indexToRemove = selectedTypes.indexOf(equipmentTypeToRemove);
-                    if (indexToRemove !== -1) {
-                        selectedTypes.splice(indexToRemove, 1);
-                    }
-                });
-
-                periodRows.forEach(row => {
-                    const periodInput = row.querySelector('.period').value;
-                    const rateInput = row.querySelector('.rate').value;
-                    const daysInput = row.querySelector('.days').value;
-
-                    row.querySelector('.container_type').value = equipmentTypeValue
-                    row.className = `d-none row-${count}`;
-                });
-            });
-        });
-    </script>
-
-
     <script>
         $(document).ready(function () {
             $('#tariff_type_id').on('change', function () {

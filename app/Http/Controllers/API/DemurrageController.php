@@ -17,9 +17,10 @@ class DemurrageController extends Controller
      * @param $triffType
      * @return JsonResponse
      */
-    public function checkTriffOverlap ($portId,$from,$to,$triffType): JsonResponse
+    public function checkTriffOverlap ($companyId,$portId,$from,$to,$triffType): JsonResponse
     {
         $valid = Demurrage::query()->where('port_id', $portId)->where('tariff_type_id', $triffType)
+            ->where('company_id',$companyId)
             ->where(function ($query) use ($from, $to) {
                 $query->where(function ($query) use ($from, $to) {
                     $query->where('validity_from', '<=', $from)->where('validity_to', '>=', $from);

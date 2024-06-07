@@ -56,5 +56,5 @@ Route::get('storage/bl/containers/{id}/{company_id}', [StorageContainersControll
 Route::get('storage/triffs/{service}/{company_id}', [StorageContainersController::class, 'getStorageTriffs']);
 Route::get('/get-ports', [PortController::class, 'getPorts'])->name('api.get-ports');
 Route::get('get_invoice_json/{id}','Invoice\InvoiceController@invoiceJson');
-Route::get('validate/demurrage/{portId}/{from}/{to}/{triffType}', [DemurrageController::class, 'checkTriffOverlap']);
+Route::get('validate/demurrage/{companyId}/{portId}/{from}/{to}/{triffType}', [DemurrageController::class, 'checkTriffOverlap']);
 
