@@ -1,0 +1,3 @@
+[14-Feb-2023 10:15:25 UTC] PHP Fatal error:  Can't use method return value in write context in /home3/meastlin/public_html/demo/app/Exports/BookingExport.php on line 46
+[14-Feb-2023 10:15:28 UTC] PHP Fatal error:  Can't use method return value in write context in /home3/meastlin/public_html/demo/app/Exports/BookingExport.php on line 46
+[14-Feb-2023 10:17:08 UTC] PHP Fatal error:  Can't use method return value in write context in /home3/meastlin/public_html/demo/app/Exports/BookingExport.php on line 46

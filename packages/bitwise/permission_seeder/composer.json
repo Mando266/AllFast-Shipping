@@ -1,0 +1,21 @@
+{
+    "name": "bitwise/permissions",
+    "description": "laratrust permission seeder",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mahmoud Hosny",
+            "email": "mahmoud.e.hosny84@gmail.com"
+        }
+    ],
+    "require": {
+        "laravel/sanctum": "^2.3",
+        "santigarcor/laratrust": "5.2.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Bitwise\\PermissionSeeder\\":"src"
+        }
+    }
+}

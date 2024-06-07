@@ -1,0 +1,38 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreateAgentsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('agents', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('city')->nullable();
+            $table->boolean('intermediate_payer')->nullable();
+            $table->boolean('port_control')->nullable();
+            $table->boolean('documentation_control')->nullable();
+            $table->unsignedInteger('country_id')->nullable();
+            $table->BigInteger('company_id')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('agents');
+    }
+}
