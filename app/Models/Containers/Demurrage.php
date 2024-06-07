@@ -51,4 +51,24 @@ class Demurrage extends Model implements PermissionSeederContract
     public function bound(){
         return $this->belongsTo(Bound::class,'bound_id','id');
     }
+    public function slabs()
+    {
+        return $this->hasMany(DemurageContainerType::class,'demurage_id' ,'id');
+    }
+    public function periods()
+    {
+        return $this->hasMany(DemurageContainerTypeSlab::class, 'demurrage_container_id', 'id');
+    }
+
+    public function createOrUpdateSlabs($slabsData)
+    {
+        $slabs = DemurageContainerType::where('demurage_id', $this->id)->with('periods')->get();
+        if (is_array($slabs) || is_object($slabs)){
+            foreach ($slabs as $slab) {
+
+                foreach($slab->periods as $period){
+                }
+            }
+        }
+    }
 }
