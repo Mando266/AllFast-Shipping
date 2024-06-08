@@ -42,40 +42,6 @@
                             </div>
 
                             <div class="form-group col-md-2">
-                                <label for="equipment_type_id">Equipment Type <span class="text-warning"> *</span></label>
-                                 <select class="selectpicker form-control" id="equipment_type_id" data-live-search="true" name="equipment_type_id" data-size="10"
-                                 title="{{trans('forms.select')}}" required>
-                                    @foreach ($equipmentTypes as $item)
-                                        @if($quotation->equipment_type_id != null)
-                                        <option value="{{$item->id}}" {{$item->id == old('equipment_type_id',$quotation->equipment_type_id) ? 'selected':'disabled'}}>{{$item->name}}</option>
-                                        @else
-                                        <option value="{{$item->id}}" {{$item->id == old('equipment_type_id',$quotation->equipment_type_id) ? 'selected':''}}>{{$item->name}}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                @error('equipment_type_id')
-                                <div style="color: red;">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            @if(request()->input('quotation_id') == "draft")
-
-                            <div class="form-group col-md-2">
-                                <label for="status">Is Transhipment</label>
-                                <select class="selectpicker form-control" data-live-search="true" name="is_transhipment" title="{{trans('forms.select')}}">
-                                    <option value="1">Yes</option>
-                                    <option value="0">NO</option>
-                                </select>
-                                @error('is_transhipment')
-                                <div style="color:red;">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            @else
-                            <input type="hidden" name="is_transhipment" value="0">
-                            <div class="form-group col-md-2">
                                 <label for="status">Booking Status<span class="text-warning"> * </span></label>
                                 <select class="selectpicker form-control" data-live-search="true" name="booking_confirm" title="{{trans('forms.select')}}" required>
                                     <option value="1">Confirm</option>
@@ -87,7 +53,7 @@
                                 </div>
                                 @enderror
                             </div>
-                            @endif
+                            
                             <div class="form-group col-md-4" style="padding-top: 30px;">
                                 <div class="form-check">
                                 <input type="checkbox" id="soc" name="soc" value="1"  onclick="return false;" readonly {{$quotation->soc == 1 ? 'checked' : ''}}><a style="font-size: 15px; color: #3b3f5c; letter-spacing: 1px; margin-right: 10px;"> SOC </a>

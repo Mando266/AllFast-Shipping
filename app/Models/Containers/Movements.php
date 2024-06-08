@@ -111,5 +111,4 @@ class Movements extends Model implements PermissionSeederContract
     {
         return $this->belongsTo(Booking::class, 'booking_no');
     }
-
 }

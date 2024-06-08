@@ -126,12 +126,12 @@ class BookingController extends Controller
                 return $query->where('role_id', 1);
             }
         )->with('CustomerRoles.role')->get();
-        $terminals = Terminals::where('company_id', Auth::user()->company_id)->get();
+        $terminals = Terminals::get();
         if (request('quotation_id') == 'draft') {
             $quotation = new Quotation();
         } else {
             $quotation = Quotation::findOrFail(request('quotation_id'));
-            $terminals = Terminals::where('company_id', Auth::user()->company_id)->where(
+            $terminals = Terminals::where(
                 'port_id',
                 $quotation->discharge_port_id
             )->get();
@@ -139,8 +139,17 @@ class BookingController extends Controller
     }
 
         $agents = Agents::where('company_id', Auth::user()->company_id)->where('is_active', 1)->get();
-        $equipmentTypes = ContainersTypes::orderBy('id')->get();
-        $terminal = Terminals::where('company_id', Auth::user()->company_id)->get();
+        
+        $equipmentTypeIds = $quotation->quotationDesc->pluck('equipment_type_id')->toArray();
+        $equipmentTypes = collect(); // Initialize an empty collection
+        if (!empty($equipmentTypeIds)) {
+            $equipmentTypes = ContainersTypes::whereIn('id', $equipmentTypeIds)
+                ->orderBy('id')
+                ->get();
+        }
+        
+        //dd($equipmentTypes);
+        $terminal = Terminals::get();
         $vessels = Vessels::where('company_id', Auth::user()->company_id)->get();
         if (request('quotation_id') == 'draft') {
             $voyages = Voyages::with('vessel', 'voyagePorts')->where('company_id', Auth::user()->company_id)->get();
@@ -153,7 +162,7 @@ class BookingController extends Controller
             )->get();
         }
 
-        $ports = Ports::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
+        $ports = Ports::orderBy('id')->get();
         if($quotation->shipment_type == 'Export'){
             $containers = Containers::where('company_id', Auth::user()->company_id)->whereHas(
                 'activityLocation',
@@ -174,29 +183,17 @@ class BookingController extends Controller
                 }
             )->where('status', 2)->get();
         }
-
-        $transhipmentContainers = Containers::where('company_id', Auth::user()->company_id)->where(
-            'is_transhipment',
-            1
-        )->get();
-        $activityLocations = Ports::where('company_id', Auth::user()->company_id)->get();
+        $activityLocations = Ports::get();
         
         if ($quotation->shipment_type == 'Export') {
-            $activityLocations = Ports::where('country_id', $quotation->countrydis)->where(
-                'company_id',
-                Auth::user()->company_id
-            )->get();
+            $activityLocations = Ports::where('country_id', $quotation->countrydis)->get();
         } elseif ($quotation->shipment_type != 'Export') {
-            $activityLocations = Ports::where('country_id', $quotation->countryload)->where(
-                'company_id',
-                Auth::user()->company_id
-            )->get();
+            $activityLocations = Ports::where('country_id', $quotation->countryload)->get();
         }
 
         $line = Lines::where('company_id', Auth::user()->company_id)->get();
         return view('booking.booking.create', [
             'ffw' => $ffw,
-            'transhipmentContainers' => $transhipmentContainers,
             'consignee' => $consignee,
             'containers' => $containers,
             'agents' => $agents,
