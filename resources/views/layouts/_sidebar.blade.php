@@ -132,11 +132,11 @@
                                                 <a href="{{route('localporttriff.index')}}">Local Port Triff</a>
                                             </li>
                                         @endpermission
-                                        <!-- @permission('Demurrage-List')
+                                        @permission('Demurrage-List')
                                             <li>
                                                 <a href="{{route('demurrage.index')}}">Demurrage and Detention Tariffs</a>
                                             </li>
-                                        @endpermission -->
+                                        @endpermission
                                         <!-- @permission('SupplierPrice-List')
                                             <li>
                                                 <a href="{{route('supplierPrice.index')}}"> Slot Rates Triffs </a>
