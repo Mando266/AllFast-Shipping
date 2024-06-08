@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Models\Containers;
+use App\Models\Master\Terminals;
 use App\TariffType;
 use Bitwise\PermissionSeeder\PermissionSeederContract;
 use Bitwise\PermissionSeeder\Traits\PermissionSeederTrait;
@@ -43,7 +44,7 @@ class Demurrage extends Model implements PermissionSeederContract
         return $this->belongsTo(Ports::class,'port_id','id');
     }
     public function terminal(){
-        return $this->belongsTo(Ports::class,'terminal_id','id');
+        return $this->belongsTo(Terminals::class,'terminal_id','id');
     }
     public function country(){
         return $this->belongsTo(Country::class,'country_id','id');
