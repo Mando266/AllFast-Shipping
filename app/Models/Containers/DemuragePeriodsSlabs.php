@@ -19,13 +19,14 @@ class DemuragePeriodsSlabs extends Model
         return $this->belongsTo(Demurrage::class, 'demurage_id', 'id');
     }
 
-    public function periods(): HasMany
-    {
-        return $this->hasMany(DemurageContainerTypeSlab::class, 'demurrage_container_id', 'id');
-    }
 
     public function containersType(){
         return $this->belongsTo(ContainersTypes::class,'container_type_id','id');
+    }
+
+    public function demurageContainerType()
+    {
+        return $this->belongsTo(DemurageContainerType::class, 'demurrage_container_id');
     }
 
 

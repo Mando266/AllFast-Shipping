@@ -6,6 +6,7 @@ use App\Filters\Containers\ContainersIndexFilter;
 use App\Http\Controllers\Controller;
 use App\Models\Containers\Bound;
 use App\Models\Containers\DemuragePeriodsSlabs;
+use App\Models\Containers\DemurageContainerType ;
 use App\Models\Containers\Demurrage;
 use App\Models\Containers\Period;
 use App\Models\Containers\Triff;
@@ -66,61 +67,83 @@ class DemurageController extends Controller
     {
         $user = Auth::user();
 
-        $demurrages = Demurrage::create([
+        // Create the demurrage entry
+        $demurrage = Demurrage::create([
             'country_id' => $request->input('country_id'),
             'terminal_id' => $request->input('terminal_id'),
             'port_id' => $request->input('port_id'),
             'validity_from' => $request->input('validity_from'),
             'validity_to' => $request->input('validity_to'),
             'currency' => $request->input('currency'),
-            'container_status' => $request->container_status,
+            'container_status' => $request->input('container_status'),
             'tariff_id' => $request->input('tariff_id'),
             'company_id' => $user->company_id,
-            'tariff_type_id' => $request->tariff_type_id,
+            'tariff_type_id' => $request->input('tariff_type_id'),
         ]);
-        $slabs = collect($request->period)->groupBy('container_type_id');
-        foreach ($slabs as $slab) {
+
+        // Iterate over each container type
+        foreach ($request->input('container_types') as $containerTypeId => $containerTypeData) {
+            // Check if periods data is set and is an array
+            if (!isset($containerTypeData['periods']) || !is_array($containerTypeData['periods'])) {
+                // Handle the error, e.g., skip this container type or throw an exception
+                continue;
+            }
+
+            // Create a new DemurageContainerType entry
             $createdContainerTypeSlab = DemurageContainerType::create([
-                'demurage_id' => $demurrages->id,
-                'container_type_id' => $demurrages->container_type_id,
+                'demurage_id' => $demurrage->id,
+                'container_type_id' => $containerTypeId,
             ]);
-            foreach ($slab as $period) {
+
+            // Create associated DemuragePeriodsSlabs entries
+            foreach ($containerTypeData['periods'] as $period) {
                 DemuragePeriodsSlabs::create([
                     'rate' => $period['rate'],
                     'period' => $period['period'],
-                    'number_off_dayes' => $period['number_off_days'],
-                    'container_type_id'=>$createdContainerTypeSlab->container_type_id,
+                    'number_off_dayes' => $period['days'],
+                    'container_type_id' => $containerTypeId,
                     'demurrage_container_id' => $createdContainerTypeSlab->id,
                 ]);
             }
         }
+
         return redirect()->route('demurrage.index')->with('success', trans('Demurrage.created'));
     }
+
+
+
 
     public function show($id)
     {
         $this->authorize(__FUNCTION__, Demurrage::class);
+
         $demurrages = Demurrage::find($id);
-        $slabs = DemuragePeriodsSlabs::where('demurage_id', $id)->with('periods')->get();
+        $slabs = DemurageContainerType::where('demurage_id', $id)->with('periods')->get();
+        $periodData = [];
 
         foreach ($slabs as $slab) {
             foreach ($slab->periods as $period) {
-                $periodData = $period->toArray();
+                $periodData[] = $period->toArray();
             }
         }
-        // dd($slabs);
+
+        $tariffTypes = TariffType::all();
+
         return view('containers.demurrage.show', [
             'demurrages' => $demurrages,
             'slabs' => $slabs,
             'periodData' => $periodData,
+            'tariffTypes' => $tariffTypes,
         ]);
     }
+
+
 
 
     public function edit(Demurrage $demurrage)
     {
         $this->authorize(__FUNCTION__, Demurrage::class);
-        $slabs = DemuragePeriodsSlabs::where('demurage_id', $demurrage->id)->with('periods')->get();
+        $slabs = DemurageContainerType::where('demurage_id', $demurrage->id)->with('periods')->get();
         $tariffTypes = TariffType::all();
         $countries = Country::orderBy('id')->get();
         $bounds = Bound::orderBy('id')->get();
@@ -130,7 +153,7 @@ class DemurageController extends Controller
         $currency = Currency::all();
         $terminals = Terminals::where('company_id', Auth::user()->company_id)->get();
         $containerstatus = ContainerStatus::orderBy('id')->get();
-        
+
         return view('containers.demurrage.edit', [
             'demurrage' => $demurrage,
             'terminals' => $terminals,
@@ -148,7 +171,69 @@ class DemurageController extends Controller
 
     public function update(Request $request, Demurrage $demurrage)
     {
+        $this->authorize(__FUNCTION__, Demurrage::class);
+
+        // Define the demurrage data that can be updated
+        $demurrageData = [
+            'country_id' => $request->country_id,
+            'terminal_id' => $request->terminal_id,
+            'port_id' => $request->port_id,
+            'bound_id' => $request->bound_id,
+            'currency' => $request->currency,
+            'validity_from' => $request->validity_from,
+            'validity_to' => $request->validity_to,
+            'tariff_id' => $request->tariff_id,
+            'is_storge' => $request->is_storge,
+            'container_status' => $request->container_status,
+        ];
+
+        // Update the Demurrage model with the data
+        $demurrage->update($demurrageData);
+
+        // Track existing container types for comparison
+        $existingContainerTypes = $demurrage->slabs->pluck('container_type_id')->toArray();
+
+        // Iterate over each container type and its periods to create or update slabs and periods
+        foreach ($request->container_types as $containerTypeId => $containerTypeData) {
+            $createdSlab = DemurageContainerType::updateOrCreate(
+                ['demurage_id' => $demurrage->id, 'container_type_id' => $containerTypeData['id']],
+                ['container_type_id' => $containerTypeData['id']]
+            );
+
+            // Delete old periods related to the current slab
+            DemuragePeriodsSlabs::where('demurrage_container_id', $createdSlab->id)->delete();
+
+            if (isset($containerTypeData['periods'])) {
+                foreach ($containerTypeData['periods'] as $period) {
+                    DemuragePeriodsSlabs::create([
+                        'rate' => $period['rate'],
+                        'period' => $period['period'],
+                        'number_off_dayes' => $period['days'],
+                        'container_type_id' => $containerTypeData['id'],
+                        'demurrage_container_id' => $createdSlab->id,
+                    ]);
+                }
+            }
+        }
+
+        // Delete slabs for container types that were removed
+        $newContainerTypes = array_column($request->container_types, 'id');
+        $containerTypesToDelete = array_diff($existingContainerTypes, $newContainerTypes);
+
+        foreach ($containerTypesToDelete as $deletedContainerTypeId) {
+            $slab = DemurageContainerType::where('demurage_id', $demurrage->id)->where('container_type_id', $deletedContainerTypeId)->first();
+            if ($slab) {
+                DemuragePeriodsSlabs::where('demurrage_container_id', $slab->id)->delete();
+                $slab->delete();
+            }
+        }
+
+        return redirect('/containers/demurrage')->with('success', trans('Demurrage.updated.success'));
     }
+
+
+
+
 
 
     /**
