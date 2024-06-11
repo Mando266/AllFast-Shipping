@@ -19,7 +19,7 @@ class QuotationExport implements FromCollection, WithHeadings
      */
     public function __construct(Request $quotations)
     {
-        $this->quotations = Quotation::filter(new QuotationIndexFilter($quotations))->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->get();
+        $this->quotations = Quotation::filter(new QuotationIndexFilter($quotations))->where('company_id', Auth::user()->company_id)->with('quotationDesc')->orderBy('id', 'desc')->get();
     }
 
     public function headings(): array
@@ -57,19 +57,27 @@ class QuotationExport implements FromCollection, WithHeadings
         $quotations = $this->quotations;
         $exportQuotations = collect();
         foreach ($quotations as $quotation) {
+            $equipmentNames = $quotation->quotationDesc->map(function ($desc) {
+                return optional($desc->equipmentsType)->name;
+            })->filter()->implode('-');
+
+            $ofr = $quotation->quotationDesc->map(function ($desc) {
+                return optional($desc)->ofr;
+            })->filter()->implode('-');
+
             $tempCollection = collect([
                 'REF NO' => $quotation->ref_no,
                 "CUSTOMER" => optional($quotation->customer)->name,
                 "Freight Forwarder Name" => optional($quotation->ffw)->name,
                 "VALIDITY FROM" => $quotation->validity_from,
                 "VALIDITY TO" => $quotation->validity_to,
-                "EQUIPMENT TYPE" => optional($quotation->equipmentsType)->name,
+                "EQUIPMENT TYPE" => $equipmentNames,
                 "PLACE OF ACCEPTENCE" => optional($quotation->placeOfAcceptence)->name,
                 "PLACE OF DELIVERY" => optional($quotation->placeOfDelivery)->name,
                 "LOAD PORT" => optional($quotation->loadPort)->name,
                 "DISCHARGE PORT" => optional($quotation->dischargePort)->name,
                 "Main Line" => optional($quotation->principal)->name,
-                "OFR" => $quotation->ofr,
+                "OFR" => $ofr,
                 "SOC / COC" => $quotation->soc == 1 ? "SOC" : "COC",
                 "payment kind" => $quotation->payment_kind,
                 "Quotation Type" => $quotation->quotation_type,

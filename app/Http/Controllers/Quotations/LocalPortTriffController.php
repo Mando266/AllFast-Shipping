@@ -71,7 +71,6 @@ class LocalPortTriffController extends Controller
             'country_id' => ['required'],  
             'port_id' => ['required'], 
             'terminal_id' => ['required'], 
-            'agent_id' => ['required'], 
             'validity_from' => ['required'], 
             'validity_to' => ['required','after:validity_from'],
         ],[
@@ -82,7 +81,7 @@ class LocalPortTriffController extends Controller
         $port = Ports::where('id',$request->port_id)->pluck('code')->first();
         $validityFrom = Carbon::parse($request->validity_from)->format('d-m-Y');
         $validityTo = Carbon::parse($request->validity_to)->format('d-m-Y');
-        $triff_no = $country.'-'.$port.'-'.$request->agent_id.'-'.''.$validityFrom.'.'.'To'.'.'.$validityTo.'-';
+        $triff_no = $country.'-'.$port.'-'.''.$validityFrom.'.'.'To'.'.'.$validityTo.'-';
         $localporttriff = LocalPortTriff::create([
             'triff_no'=> "",
             'country_id'=> $request->input('country_id'),
@@ -90,7 +89,6 @@ class LocalPortTriffController extends Controller
             'terminal_id'=> $request->input('terminal_id'),
             'validity_from'=> $request->input('validity_from'),
             'validity_to'=> $request->input('validity_to'),
-            'agent_id'=> $request->input('agent_id'),
             'company_id'=>$user->company_id,
         ]);
 
@@ -100,11 +98,7 @@ class LocalPortTriffController extends Controller
                 'charge_type'=>$triffPriceDetailes['charge_type'],
                 'unit'=>$triffPriceDetailes['unit'],
                 'selling_price'=>$triffPriceDetailes['selling_price'],
-                'cost'=>$triffPriceDetailes['cost'],
-                'agency_revene'=>$triffPriceDetailes['agency_revene'],
-                'liner'=>$triffPriceDetailes['liner'],
                 'payer'=>$triffPriceDetailes['payer'],
-                'add_to_quotation' => $triffPriceDetailes['add_to_quotation'],
                 'currency'=> $triffPriceDetailes['currency'],
                 'equipment_type_id'=> $triffPriceDetailes['equipment_type_id'],
                 'is_import_or_export'=> $triffPriceDetailes['is_import_or_export'],

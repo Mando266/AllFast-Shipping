@@ -285,7 +285,7 @@
                                             <ul class="table-controls">
                                                 @permission('Movements-Show')
                                                 <li>
-                                                    <a href="{{route('movements.show',['movement'=>$item->container_id,'bl_no' => $plNo,'port_location_id' => request()->input('port_location_id'),'booking_no' => request()->input('booking_no'),'movement_id' => request()->input('movement_id'),'voyage_id' => request()->input('voyage_id')])}}"
+                                                    <a href="{{route('movements.show',['movement'=>$item->container_id])}}"
                                                        data-toggle="tooltip" data-placement="top" title=""
                                                        data-original-title="show" target="blank">
                                                         <i class="far fa-eye text-primary"></i>

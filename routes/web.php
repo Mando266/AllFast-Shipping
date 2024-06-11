@@ -145,8 +145,8 @@ Route::group(['middleware' => 'auth'], function () {
     */
     Route::prefix('booking')->namespace('Booking')->group(function () {
         Route::resource('booking', 'BookingController');
-        Route::get('selectQuotation', [BookingController::class, 'selectQuotation'])
-            ->name('booking.selectQuotation');
+        Route::get('selectImportQuotation', [BookingController::class, 'selectImportQuotation'])
+            ->name('booking.selectImportQuotation');
         Route::get('selectGateOut/{booking}', [BookingController::class, 'selectGateOut'])
             ->name('booking.selectGateOut');
         Route::get('showShippingOrder/{booking}', [BookingController::class, 'showShippingOrder'])
@@ -165,7 +165,7 @@ Route::group(['middleware' => 'auth'], function () {
             ->name('booking.showGateOutImport');
         Route::get('referManifest', [BookingController::class, 'referManifest'])
             ->name('booking.referManifest');
-        Route::get('selectBooking', [BookingController::class, 'selectBooking'])
+        Route::get('selectImportBooking', [BookingController::class, 'selectBooking'])
             ->name('booking.selectBooking');
         Route::post('importBooking', [ImportExportController::class, 'importBooking'])
             ->name('importBooking');

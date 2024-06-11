@@ -494,7 +494,7 @@
                     e.preventDefault();
                     swal({
                         title: 'Error',
-                        text: 'At least one container tariff should be added to save.',
+                        text: 'At least One Container Period should be added to save.',
                         icon: 'error'
                     });
                     return;

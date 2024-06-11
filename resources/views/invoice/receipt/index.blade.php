@@ -18,7 +18,9 @@
                             @permission('Invoice-List')
                             <a href="{{route('export.receipt')}}" class="btn btn-warning">Export</a>
                             @endpermission
+                            @permission('Invoice-List')
                             <a href="{{route('receipt.selectinvoice')}}" class="btn btn-primary">New Receipt</a>
+                            @endif
                             </div>
                         </div>
                     </br>

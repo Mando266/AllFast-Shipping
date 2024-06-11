@@ -49,7 +49,7 @@
                                     <label for="is_storge">Detention OR Storage</label>
                                     <select class="selectpicker form-control" id="is_storge" data-live-search="true" name="is_storge" data-size="10"
                                     title="{{trans('forms.select')}}" autofocus>
-                                            <option value="Detention">Detention</option>
+                                            <option value="EXPORT/DETENTION">Detention</option>
                                             <option value="Storage">Storage</option>
                                             <option value="power charges">power charges</option>
                                     </select>
@@ -74,11 +74,6 @@
                                             <th>Tariff Ref No</th>
                                             <th>validity from</th>
                                             <th>validity to</th>
-{{--                                            <th>Container Type/Size</th>--}}
-{{--                                            <th>Detention OR Storage</th>--}}
-{{--                                            <th>period Details</th>--}}
-                                            {{-- <th>period</th>
-                                            <th>calendar days</th>--}}
                                             <th></th>
                                             <th></th>
                                         </tr>
@@ -87,7 +82,7 @@
                                         @forelse ($items as $item)
                                         <tr>
                                             <td>{{$loop->iteration}}</td>
-                                            <td>{{{optional($item->tarriffType)->description}}} - {{{optional($item->ports)->code}}} - {{$item->tariff_id}} - {{{optional($item->containersType)->name}}} </td>
+                                            <td>{{{optional($item->tarriffType)->description}}} - {{{optional($item->ports)->code}}} - {{$item->tariff_id}}</td>
                                             <td>{{$item->validity_from}}</td>
                                             <td>{{$item->validity_to}}</td>
                                            <td class="text-center">

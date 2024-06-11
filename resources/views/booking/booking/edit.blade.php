@@ -12,12 +12,7 @@
                             <li class="breadcrumb-item"></li>
                         </ol>
                     </nav>
-                    <div class="row">
-                        <div class="col-md-12 text-right mb-6">
-                            <a class="btn btn-danger" href="{{ route('temperature-discrepancy',$booking->id) }}"
-                            >Temperature Discrepancy</a>
-                        </div>
-                    </div>
+
                 </div>
                 <div class="widget-content widget-content-area">
                     @if($booking->quotation_id != null)
