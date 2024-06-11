@@ -342,8 +342,18 @@
                                 @enderror
                             </div>
                         </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-3">
+                                <label>Requset Type<span class="text-warning"> *</span></label>
+                                    <select class="selectpicker form-control" id="requset"  data-size="10" title="{{trans('forms.select')}}">
+                                        <option value="Normal">Normal</option>
+                                        <option value="Reefer">Reefer</option>
+                                        <option value="Special">Special</option>
+                                    </select>
+                            </div>
+                        </div>
 
-                        <table id="quotationTriffDischarge" class="table table-bordered">
+                        <table id="ofr" class="table table-bordered">
                             <thead>
                                 <tr>
                                     <th>Equipment Type</th>
@@ -356,8 +366,8 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>
-                                        <select class="selectpicker form-control" id="equipment_types" data-live-search="true" name="quotationDis[0][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}">
+                                    <td id="equpmints">
+                                        <select class="selectpicker form-control" id="equpmint" data-live-search="true" name="quotationDis[0][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}">
                                             @foreach ($equipment_types as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('equipment_type_id') ? 'selected':''}}>{{$item->name}}</option>
                                             @endforeach
@@ -448,17 +458,17 @@
         let exportCount = 1;
         $("#adddis").click(function () {
             var tr = '<tr>' +
-                '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10"><option>Select</option>@foreach ($equipment_types as $item)<option value="{{$item->id}}">{{$item->name}}</option>@endforeach</select></td>' +
+                '<td id="equpmints"><select id="equpmint" class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10"><option>Select</option>@foreach ($equipment_types as $item)<option value="{{$item->id}}">{{$item->name}}</option>@endforeach</select></td>' +
                 '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][currency]" data-size="10"><option>Select</option>@foreach ($currency as $item)<option value="{{$item->name}}">{{$item->name}}</option>@endforeach</select></td>' +
                 '<td><input type="text" name="quotationDis[' + exportCount + '][ofr]" class="form-control" autocomplete="off" required></td>' +
                 '<td style="width:85px;"><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>' +
                 '</tr>';
-            $('#quotationTriffDischarge tbody').append(tr);
+            $('#ofr tbody').append(tr);
             $('.selectpicker').selectpicker('refresh');
             exportCount++;
         });
 
-        $("#quotationTriffDischarge").on("click", ".remove", function () {
+        $("#ofr").on("click", ".remove", function () {
             $(this).closest("tr").remove();
         });
 

@@ -336,7 +336,7 @@
                         </ul>
             </li>
             @endpermission
-
+            @endif
             @permission('Quotation-List')
             <li class="menu">
                         <a href="#component8" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
@@ -358,6 +358,7 @@
             </li>
             @endpermission
 
+            @if(Auth::user()->is_super_admin == 1)
 
             <ul class="list-unstyled menu-categories" id="accordionExample" style="padding:0px;">
             @permission('Booking-List')
@@ -377,7 +378,7 @@
 
                                 @permission('Booking-List')
                                 <li>
-                                    <a href="{{route('booking.index')}}">Booking Gates</a>
+                                    <a href="{{route('booking.index')}}">Export Booking Gates</a>
                                 </li>
                                 @endpermission
 

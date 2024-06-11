@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Finance\AccountPeriod;
 use App\Models\Finance\OperationRate;
+use App\Models\Master\ContainersTypes;
 use App\Models\Invoice\Invoice;
 use App\Models\Master\Customers;
 use App\Models\Master\Ports;
@@ -103,6 +104,15 @@ class CompanyDataController extends Controller
 
         return response()->json([
             'lines' => $lines,
+        ], 200);
+    }
+
+    public function requestType($name)
+    {
+        $request_Type = ContainersTypes::where('category', $name)->select('category','name')->get();
+
+        return Response::json([
+            'request_Type' => $request_Type,
         ], 200);
     }
 }

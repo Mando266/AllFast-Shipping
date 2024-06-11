@@ -31,12 +31,8 @@
                                         <th>unit</th>
                                         <th>currency</th>
                                         <th>selling price</th>
-                                        <th>cost</th>
-                                        <th>agency revene</th>
-                                        <th>liner</th>
                                         <th>payer</th>
                                         <th>Import Or Export</th>
-                                        <th>add to quotation</th>
                                         <th>standard Or customise</th>
                                     </tr>
                                 </thead>
@@ -52,9 +48,6 @@
                                             <td>{{$triffPriceDetailes->unit}}</td>
                                             <td>{{$triffPriceDetailes->currency}}</td>
                                             <td>{{$triffPriceDetailes->selling_price}}</td>
-                                            <td>{{$triffPriceDetailes->cost}}</td>
-                                            <td>{{$triffPriceDetailes->agency_revene}}</td>
-                                            <td>{{$triffPriceDetailes->liner}}</td>
                                             <td>{{$triffPriceDetailes->payer}}</td>
                                             <td class="text-center">
                                                 @if($triffPriceDetailes->is_import_or_export == 0)
@@ -67,13 +60,6 @@
                                                     <span class="badge badge-dark">Transshipment</span>
                                                 @else
                                                     <span class="badge badge-success"> Empty</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-center">
-                                                @if($triffPriceDetailes->add_to_quotation == 1)
-                                                    <span class="badge badge-info"> Yes </span>
-                                                @else
-                                                    <span class="badge badge-danger"> No</span>
                                                 @endif
                                             </td>
                                             <td class="text-center">

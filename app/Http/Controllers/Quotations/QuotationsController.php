@@ -24,7 +24,8 @@ class QuotationsController extends Controller
     {
         $this->authorize(__FUNCTION__, Quotation::class);
 
-        $quotations = Quotation::filter(new QuotationIndexFilter(request()))->where('company_id', Auth::user()->company_id)->orderBy('id', 'desc')->paginate(30);
+        $quotations = Quotation::filter(new QuotationIndexFilter(request()))->where('company_id', Auth::user()->company_id)->with('quotationDesc')->orderBy('id', 'desc')->paginate(30);
+        //dd($quotations);
         $exportQuotations = request();
         $quotation = Quotation::where('company_id', Auth::user()->company_id)->get();
         $customers = Customers::where('company_id', Auth::user()->company_id)->orderBy('id')->get();

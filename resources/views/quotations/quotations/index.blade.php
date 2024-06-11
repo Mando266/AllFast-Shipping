@@ -139,8 +139,16 @@
                                         <td>{{optional($item->customer)->name}}</td>
                                         <td>{{$item->validity_from}}</td>
                                         <td>{{$item->validity_to}}</td>
-                                        <td>{{optional($item->equipmentsType)->name}}</td>
-                                        <td>{{$item->ofr}}</td>
+                                        <td>
+                                            @foreach($item->quotationDesc as $desc)
+                                            {{ optional($desc->equipmentsType)->name }}@if (!$loop->last)<br>@endif
+                                            @endforeach
+                                        </td>
+                                        <td>
+                                            @foreach($item->quotationDesc as $desc)
+                                            {{ optional($desc)->ofr }}@if (!$loop->last)<br>@endif
+                                            @endforeach
+                                        </td>
                                         <td>{{optional($item->placeOfAcceptence)->code}}</td>
                                         <td>{{optional($item->placeOfDelivery)->code}}</td>
                                         <td>{{optional($item->loadPort)->code}}</td>

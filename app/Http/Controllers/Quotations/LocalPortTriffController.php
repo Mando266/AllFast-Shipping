@@ -71,7 +71,6 @@ class LocalPortTriffController extends Controller
             'country_id' => ['required'],  
             'port_id' => ['required'], 
             'terminal_id' => ['required'], 
-            'agent_id' => ['required'], 
             'validity_from' => ['required'], 
             'validity_to' => ['required','after:validity_from'],
         ],[

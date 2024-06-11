@@ -44,6 +44,8 @@ Route::get('vessel/multi-voyages/{id}', [CompanyDataController::class, 'getMulti
 Route::get('master/ports/{id}', [CompanyDataController::class, 'portsCountry']);
 Route::get('master/customers/{id}', [CompanyDataController::class, 'customer']);
 Route::get('master/terminals/{id}', [CompanyDataController::class, 'terminalsPorts']);
+Route::get('master/requesttype/{name}', [CompanyDataController::class, 'requestType']);
+
 Route::get('agent/loadPrice/{id}/{equipment_id?}/{company_id}', [PriceController::class, 'getLoadAgentPrice']);
 Route::get('agent/dischargePrice/{id}/{equipment_id?}/{company_id}', [PriceController::class, 'getDischargeAgentPrice']);
 Route::get('agent/agentCountry/{id}', [AgentCountry::class, 'getAgentCountry']);
