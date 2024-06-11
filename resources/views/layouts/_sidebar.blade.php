@@ -378,7 +378,7 @@
 
                                 @permission('Booking-List')
                                 <li>
-                                    <a href="{{route('booking.index')}}">Export Booking Gates</a>
+                                    <a href="{{route('booking.index')}}">Import Booking Gates</a>
                                 </li>
                                 @endpermission
 

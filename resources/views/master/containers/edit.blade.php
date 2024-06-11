@@ -169,7 +169,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <hr/>
+                            <!-- <hr/>
                         <table id="containerRepairs" class="table table-bordered">
                                 <thead>
                                 <tr>
@@ -247,7 +247,7 @@
                                 @endforeach
                                 </tbody>
                         </table>
-                            <input name="removed" id="removed" type="hidden" value="">
+                            <input name="removed" id="removed" type="hidden" value=""> -->
 
                             <div class="row">
                                 <div class="col-md-12 text-center">
@@ -303,7 +303,7 @@
 
     </style>
 @endpush
-@push('scripts')
+<!-- @push('scripts')
     <script>
         var removed = [];
         function removeItem( item )
@@ -338,4 +338,4 @@
             });
         });
     </script>
-@endpush
+@endpush -->

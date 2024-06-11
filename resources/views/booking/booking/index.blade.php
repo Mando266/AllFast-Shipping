@@ -21,7 +21,7 @@
                             </br>
                             <div class="col-md-12 text-right mb-5">
                                 @permission('Booking-Create')
-                                <a href="{{route('booking.selectQuotation')}}" class="btn btn-primary">New Booking</a>
+                                <a href="{{route('booking.selectImportQuotation')}}" class="btn btn-primary">New Booking</a>
                                 @endpermission
                                 @permission('Booking-List')
                                 <button id="export-current" class="btn btn-warning" type="button">Export</button>
@@ -371,7 +371,7 @@
                                             <ul class="table-controls">
                                                 @if($item->booking_confirm == 1 && $item->is_transhipment == 0)
                                                     <li>
-                                                        @if(optional($item->quotation)->shipment_type == "Import")
+                                                        @if(optional($item)->shipment_type == "Import")
                                                             <a href="{{route('booking.deliveryOrder',['booking'=>$item->id])}}"
                                                                target="_blank">
                                                                 <i class="fas fa-file-pdf text-primary"

@@ -29,7 +29,7 @@ class BookingController extends Controller
     {
         $this->authorize(__FUNCTION__, Booking::class);
         $booking = Booking::filter(new QuotationIndexFilter(request()))->orderBy('id', 'desc')
-            ->where('company_id', Auth::user()->company_id)->with('bookingContainerDetails')->paginate(30);
+            ->where('company_id', Auth::user()->company_id)->where('shipment_type','Import')->with('bookingContainerDetails')->paginate(30);
         $exportbooking = request();
         $voyages = Voyages::with('vessel')->where('company_id', Auth::user()->company_id)->get();
         $bookingNo = Booking::where('company_id', Auth::user()->company_id)->get();
@@ -69,22 +69,24 @@ class BookingController extends Controller
         ]);
     }
 
+    
+    public function selectImportQuotation()
+    {
+        $quotation = Quotation::where('company_id', Auth::user()->company_id)->where('shipment_type','Import')
+        ->where('status', 'approved')->with(
+            'customer',
+            'equipmentsType'
+        )->get();
+        return view('booking.booking.selectImportQuotation', [
+            'quotation' => $quotation,
+        ]);
+    }
+
     public function selectBooking()
     {
         $bookings = Booking::where('company_id', Auth::user()->company_id)->get();
         return view('booking.booking.selectBooking', [
             'bookings' => $bookings,
-        ]);
-    }
-
-    public function selectQuotation()
-    {
-        $quotation = Quotation::where('company_id', Auth::user()->company_id)->where('status', 'approved')->with(
-            'customer',
-            'equipmentsType'
-        )->get();
-        return view('booking.booking.selectQuotation', [
-            'quotation' => $quotation,
         ]);
     }
 
@@ -135,21 +137,11 @@ class BookingController extends Controller
                 'port_id',
                 $quotation->discharge_port_id
             )->get();
-//            dd($terminals,$quotation->discharge_port_id,Auth::user()->company_id);
-    }
+        }
 
         $agents = Agents::where('company_id', Auth::user()->company_id)->where('is_active', 1)->get();
-        
-        $equipmentTypeIds = $quotation->quotationDesc->pluck('equipment_type_id')->toArray();
-        $equipmentTypes = collect(); // Initialize an empty collection
-        if (!empty($equipmentTypeIds)) {
-            $equipmentTypes = ContainersTypes::whereIn('id', $equipmentTypeIds)
-                ->orderBy('id')
-                ->get();
-        }
-        
-        //dd($equipmentTypes);
         $terminal = Terminals::get();
+
         $vessels = Vessels::where('company_id', Auth::user()->company_id)->get();
         if (request('quotation_id') == 'draft') {
             $voyages = Voyages::with('vessel', 'voyagePorts')->where('company_id', Auth::user()->company_id)->get();
@@ -162,44 +154,44 @@ class BookingController extends Controller
             )->get();
         }
 
-        $ports = Ports::orderBy('id')->get();
-        if($quotation->shipment_type == 'Export'){
-            $containers = Containers::where('company_id', Auth::user()->company_id)->whereHas(
-                'activityLocation',
-                function ($query) use ($quotation) {
-                    $query->where('country_id', $quotation->countrydis)->where(
-                        'container_type_id',
-                        $quotation->equipment_type_id
-                    );
-                }
-            )->where('status', 2)->get();
-        }else{
-            $containers = Containers::where('company_id', Auth::user()->company_id)->whereHas(
-                'activityLocation',
-                function ($query) use ($quotation) {
-                    $query->where('container_type_id',
-                        $quotation->equipment_type_id
-                    );
-                }
-            )->where('status', 2)->get();
+        $equipmentTypeIds = [];
+        if (request('quotation_id') == 'draft') {
+            $equipmentTypes = ContainersTypes::orderBy('id')->get();
+            $containers = Containers::where('company_id', Auth::user()->company_id)->get(); 
+        } else {
+            $equipmentTypeIds = $quotation->quotationDesc->pluck('equipment_type_id')->toArray();
+            $equipmentTypes = collect(); // Initialize an empty collection
+            if (!empty($equipmentTypeIds)) {
+                $equipmentTypes = ContainersTypes::whereIn('id', $equipmentTypeIds)
+                    ->orderBy('id')
+                    ->get();
+            }            
+            $containers = Containers::where('company_id', Auth::user()->company_id)
+                ->whereIn('container_type_id', $equipmentTypeIds)
+                ->get(); 
         }
+
         $activityLocations = Ports::get();
-        
+        $ports = Ports::get();
+
         if ($quotation->shipment_type == 'Export') {
             $activityLocations = Ports::where('country_id', $quotation->countrydis)->get();
-        } elseif ($quotation->shipment_type != 'Export') {
+        } elseif ($quotation->shipment_type == 'Import') {
             $activityLocations = Ports::where('country_id', $quotation->countryload)->get();
+        }elseif (request('quotation_id') == 'draft') {
+            $activityLocations = Ports::get();
         }
 
         $line = Lines::where('company_id', Auth::user()->company_id)->get();
+
         return view('booking.booking.create', [
             'ffw' => $ffw,
             'consignee' => $consignee,
             'containers' => $containers,
             'agents' => $agents,
             'terminals' => $terminals,
-            'equipmentTypes' => $equipmentTypes,
-            'ports' => $ports,
+            'equipmentTypeIds' => $equipmentTypeIds,
+            'equipmentTypes'=>$equipmentTypes,
             'quotation' => $quotation,
             'terminal' => $terminal,
             'customers' => $customers,
@@ -207,6 +199,7 @@ class BookingController extends Controller
             'voyages' => $voyages,
             'activityLocations' => $activityLocations,
             'line' => $line,
+            'ports' => $ports,
         ]);
     }
 
@@ -292,13 +285,11 @@ class BookingController extends Controller
             'imo' => $request->input('imo') != null ? 1 : 0,
             'rf' => $request->input('rf') != null ? 1 : 0,
             'oog' => $request->input('oog') != null ? 1 : 0,
-            'nor' => $request->input('nor') != null ? 1 : 0,
             'ffw_id' => $request->input('ffw_id'),
             'booking_confirm' => $request->input('booking_confirm'),
             'notes' => $request->input('notes'),
             'principal_name' => $request->input('principal_name'),
             'vessel_name' => $request->input('vessel_name'),
-            'is_transhipment' => $request->input('is_transhipment'),
             'transhipment_port' => $request->input('transhipment_port'),
             'acid' => $request->input('acid'),
             'shipment_type' => $request->input('shipment_type'),
@@ -340,36 +331,20 @@ class BookingController extends Controller
         // check if quotation Export create serial No else will not create serial No
         $quotation = Quotation::find($request->input('quotation_id'));
 
-        if (Auth::user()->company_id == 3 && optional($booking)->shipment_type == "Import"){
+        if (Auth::user()->company_id == 1 && optional($booking)->shipment_type == "Import"){
             $booking->ref_no = $request->input('ref_no');
             $setting = Setting::find(1);
-            $booking->win_delivery_no = $setting->win_delivery_no += 1;
+            $booking->delivery_no = $setting->delivery_no += 1;
             $setting->save();
-        }elseif (Auth::user()->company_id == 3 &&  optional($quotation)->shipment_type == "Export") {
+        }elseif (Auth::user()->company_id == 1 &&  optional($quotation)->shipment_type == "Export") {
             $setting = Setting::find(1);
-            $booking->ref_no = 'WIN' . substr($booking->loadPort->code, -3) . substr($booking->dischargePort->code, -3) 
-            . sprintf(
-                    '%06u',
-            $setting->win_booking_ref_no
-                );
-            $setting->win_booking_ref_no += 1;
-            $setting->save();
-    
-        }elseif (optional($quotation)->shipment_type == "Export") {
-            $setting = Setting::find(1);
-            $booking->ref_no = 'CSDALY' //. $booking->loadPort->code . substr($booking->dischargePort->code, -3) 
+            $booking->ref_no = 'DAH' . substr($booking->loadPort->code, -3) . substr($booking->dischargePort->code, -3) 
             . sprintf(
                     '%06u',
             $setting->booking_ref_no
                 );
             $setting->booking_ref_no += 1;
             $setting->save();
-        } elseif (optional($booking)->shipment_type == "Import") {
-            $booking->ref_no = $request->input('ref_no');
-            $setting = Setting::find(1);
-            $booking->deleviry_no = $setting->delivery_no += 1;
-            $setting->save();
-
         }else{
             $booking->ref_no = $request->input('ref_no');
         }

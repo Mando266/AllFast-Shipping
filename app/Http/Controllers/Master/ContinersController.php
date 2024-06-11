@@ -86,7 +86,6 @@ class ContinersController extends Controller
             'certificat' => $request->input('certificat'),
             'status' => $request->input('status'),
             'activity_location_id' => $request->input('activity_location_id'),
-            'is_transhipment' => $request->input('is_transhipment'),
             'type' => $request->input('type'),
             'SOC_COC' => $request->input('SOC_COC'),
         ]);
