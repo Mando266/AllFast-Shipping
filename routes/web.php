@@ -145,6 +145,8 @@ Route::group(['middleware' => 'auth'], function () {
     */
     Route::prefix('booking')->namespace('Booking')->group(function () {
         Route::resource('booking', 'BookingController');
+        Route::get('/check-container', [BookingController::class, 'checkContainer']);
+        Route::get('/create-container', [BookingController::class, 'createContainer']);
         Route::get('selectImportQuotation', [BookingController::class, 'selectImportQuotation'])
             ->name('booking.selectImportQuotation');
         Route::get('selectGateOut/{booking}', [BookingController::class, 'selectGateOut'])
