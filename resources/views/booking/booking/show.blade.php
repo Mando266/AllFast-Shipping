@@ -73,7 +73,23 @@
             </tr>
             <tr>
                 <td>Container(s):</td>
-                <td style = "text-align: center;"></td>
+                <td style = "text-align: center;">
+
+                @php
+                    $containerTypes = $booking->bookingContainerDetails->pluck('containerType.name')->unique();
+                @endphp
+                @if($containerTypes->count() > 1)
+                    @foreach($booking->bookingContainerDetails as $detail)
+                        {{ $detail->qty }} X {{ optional($detail->containerType)->name }} <br>
+                    @endforeach
+                @else
+                    @php
+                        $totalQty = $booking->bookingContainerDetails->sum('qty');
+                        $singleType = $booking->bookingContainerDetails->first();
+                    @endphp
+                    {{ $totalQty }}
+                @endif
+                </td>
                 <td style = "text-align: right;">عدد الحاويات</td>
             </tr>
             <tr>
