@@ -17,7 +17,7 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <img src="{{asset('assets/img/msl.png')}}" style="width: 400px;" alt="logo">
+                            <img src="{{asset('assets/img/allfastLogo.png')}}" style="width: 400px;" alt="logo">
                         </div>
                         <div class="col-md-6 tableStyle text-right underline" style="font-size: 30px; font-weight:bold !important">
                             {{optional($booking->principal)->name}}
@@ -31,11 +31,7 @@
                                 <td style="height: 45px;"></td>
                             </tr>
                                 <tr>
-                                    @if(Auth::user()->company_id == 3)
-                                    <th class="text-center thstyle underline">W اذن تسليم {{$booking->win_delivery_no}} </th>
-                                    @else
                                     <th class="text-center thstyle underline">اذن تسليم {{$booking->deleviry_no}}</th>
-                                    @endif
                                 </tr>
                             </tbody>
                         </table>
@@ -79,23 +75,9 @@
                             <td class="col-md-9 tableStyle text-right underline" ></td>
                             <td class="col-md-3 tableStyle text-right underline" ></td>
                         </tr>
-                        {{-- <tr>
-                        <td class="col-md-9 tableStyle text-right underline"></td>
-                            @if(optional($booking->principal)->code == 'PLS')
-                            <td class="col-md-3 tableStyle text-right underline" >{{optional($booking->principal)->code}} SOC</td>
-                            @elseif(optional($booking->principal)->code == 'MAS')
-                            <td class="col-md-3 tableStyle text-right underline" >{{optional($booking->principal)->code}} COC</td>
-                            @else
-                            <td class="col-md-3 tableStyle text-right underline" >{{optional($booking->principal)->code}} </td>
-                            @endif
-                        </tr> --}}
-
                         <tr> 
-                        @if (str_contains(optional($booking)->consignee->name, 'TO THE ORDER') || str_contains(optional($booking)->consignee->name, 'TO ORDER'))
-                            <td class="col-md-9 tableStyle" style="padding-left: 80px;"><br> {{optional(optional($booking->bldraft)->customerNotify)->name}}</td>
-                        @else
+
                             <td class="col-md-9 tableStyle" style="padding-left: 80px;"><br>{{ optional($booking->consignee)->name }}</td>
-                        @endif
 
                             <td class="col-md-3 tableStyle text-right underline" >برجاء تسليم السادة</td>
                         </tr>
@@ -153,12 +135,12 @@
 
 
 
-                @if(optional(optional($booking->bldraft)->blDetails)->count() > 4 && optional(optional($booking->bldraft)->blDetails)->count() != null)
+                @if(optional(optional($booking)->bookingContainerDetails)->count() > 4 && optional(optional($booking)->bookingContainerDetails)->count() != null)
                     @php
-                        $chunkedDetails = optional($booking->bldraft)->blDetails->chunk(26); // Divide the collection into chunks of 15 items
+                        $chunkedDetails = optional($booking)->bookingContainerDetails->chunk(26); // Divide the collection into chunks of 15 items
                         $gross_weight = 0;
                     @endphp
-                    @foreach(optional($booking->bldraft)->blDetails as $bldetails)
+                    @foreach(optional($booking)->bookingContainerDetails as $bldetails)
                         @php
                             $gross_weight = $gross_weight + (float)$bldetails->gross_weight;
                         @endphp
@@ -194,7 +176,7 @@
                                 </td>
                                 <td class="col-md-4 tableStyle"  rowspan="5" style="border: 1px solid #000;  border-left-style: 1px solid #000; font-size: 14px; padding: .75rem;">
                                     <textarea class="tableStyle" name="maindesc"  style="overflow: hidden;font-size: 16px;border-style: hidden; height: 285px; width: 500px;resize: none; background-color: white;" cols="30" rows="10" readonly>
-                                        {!!  optional($booking->bldraft)->descripions  !!}
+                                        {!!  optional($booking)->descripions  !!}
                                     </textarea>
                                 </td>
                                 <td class="col-md-2 tableStyle" style="border: 1px solid #000; border-bottom-style: hidden; border-left-style: 1px solid #000; font-size: 14px; padding: .75rem;">
@@ -340,7 +322,7 @@
                                 </td>
                                     <td class="col-md-4 tableStyle"  rowspan="{{ $booking->bookingContainerDetails ->count()+ 1 }}" style="border: 1px solid #000;  border-left-style: 1px solid #000; font-size: 14px; padding: .75rem;">
                                         <textarea class="tableStyle" name="maindesc"  style="overflow: hidden;font-size: 16px;border-style: hidden; height: 285px; width: 500px;resize: none; background-color: white;" cols="30" rows="10" readonly>
-                                            {!!  optional($booking->bldraft)->descripions  !!}
+                                            {!!  optional($booking)->descripions  !!}
                                         </textarea>
                                     </td>
 
@@ -348,7 +330,7 @@
 
                                 </td>
                             </tr>
-                            @foreach(optional($booking->bldraft)->blDetails as $detail)
+                            @foreach(optional($booking)->bookingContainerDetails as $detail)
                             <tr>
 
                                 <td class="col-md-2 tableStyle" style="border: 1px solid #000; border-right-style: hidden; font-size: 14px; padding: .75rem;">
@@ -356,7 +338,7 @@
                                     
                                 </td>
                                 <td class="col-md-2 tableStyle" style="border: 1px solid #000; border-right-style: hidden; border-left-style: hidden; font-size: 14px; padding: .75rem;">
-                                {{substr(optional(optional($detail->container)->containersTypes)->name, 0, 2)}} / {{optional($detail->container->containersTypes)->code}}  
+                                {{substr(optional(optional($detail->container)->containersTypes)->name, 0, 2)}} / {{optional(optional($detail->container)->containersTypes)->code}}  
                                 </td>
                                 <td class="col-md-2 tableStyle" style="border: 1px solid #000; border-right-style: 1px solid #000; border-left-style: 1px solid #000; font-size: 14px; padding: .75rem;">
                                     {{$detail->seal_no}}

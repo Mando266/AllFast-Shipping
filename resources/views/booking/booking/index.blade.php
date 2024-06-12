@@ -8,7 +8,7 @@
                         <nav class="breadcrumb-two" aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a a href="javascript:void(0);">Booking</a></li>
-                                <li class="breadcrumb-item  active"><a href="javascript:void(0);">Booking Gates</a></li>
+                                <li class="breadcrumb-item  active"><a href="javascript:void(0);">Import Booking Gates</a></li>
                                 <li class="breadcrumb-item"></li>
                             </ol>
                         </nav>
@@ -21,12 +21,12 @@
                             </br>
                             <div class="col-md-12 text-right mb-5">
                                 @permission('Booking-Create')
-                                <a href="{{route('booking.selectImportQuotation')}}" class="btn btn-primary">New Booking</a>
+                                <a href="{{route('booking.selectImportQuotation')}}" class="btn btn-primary">New Import Booking</a>
                                 @endpermission
                                 @permission('Booking-List')
                                 <button id="export-current" class="btn btn-warning" type="button">Export</button>
-                                <button id="export-current-loadlist" class="btn btn-info" type="button">Load List /
-                                    Discharge
+                                <button id="export-current-loadlist" class="btn btn-info" type="button">
+                                    Discharge List
                                 </button>
                                 @endpermission
                             </div>
@@ -199,36 +199,6 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="form-group col-md-3">
-                                <label for="transhipment">Is Transhipment</label>
-                                <select class="selectpicker form-control" id="is_transhipment" data-live-search="true"
-                                        name="is_transhipment" data-size="10"
-                                        title="{{trans('forms.select')}}">
-                                    <option
-                                        value="1" {{"1" == old('is_transhipment',request()->input('is_transhipment')) ? 'selected':''}}>
-                                        Yes
-                                    </option>
-                                    <option
-                                        value="0" {{"0" == old('is_transhipment',request()->input('is_transhipment')) ? 'selected':''}}>
-                                        No
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <label for="booking_type">Booking Type</label>
-                                <select class="selectpicker form-control" id="booking_type" data-live-search="true"
-                                        name="booking_type" data-size="10"
-                                        title="{{trans('forms.select')}}">
-                                    <option
-                                        value="Import" {{"Import" == old('booking_type',request()->input('booking_type')) ? 'selected':''}}>
-                                        Import
-                                    </option>
-                                    <option
-                                        value="Export" {{"Export" == old('booking_type',request()->input('booking_type')) ? 'selected':''}}>
-                                        Export
-                                    </option>
-                                </select>
-                            </div>
                         </div>
 
                         <div class="form-row">
@@ -265,7 +235,7 @@
                                     <th>MT/FL</th>
                                     <th>Booking Status</th>
                                     <th class='text-center' style='width:100px;'>add bl</th>
-                                    <th>S Order / D Order</th>
+                                    <th>D.O</th>
                                     <th>Gate In</th>
                                     <th>Gate Out</th>
                                     <th class='text-center' style='width:100px;'></th>
