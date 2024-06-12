@@ -67,8 +67,8 @@
                             <div class="form-group col-md-3" style="padding-top: 30px;">
                                 <div class="form-check">
                                     @foreach ($fields as $field => $label)
-                                        <input type="checkbox" id="{{ $field }}" name="{{ $field }}" value="1" 
-                                            {{ $quotation->$field == 1 ? 'checked' : '' }} 
+                                        <input type="checkbox" id="{{ $field }}" name="{{ $field }}" value="1"
+                                            {{ $quotation->$field == 1 ? 'checked' : '' }}
                                             {{ $isDraft ? '' : 'disabled' }}>
                                         <a style="font-size: 15px; color: #3b3f5c; letter-spacing: 1px; margin-right: 10px;"> {{ $label }} </a>
                                     @endforeach
@@ -501,91 +501,68 @@
 
                         <h4>Container Details</h4>
                         <table id="containerDetails" class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th class="text-center">Seal No</th>
-                                        <th class="text-center">Container Type</th>
-                                        <th class="text-center">QTY</th>
-                                        <th class="text-center">Return Location</th>                                       
-                                        <th class="text-center">Container No</th>
-                                        <th class="text-center">HAZ / Reefer/ OOG Details / Haz Approval Ref</th>
-                                        <th class="text-center">weight</th>
-                                        <th class="text-center">vgm</th>
-                                        <th class="text-center">
-                                            <a id="add"> Add Container <i class="fas fa-plus"></i></a>
-                                        </th>
-                                    </tr>
-                                </thead>
-                        <tbody>
+                            <thead>
                             <tr>
-                                <td>
-                                    <input type="text" id="seal_no" name="containerDetails[0][seal_no]" class="form-control" autocomplete="off" placeholder="Seal No">
-                                </td>
+                                <th class="text-center">Seal No</th>
+                                <th class="text-center">Container Type</th>
+                                <th class="text-center">QTY</th>
+                                <th class="text-center">Return Location</th>
+                                <th class="text-center">Container No</th>
+                                <th class="text-center">HAZ / Reefer/ OOG Details / Haz Approval Ref</th>
+                                <th class="text-center">Weight</th>
+                                <th class="text-center">VGM</th>
+                                <th class="text-center">Add Container</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><input type="text" name="containerDetails[0][seal_no]" class="form-control" placeholder="Seal No"></td>
                                 <td class="container_type">
-                                <select class="selectpicker form-control" id="container_type" data-live-search="true" name="containerDetails[0][container_type]" data-size="10" title="{{ trans('forms.select') }}">
-                                    @foreach ($equipmentTypes as $item)
-                                        <option value="{{ $item->id }}" {{ $item->id == old('container_type') ? 'selected' : '' }}>{{ $item->name }}</option>
-                                    @endforeach
-                                </select>
-                                    @error('container_type')
-                                    <div style="color: red;">
-                                        {{$message}}
-                                    </div>
-                                    @enderror
-                                </td>
-
-                                <td>
-                                    <input type="text" id="qyt" onchange="return check();" name="containerDetails[0][qty]" class="form-control input"  autocomplete="off" placeholder="QTY" required>
-                                    @error('qty')
-                                    <div style="color: red;">
-                                        {{$message}}
-                                    </div>
-                                    @enderror
-                                </td>
-
-                                @if($quotation->shipment_type == 'Import')
-                                    <td>
-                                @else
-                                    <td class="ports">
-                                @endif
-                                    <select class="selectpicker form-control" id="activity_location_id" data-live-search="true" name="containerDetails[0][activity_location_id]" data-size="10"
-                                    title="{{trans('forms.select')}}">
-                                        @foreach ($activityLocations as $activityLocation)
-                                            <option value="{{$activityLocation->id}}" {{$activityLocation->id == old('activity_location_id') ? 'selected':''}}>{{$activityLocation->code}}</option>
+                                    <select class="selectpicker form-control" name="containerDetails[0][container_type]" data-live-search="true" title="Select">
+                                        @foreach ($equipmentTypes as $item)
+                                            <option value="{{ $item->id }}">{{ $item->name }}</option>
                                         @endforeach
                                     </select>
                                 </td>
-
-                                <td class="containerDetailsID">
-                                  <select class="selectpicker form-control" id="containerDetailsID" data-live-search="true" name="containerDetails[0][container_id]" data-size="10"
-                                          title="{{trans('forms.select')}}">
-                                          <option value="000" selected>Select</option>
-                                            @foreach ($containers as $item)
-                                                <option value="{{$item->id}}" {{$item->id == old('container_id') ? 'selected':''}}>{{$item->code}}</option>
-                                            @endforeach
-                                  </select>
+                                <td><input type="text" name="containerDetails[0][qty]" class="form-control" placeholder="QTY" required></td>
+                                <td class="ports">
+                                    <select class="selectpicker form-control" name="containerDetails[0][activity_location_id]" data-live-search="true" title="Select">
+                                        @foreach ($activityLocations as $location)
+                                            <option value="{{ $location->id }}">{{ $location->code }}</option>
+                                        @endforeach
+                                    </select>
                                 </td>
-
                                 <td>
-                                @if($quotation->oog_dimensions != null)
-                                <input type="text" class="form-control" id="haz" name="containerDetails[0][haz]" value="{{old('haz',$quotation->oog_dimensions)}}"
-                                    placeholder="" autocomplete="off">
-                                @else
-                                <input type="text" class="form-control" id="haz" name="containerDetails[0][haz]" value="{{old('haz')}}"
-                                    placeholder="HAZ / REEFER/ OOG DETAILS / HAZ APPROVAL REF" autocomplete="off">
-                                @endif
+                                    <input type="text" name="containerDetails[0][container_number]" class="form-control container-number" placeholder="Container No">
+                                    <input type="hidden" name="containerDetails[0][container_id]" class="container-id">
                                 </td>
-
-                                <td><input type="text" class="form-control" id="weight" name="containerDetails[0][weight]" value="{{old('weight')}}"
-                                    placeholder="Weight" autocomplete="off">
-                                </td>
-                                <td><input type="text" class="form-control" id="vgm" name="containerDetails[0][vgm]" value="{{old('vgm')}}"
-                                    placeholder="VGM" autocomplete="off">
-                                </td>
-                                <td></td>
+                                <td><input type="text" name="containerDetails[0][haz]" class="form-control" placeholder="HAZ / REEFER/ OOG DETAILS / HAZ APPROVAL REF"></td>
+                                <td><input type="text" name="containerDetails[0][weight]" class="form-control" placeholder="Weight"></td>
+                                <td><input type="text" name="containerDetails[0][vgm]" class="form-control" placeholder="VGM"></td>
+                                <td><button type="button" id="addContainerRow" class="btn btn-primary"><i class="fas fa-plus"></i></button></td>
                             </tr>
                             </tbody>
                         </table>
+
+
+
+                        <!-- Modal for error messages -->
+                        <div class="modal fade" id="containerErrorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="errorModalLabel">Container Error</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p id="errorModalMessage"></p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                             <div class="row">
                                 <div class="col-md-12 text-center">
                                     <button type="submit" class="btn btn-primary mt-3">{{trans('forms.create')}}</button>
@@ -749,5 +726,137 @@ $(document).ready(function() {
         });
     });
 </script>
+
+
+<script>
+    $(document).ready(function() {
+        var containerIndex = 1; // Start from 1 since 0 is already used for the first row
+
+        function addContainerRow() {
+            var newRow = `<tr>
+            <td><input type="text" name="containerDetails[${containerIndex}][seal_no]" class="form-control" placeholder="Seal No"></td>
+            <td class="container_type">
+                <select class="selectpicker form-control" name="containerDetails[${containerIndex}][container_type]" data-live-search="true" data-size="10" title="Select">
+                    @foreach ($equipmentTypes as $item)
+            <option value="{{ $item->id }}">{{ $item->name }}</option>
+                    @endforeach
+            </select>
+        </td>
+        <td><input type="text" name="containerDetails[${containerIndex}][qty]" class="form-control" placeholder="QTY" required></td>
+            <td class="ports">
+                <select class="selectpicker form-control" name="containerDetails[${containerIndex}][activity_location_id]" data-live-search="true" data-size="10" title="Select">
+                    @foreach ($activityLocations as $location)
+            <option value="{{ $location->id }}">{{ $location->code }}</option>
+                    @endforeach
+            </select>
+        </td>
+        <td>
+            <input type="text" name="containerDetails[${containerIndex}][container_number]" class="form-control container-number" placeholder="Container No">
+                <input type="hidden" name="containerDetails[${containerIndex}][container_id]" class="container-id">
+            </td>
+            <td><input type="text" name="containerDetails[${containerIndex}][haz]" class="form-control" placeholder="HAZ / REEFER/ OOG DETAILS / HAZ APPROVAL REF"></td>
+            <td><input type="text" name="containerDetails[${containerIndex}][weight]" class="form-control" placeholder="Weight"></td>
+            <td><input type="text" name="containerDetails[${containerIndex}][vgm]" class="form-control" placeholder="VGM"></td>
+            <td><button type="button" class="btn btn-danger removeRow"><i class="fa fa-trash"></i></button></td>
+        </tr>`;
+            $('#containerDetails tbody').append(newRow);
+            $('.selectpicker').selectpicker('refresh');
+            containerIndex++;
+        }
+
+        $('#addContainerRow').click(function() {
+            addContainerRow();
+        });
+
+        $(document).on('click', '.removeRow', function() {
+            $(this).closest('tr').remove();
+        });
+
+        $(document).on('change', '.container-number', function() {
+            var containerNumber = $(this).val();
+            var row = $(this).closest('tr');
+            $.ajax({
+                url: '/booking/check-container',
+                method: 'GET',
+                data: { number: containerNumber },
+                success: function(response) {
+                    if (response.exists) {
+                        row.find('[name^="containerDetails"]').each(function() {
+                            var name = $(this).attr('name');
+                            if (name.includes('[container_type]')) $(this).val(response.type).selectpicker('refresh');
+                            if (name.includes('[activity_location_id]')) $(this).val(response.ownership).selectpicker('refresh');
+                            if (name.includes('[haz]')) $(this).val(response.haz);
+                            if (name.includes('[weight]')) $(this).val(response.weight);
+                            if (name.includes('[vgm]')) $(this).val(response.vgm);
+                        });
+                        row.find('.container-id').val(response.id);
+                    } else {
+                        $('#errorModalMessage').text('Container not found! Please enter the container type manually.');
+                        $('#containerErrorModal').modal('show');
+                        row.find('[name*="[container_type]"]').val('').selectpicker('refresh');
+                        row.find('[name*="[activity_location_id]"]').val('').selectpicker('refresh');
+                        row.find('[name*="[haz]"]').val('');
+                        row.find('[name*="[weight]"]').val('');
+                        row.find('[name*="[vgm]"]').val('');
+                        row.find('.container-id').val('');
+                    }
+                },
+                error: function(xhr) {
+                    console.error('An error occurred:', xhr);
+                }
+            });
+        });
+
+        $('#bookingForm').on('submit', function(e) {
+            e.preventDefault();
+            var formData = $(this).serializeArray();
+
+            // Collect container data separately
+            var containerDetails = [];
+            $('#containerDetails tbody tr').each(function() {
+                var containerNumber = $(this).find('.container-number').val();
+                var containerId = $(this).find('.container-id').val();
+                if (!containerId) { // If container_id is not set, create the container
+                    containerDetails.push({
+                        container_number: containerNumber,
+                        // Add more fields if required
+                    });
+                }
+            });
+
+            // Create containers if necessary
+            if (containerDetails.length > 0) {
+                $.ajax({
+                    url: '/booking/create-container',
+                    method: 'POST',
+                    data: JSON.stringify({ containers: containerDetails }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.success) {
+                            // Update form with new container IDs
+                            response.containers.forEach(function(container) {
+                                $('#containerDetails tbody tr').each(function() {
+                                    var row = $(this);
+                                    if (row.find('.container-number').val() === container.container_number) {
+                                        row.find('.container-id').val(container.id);
+                                    }
+                                });
+                            });
+                            $('#bookingForm').off('submit').submit();
+                        } else {
+                            alert('Error creating containers!');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('An error occurred:', xhr);
+                    }
+                });
+            } else {
+                $('#bookingForm').off('submit').submit();
+            }
+        });
+    });
+</script>
+
 @endpush
 
