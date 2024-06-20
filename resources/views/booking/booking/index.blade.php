@@ -8,7 +8,7 @@
                         <nav class="breadcrumb-two" aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a a href="javascript:void(0);">Booking</a></li>
-                                <li class="breadcrumb-item  active"><a href="javascript:void(0);">Import Booking Gates</a></li>
+                                <li class="breadcrumb-item  active"><a href="javascript:void(0);">Import Booking</a></li>
                                 <li class="breadcrumb-item"></li>
                             </ol>
                         </nav>
@@ -230,11 +230,10 @@
                                     <th>discharge port</th>
                                     <th>Equipment Type</th>
                                     <th>qty</th>
-                                    <th>Containers Status</th>
+                                    <!-- <th>Containers Status</th> -->
                                     <th>Booking Creation</th>
                                     <th>MT/FL</th>
                                     <th>Booking Status</th>
-                                    <th class='text-center' style='width:100px;'>add bl</th>
                                     <th>D.O</th>
                                     <th>Gate In</th>
                                     <th>Gate Out</th>
@@ -297,10 +296,10 @@
                                             </table>
                                         </td>
                                         <td>{{ $qty }}</td>
-                                        <td>
+                                        <!-- <td>
                                             {{ $assigned }} Assigned<br>
                                             {{ $unassigned }} Unassigned
-                                        </td>
+                                        </td> -->
                                         <td>{{{$item->created_at}}}</td>
                                         <td>{{{$item->booking_type}}}</td>  
                                         <td class="text-center">
@@ -312,48 +311,17 @@
                                                 <span class="badge badge-danger"> Cancelled </span>
                                             @endif
                                         </td>
-                                        <td class="text-center">
-                                            <ul class="table-controls">
-                                                @if($item->booking_confirm == "1")
-                                                    @permission('Booking-Create')
-                                                    @if($item->has_bl == 0)
-                                                        <li>
-                                                            <a href="{{route('bldraft.create',['booking_id'=>$item->id])}}"
-                                                               data-toggle="tooltip" data-placement="top" title=""
-                                                               data-original-title="show">
-                                                                <i class="fas fa-plus text-primary"></i>
-                                                            </a>
-                                                        </li>
-                                                    @else
-                                                        @if(optional($item->bldraft)->bl_status == 1)
-                                                            <span class="badge badge-info"> Confirmed </span>
-                                                        @else
-                                                            <span class="badge badge-warning"> Draft </span>
-                                                        @endif
-                                                    @endif
-                                                    @endpermission
-
-                                                @endif
-                                            </ul>
-                                        </td>
+                      
                                         <td class="text-center">
                                             @permission('Booking-Show')
                                             <ul class="table-controls">
-                                                @if($item->booking_confirm == 1 && $item->is_transhipment == 0)
+                                                @if($item->booking_confirm == 1)
                                                     <li>
-                                                        @if(optional($item)->shipment_type == "Import")
                                                             <a href="{{route('booking.deliveryOrder',['booking'=>$item->id])}}"
                                                                target="_blank">
                                                                 <i class="fas fa-file-pdf text-primary"
                                                                    style='font-size:large;'></i>
                                                             </a>
-                                                        @else
-                                                            <a href="{{route('booking.showShippingOrder',['booking'=>$item->id])}}"
-                                                               target="_blank">
-                                                                <i class="fas fa-file-pdf text-primary"
-                                                                   style='font-size:large;'></i>
-                                                            </a>
-                                                        @endif
                                                     </li>
                                                 @endif
                                             </ul>
@@ -362,21 +330,13 @@
                                         <td class="text-center">
                                             @permission('Booking-Show')
                                             <ul class="table-controls">
-                                                @if($item->booking_confirm == 1  && $item->is_transhipment == 0)
+                                                @if($item->booking_confirm == 1)
                                                     <li>
-                                                        @if(optional($item)->shipment_type == "Import")
                                                             <a href="{{route('booking.selectGateInImport',['booking'=>$item->id])}}"
                                                                target="_blank">
                                                                 <i class="fas fa-file-pdf text-primary"
                                                                    style='font-size:large;'></i>
                                                             </a>
-                                                        @else
-                                                            <a href="{{route('booking.showGateIn',['booking'=>$item->id])}}"
-                                                               target="_blank">
-                                                                <i class="fas fa-file-pdf text-primary"
-                                                                   style='font-size:large;'></i>
-                                                            </a>
-                                                        @endif
                                                     </li>
                                                 @endif
                                             </ul>
@@ -386,7 +346,7 @@
                                         <td class="text-center">
                                             @permission('Booking-Show')
                                             <ul class="table-controls">
-                                                @if($item->booking_confirm == 1  && $item->is_transhipment == 0)
+                                                @if($item->booking_confirm == 1)
                                                     <li>
                                                         <a href="{{route('booking.selectGateOut',['booking'=>$item->id])}}"
                                                            target="_blank">
@@ -418,28 +378,15 @@
                                                     </a>
                                                 </li>
                                                 @endpermission
-                                                @if($item->is_transhipment == 0)
                                                     @permission('Booking-Show')
                                                     <li>
-                                                        <a href="{{route('booking.show',['booking'=>$item->id])}}"
-                                                           data-toggle="tooltip" data-placement="top" title=""
+                                                    <a href="{{route('booking.arrivalNotification',['booking'=>$item->id])}}"
+                                                    data-toggle="tooltip" data-placement="top" title=""
                                                            data-original-title="show">
                                                             <i class="far fa-eye text-primary"></i>
                                                         </a>
                                                     </li>
                                                     @endpermission
-                                                @endif
-                                                {{-- @if($item->has_bl == 0)
-                                                @permission('Booking-Delete')
-                                                <li>
-                                                    <form action="{{route('booking.destroy',['booking'=>$item->id])}}" method="post">
-                                                        @method('DELETE')
-                                                        @csrf
-                                                    <button style="border: none; background: none;" type="submit" class="fa fa-trash text-danger show_confirm"></button>
-                                                    </form>
-                                                </li>
-                                                @endpermission
-                                                @endif --}}
                                             </ul>
                                         </td>
                                     </tr>

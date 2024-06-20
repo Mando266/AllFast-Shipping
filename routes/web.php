@@ -149,12 +149,18 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/create-container', [BookingController::class, 'createContainer']);
         Route::get('selectImportQuotation', [BookingController::class, 'selectImportQuotation'])
             ->name('booking.selectImportQuotation');
+
+        Route::get('export', [BookingController::class, 'export'])
+        ->name('booking.export');
+
         Route::get('selectGateOut/{booking}', [BookingController::class, 'selectGateOut'])
             ->name('booking.selectGateOut');
         Route::get('showShippingOrder/{booking}', [BookingController::class, 'showShippingOrder'])
             ->name('booking.showShippingOrder');
         Route::get('deliveryOrder/{booking}', [BookingController::class, 'deliveryOrder'])
             ->name('booking.deliveryOrder');
+        Route::get('arrivalNotification/{booking}', [BookingController::class, 'arrivalNotification'])
+        ->name('booking.arrivalNotification');
         Route::get('showGateIn/{booking}', [BookingController::class, 'showGateIn'])
             ->name('booking.showGateIn');
         Route::get('showGateInImport/{booking}', [BookingController::class, 'showGateInImport'])

@@ -43,19 +43,9 @@
                                 <div class="form-group col-md-4">
                                     <label for="ref_no">Booking Ref No</label>
                                         <input type="text" class="form-control" id="ref_no" name="ref_no" value="{{old('ref_no',$booking->ref_no)}}"
-                                            placeholder="Booking Ref No" autocomplete="off">
+                                            placeholder="Booking Ref No" autocomplete="off" required>
                                 </div>
-                                <div class="form-group col-md-4">
-                                    <label>OFR</label>
-                                    @if($booking->quotation_id == null)
-                                        <input type="text" class="form-control" value="{{$quotation->ofr}}"
-                                            placeholder="OFR" autocomplete="off">
-                                    @else
-                                    <input type="text" class="form-control" value="{{$quotation->ofr}}"
-                                    placeholder="OFR" autocomplete="off" disabled>
-                                    @endif
-                                </div>
-                            </div>
+                             
                             @php
                             $is_shipper = 0;
                             $is_ffw = 0;
@@ -111,24 +101,6 @@
                                         @enderror
                                 </div>
 
-                                <div class="form-group col-md-2">
-                                    <label for="equipment_type_id">Equipment Type <span class="text-warning"> *</span></label>
-                                    <select class="selectpicker form-control" id="equipment_type_id" data-live-search="true" name="equipment_type_id" data-size="10"
-                                    title="{{trans('forms.select')}}">
-                                        @foreach ($equipmentTypes as $item)
-                                        @if($booking->quotation_id == null)
-                                            <option value="{{$item->id}}" {{$item->id == old('equipment_type_id',$booking->equipment_type_id) ? 'selected':''}}>{{$item->name}}</option>
-                                        @else
-                                            <option value="{{$item->id}}" {{$item->id == old('equipment_type_id',$quotation->equipment_type_id) ? 'selected':'disabled'}}>{{$item->name}}</option>
-                                        @endif
-                                        @endforeach
-                                    </select>
-                                        @error('equipment_type_id')
-                                        <div style="color: red;">
-                                            {{$message}}
-                                        </div>
-                                        @enderror
-                                </div>
                                 <div class="form-group col-md-2">
                                     <label for="status">Booking Status<span class="text-warning"> *</span></label>
                                     <select class="selectpicker form-control" data-live-search="true" name="booking_confirm" data-live-search="true">
@@ -398,7 +370,6 @@
                             </div>
                         </div>
                         <div class="form-row">
-                        @if($quotation->id != 0)
                             <div class="form-group col-md-3">
                                 <label for="voyage_id">First Vessel / Voyage <span class="text-warning"> * (Required.) </span></label>
                                 <select class="selectpicker form-control" id="voyage_id" data-live-search="true" name="voyage_id" data-size="10"
@@ -414,21 +385,7 @@
                                 </div>
                                 @enderror
                             </div>
-                            <div class="form-group col-md-3">
-                                <label for="voyage_id_second">Second Vessel / Voyage</label>
-                                <select class="selectpicker form-control" id="voyage_id_second" data-live-search="true" name="voyage_id_second" data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                 <option value="">Select..</option>
-                                    @foreach ($voyages as $item)
-                                        <option value="{{$item->id}}" {{$item->id == old('voyage_id_second',$booking->voyage_id_second) ? 'selected':''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('voyage_id_second')
-                                <div style="color: red;">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
+                            
                             <div class="form-group col-md-3">
                                 <label for="Transhipment">Transhipment Port</label>
                                 <select class="selectpicker form-control" id="transhipment_port" data-live-search="true" name="transhipment_port" data-size="10"
@@ -458,67 +415,7 @@
                                 </div>
                                 @enderror
                             </div>
-                            @else
-                            <div class="form-group col-md-3">
-                                <label for="voyage_id">First Vessel / Voyage <span class="text-warning"> * (Required.) </span></label>
-                                <select class="selectpicker form-control" id="voyage_id" data-live-search="true" name="voyage_id" data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                 <option value="">Select..</option>
-                                    @foreach ($voyages as $item)
-                                        <option value="{{$item->id}}" {{$item->id == old('voyage_id',$booking->voyage_id) ? 'selected':''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('voyage_id')
-                                <div style="color: red;">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            <div class="form-group col-md-3">
-                                <label for="voyage_id_second">Second Vessel / Voyage</label>
-                                <select class="selectpicker form-control" id="voyage_id_second" data-live-search="true" name="voyage_id_second" data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                 <option value="">Select..</option>
-                                    @foreach ($voyages as $item)
-                                        <option value="{{$item->id}}" {{$item->id == old('voyage_id_second',$booking->voyage_id_second) ? 'selected':''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
-                                    @endforeach
-                                </select>
-                                @error('voyage_id_second')
-                                <div style="color: red;">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            <div class="form-group col-md-3">
-                                <label for="Transhipment">Transhipment Port</label>
-                                <select class="selectpicker form-control" id="transhipment_port" data-live-search="true" name="transhipment_port" data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                 <option value="">Select...</option>
-                                    @foreach ($ports as $item)
-                                        <option value="{{$item->id}}" {{$item->id == old('transhipment_port',$booking->transhipment_port) ? 'selected':''}}>{{$item->name}}</option>
-                                    @endforeach
-                                </select>
-                                @error('transhipment_port')
-                                <div style="color: red;">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            <div class="form-group col-md-3">
-                                <label for="terminal_id">Discharge Terminal <span class="text-warning"> * (Required.) </span></label>
-                                <select class="form-control" id="terminal" data-live-search="true" name="terminal_id" data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                    @foreach ($terminals as $item)
-                                        <option value="{{$item->id}}" {{$item->id == old('terminal_id',$booking->terminal_id) ? 'selected':''}}>{{$item->name}}</option>
-                                    @endforeach
-                                </select>
-                                @error('terminal_id')
-                                <div style="color: red;">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            @endif
+                            
                         </div>
 
                         <div class="form-row">
@@ -649,7 +546,7 @@
                             @if($quotation->id != 0)
                             <div class="form-group col-md-3">
                                 <label>Booking Status</label>
-                                <input type="text" class="form-control" name="booking_type" value="{{$quotation->quotation_type}}" readonly>
+                                <input type="hidden" class="form-control" name="booking_type" value="{{$quotation->quotation_type}}" readonly>
                             </div>
                             @else
                             <div class="form-group col-md-3">
@@ -768,28 +665,9 @@
                                             </select>
                                         </td>
                                     @endif
-                                    <td class="containerDetailsID">
-                                        <select class="selectpicker form-control" id="containerDetailsID" name="containerDetails[{{ $key }}][container_id]" data-live-search="true"  data-size="10"
-                                                title="{{trans('forms.select')}}">
-                                                <option value="000" selected>Select</option>
-
-                                            @if($booking->is_transhipment === 1)
-                                                @foreach ($transhipmentContainers as $transhipmentContainer)
-                                                    <option value="{{$transhipmentContainer->id}}" {{$transhipmentContainer->id == old('container_id',$transhipmentContainer->container_id) ? 'selected':''}}>{{$transhipmentContainer->code}}</option>
-                                                @endforeach
-                                            @else
-                                                @foreach ($oldContainers as $container)
-                                                    <option value="{{$container->id}}" {{$container->id == old('container_id',$item->container_id) ? 'selected':''}}>{{$container->code}}</option>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                    </td>
-                                    @else
-                                    @if($quotation->shipment_type == 'Import')
-                                        <td>
-                                    @else
-                                        <td class="ports">
-                                    @endif
+                                    
+                                    
+                                    <td class="ports">
                                         <select class="selectpicker form-control" id="activity_location_id" name="containerDetails[{{ $key }}][activity_location_id]" data-live-search="true"  data-size="10"
                                         title="{{trans('forms.select')}}" disabled>
                                             @foreach ($activityLocations as $activityLocation)
@@ -847,114 +725,7 @@
 </div>
 @endsection
 @push('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.0/sweetalert.min.js"></script>
-<script type="text/javascript">
 
-     $('.show_confirm').click(function(event) {
-          var form =  $(this).closest("form");
-          var name = $(this).data("name");
-          event.preventDefault();
-          swal({
-              title: `Are you sure you want to Change The Booking Rate?`,
-              icon: "warning",
-              buttons: true,
-              dangerMode: true,
-          })
-          .then((willDelete) => {
-            if (willDelete) {
-              form.submit();
-            }
-          });
-      });
-</script>
-<script>
-var removed = [];
-function removeItem( item )
-{
-    removed.push(item);
-    console.log(removed);
-    document.getElementById("removed").value = removed;
-}
-$(document).ready(function(){
-    $("#containerDetails").on("click", ".remove", function () {
-    $(this).closest("tr").remove();
-    });
-    var counter  = <?= isset($key)? ++$key : 0 ?>;
-
-    $("#add").click(function(){
-            var tr = '<tr>'+
-                '<td><input type="text" name="containerDetails['+counter+'][seal_no]" class="form-control" autocomplete="off" placeholder="Seal No"></td>'+
-                '<td><select class="selectpicker form-control" id="selectpicker" data-live-search="true" name="containerDetails['+counter+'][container_type]" data-size="10">@foreach ($equipmentTypes as $item)@if($quotation->equipment_type_id != null)<option value="{{$item->id}}" {{$item->id == old('container_type',$quotation->equipment_type_id) ? 'selected':'disabled'}}>{{$item->name}}</option>@else<option value="{{$item->id}}" {{$item->id == old('equipment_type_id',$quotation->equipment_type_id) ? 'selected':''}}>{{$item->name}}</option> @endif @endforeach</select></td>'+
-                '<td><input type="text" name="containerDetails['+counter+'][qty]" class="form-control input" autocomplete="off" id="number"  onchange="return check_value();" placeholder="QTY" required></td>'+
-                '@if($quotation->shipment_type == 'Import')<td>@else<td class="ports">@endif<select class="selectpicker form-control" id="selectpicker" data-live-search="true" required name="containerDetails['+counter+'][activity_location_id]" data-size="10" title="{{trans('forms.select')}}">@foreach ($activityLocations as $activityLocation)<option value="{{$activityLocation->id}}" {{$activityLocation->id == old('activity_location_id') ? 'selected':''}}>{{$activityLocation->code}}</option> @endforeach </select></td>'+
-                '<td class="containerDetailsID"><select id="selectpicker" class="selectpicker form-control" data-live-search="true" name="containerDetails['+counter+'][container_id]" data-size="10"><option value="000">Select</option> @if($quotation->id == 0) @foreach ($transhipmentContainers as $item)<option value="{{$item->id}}" {{$item->id == old('container_id') ? 'selected':''}}>{{$item->code}}</option> @endforeach @else @foreach ($containers as $item)<option value="{{$item->id}}" {{$item->id == old('container_id') ? 'selected':''}}>{{$item->code}}</option> @endforeach @endif</select></td>'+
-                '<td><input type="text" value="" name="containerDetails['+counter+'][haz]" class="form-control" autocomplete="off" placeholder="HAZ / REEFER/ OOG DETAILS / HAZ APPROVAL REF"></td>'+
-                '<td><input type="text" name="containerDetails['+counter+'][weight]" class="form-control" autocomplete="off" placeholder="Weight"></td>'+
-                '<td><input type="text" name="containerDetails['+counter+'][vgm]" class="form-control" autocomplete="off" placeholder="VGM"></td>'+
-                '<td style="width:85px;"><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>'
-        '</tr>';
-           $('#containerDetails').append(tr);
-           $('.selectpicker').selectpicker("render");
-           $('#selectpicker').selectpicker();
-        counter++;
-    });
-});
-$(function(){
-            $('#discharge_port_id').on('change',function(e){
-                let value = e.target.value;
-                let response =    $.get(`/api/master/terminals/${value}`).then(function(data){
-                    let terminals = data.terminals || '';
-                    let list2 = [`<option value=''>Select...</option>`];
-                    for(let i = 0 ; i < terminals.length; i++){
-                        list2.push(`<option value='${terminals[i].id}'>${terminals[i].name} </option>`);
-                    }
-            let terminal = $('#terminal');
-            terminal.html(list2.join(''));
-            });
-        });
-    });
-    $(function(){
-            $('#containerDetails').on('change','td.containerDetailsID select' ,function(e){
-                let self = $(this);
-                let parent = self.closest("tr");
-                let name = e.target.name;
-                let value = e.target.value;
-                if(value == 000){
-                    $(".input", parent).removeAttr('readonly');
-                }else{
-                    let valueee = 1;
-                    $(".input", parent).val(valueee);
-                    $(".input", parent).attr('readonly', true);
-                }
-        });
-    });
-</script>
-<script>
-  $(document).ready(function (){
-
-        $(function(){
-            let company_id = "{{ optional(Auth::user())->company->id }}";
-            let equipment_id = "{{$quotation->equipment_type_id}}";
-                $('#containerDetails').on('change','td.ports select' , function(e){
-                  let self = $(this);
-                  let parent = self.closest('tr');
-                    let value = e.target.value;
-                    let container = $('td.containerDetailsID select' , parent);
-                    let response =    $.get(`/api/booking/activityContainers/${value}/${company_id}/${equipment_id}`).then(function(data){
-                        let containers = data.containers || '';
-                       console.log(containers);
-                        let list2 = [`<option value=''>Select...</option>`];
-                        for(let i = 0 ; i < containers.length; i++){
-                        list2.push(`<option value='${containers[i].id}'>${containers[i].code} </option>`);
-                    }
-               container.html(list2.join(''));
-               $(container).selectpicker('refresh');
-
-                });
-            });
-        });
-  });
-</script>
 <script src="js/jquery.js"></script>
     <script type="text/javascript">
     function check(){
@@ -983,8 +754,219 @@ $(function(){
     }
 </script>
 <script>
-    $('#createForm').submit(function() {
-        $('select').removeAttr('disabled');
+
+$(document).ready(function() {
+    // Function to load terminals
+    function loadTerminals(value) {
+        $.get(`/api/master/terminals/${value}`).then(function(data) {
+            let terminals = data.terminals || [];
+            let list2 = [`<option value=''>Select...</option>`];
+            for (let i = 0; i < terminals.length; i++) {
+                list2.push(`<option value='${terminals[i].id}'>${terminals[i].name}</option>`);
+            }
+            $('#terminal').html(list2.join('')).selectpicker('refresh'); // Refresh the selectpicker
+        }).fail(function() {
+            console.error("Failed to load terminals.");
+        });
+    }
+
+    // Trigger the change event to load terminals when the discharge port changes
+    $('#discharge_port_id').on('change', function(e) {
+        let value = e.target.value;
+        loadTerminals(value);
+    });
+
+    // Load terminals on page load if there's a pre-selected discharge port
+    let initialDischargePort = $('#discharge_port_id').val();
+    if (initialDischargePort) {
+        loadTerminals(initialDischargePort);
+    } else {
+        $('#terminal').selectpicker('refresh'); // Refresh if no initial value
+    }
+
+    // Ensure the selectpicker is initialized on page load
+    $('.selectpicker').selectpicker();
+});
+
+
+    $(function(){
+            $('#containerDetails').on('change','td.containerDetailsID select' ,function(e){
+                let self = $(this);
+                let parent = self.closest("tr");
+                let name = e.target.name;
+                let value = e.target.value;
+                if(value == 000){
+                    $(".input", parent).removeAttr('readonly');
+                }else{
+                    let valueee = 1;
+                    $(".input", parent).val(valueee);
+                    $(".input", parent).attr('readonly', true);
+                }
+        });
+    });
+</script>
+
+
+<!-- <script>
+  $(document).ready(function (){
+
+        $(function(){
+            let company_id = "{{ optional(Auth::user())->company->id }}";
+            let equipment_id =  $('#container_type').val();
+                $('#containerDetails').on('change','td.ports select' , function(e){
+                  let self = $(this);
+                  let parent = self.closest('tr');
+                    let value = e.target.value;
+                    let container = $('td.containerDetailsID select' , parent);
+                    let response =    $.get(`/api/booking/activityContainers/${value}/${company_id}/${equipment_id}`).then(function(data){
+                        let containers = data.containers || '';
+                       console.log(containers);
+                        let list2 = [`<option value=''>Select...</option>`];
+                        for(let i = 0 ; i < containers.length; i++){
+                        list2.push(`<option value='${containers[i].id}'>${containers[i].code} </option>`);
+                    }
+               container.html(list2.join(''));
+               $(container).selectpicker('refresh');
+
+                });
+            });
+        });
+  });
+</script> -->
+
+<script>
+    $(document).ready(function() {
+        var containerIndex = 1; // Start from 1 since 0 is already used for the first row
+
+        function addContainerRow() {
+            var newRow = `<tr>
+            <td>
+                <input type="text" name="containerDetails[${containerIndex}][container_number]" class="form-control container-number" placeholder="Container No">
+                <input type="hidden" name="containerDetails[${containerIndex}][container_id]" class="container-id">
+            </td>
+            <td class="container_type">
+                <select class="selectpicker form-control" name="containerDetails[${containerIndex}][container_type]" data-live-search="true" data-size="10" title="Select">
+                    @foreach ($equipmentTypes as $item)
+                        <option value="{{ $item->id }}">{{ $item->name }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td><input type="text" name="containerDetails[${containerIndex}][qty]" class="form-control" placeholder="QTY" value="1" disabled></td>
+            <td class="ports">
+                <select class="selectpicker form-control" name="containerDetails[${containerIndex}][activity_location_id]" data-live-search="true" data-size="10" title="Select" required>
+                    @foreach ($activityLocations as $location)
+                        <option value="{{ $location->id }}">{{ $location->code }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td><input type="text" name="containerDetails[${containerIndex}][seal_no]" class="form-control" placeholder="Seal No"></td>
+            <td><input type="text" name="containerDetails['+counter+'][packs]" class="form-control" autocomplete="off" placeholder="Packs"></td>
+            <td><input type="text" name="containerDetails['+counter+'][pack_type]" class="form-control" autocomplete="off" placeholder="Packs Type"></td>
+            <td><input type="text" name="containerDetails[${containerIndex}][haz]" class="form-control" placeholder="HAZ / REEFER/ OOG DETAILS / HAZ APPROVAL REF"></td>
+            <td><input type="text" name="containerDetails[${containerIndex}][weight]" class="form-control" placeholder="Weight"></td>
+            <td><input type="text" name="containerDetails['+counter+'][net_weight]" class="form-control" autocomplete="off" placeholder="Net Weight"></td>
+            <td><button type="button" class="btn btn-danger removeRow"><i class="fa fa-trash"></i></button></td>
+        </tr>`;
+            $('#containerDetails tbody').append(newRow);
+            $('.selectpicker').selectpicker('refresh');
+            containerIndex++;
+        }
+
+        $('#addContainerRow').click(function() {
+            addContainerRow();
+        });
+
+        $(document).on('click', '.removeRow', function() {
+            $(this).closest('tr').remove();
+        });
+
+        $(document).on('change', '.container-number', function() {
+            var containerNumber = $(this).val();
+            var row = $(this).closest('tr');
+            $.ajax({
+                url: '/booking/check-container',
+                method: 'GET',
+                data: { number: containerNumber },
+                success: function(response) {
+                    if (response.exists) {
+                        row.find('[name^="containerDetails"]').each(function() {
+                            var name = $(this).attr('name');
+                            if (name.includes('[container_type]')) $(this).val(response.type).selectpicker('refresh');
+                            if (name.includes('[activity_location_id]')) $(this).val(response.ownership).selectpicker('refresh');
+                            if (name.includes('[packs]')) $(this).val(response.packs);
+                            if (name.includes('[pack_type]')) $(this).val(response.pack_type);
+                            if (name.includes('[haz]')) $(this).val(response.haz);
+                            if (name.includes('[weight]')) $(this).val(response.weight);
+                            if (name.includes('[net_weight]')) $(this).val(response.net_weight);
+                        });
+                        row.find('.container-id').val(response.id);
+                    } else {
+                        $('#errorModalMessage').text('Container not found! Please enter the container type manually.');
+                        $('#containerErrorModal').modal('show');
+                        row.find('[name*="[container_type]"]').val('').selectpicker('refresh');
+                        row.find('[name*="[activity_location_id]"]').val('').selectpicker('refresh');
+                        row.find('[name*="[packs]"]').val('');
+                        row.find('[name*="[pack_type]"]').val('');
+                        row.find('[name*="[haz]"]').val('');
+                        row.find('[name*="[weight]"]').val('');
+                        row.find('[name*="[net_weight]"]').val('');
+                        row.find('.container-id').val('');
+                    }
+                },
+                error: function(xhr) {
+                    console.error('An error occurred:', xhr);
+                }
+            });
+        });
+
+        $('#bookingForm').on('submit', function(e) {
+            e.preventDefault();
+            var formData = $(this).serializeArray();
+
+            // Collect container data separately
+            var containerDetails = [];
+            $('#containerDetails tbody tr').each(function() {
+                var containerNumber = $(this).find('.container-number').val();
+                var containerId = $(this).find('.container-id').val();
+                if (!containerId) { // If container_id is not set, create the container
+                    containerDetails.push({
+                        container_number: containerNumber,
+                        // Add more fields if required
+                    });
+                }
+            });
+
+            // Create containers if necessary
+            if (containerDetails.length > 0) {
+                $.ajax({
+                    url: '/booking/create-container',
+                    method: 'POST',
+                    data: JSON.stringify({ containers: containerDetails }),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.success) {
+                            // Update form with new container IDs
+                            response.containers.forEach(function(container) {
+                                $('#containerDetails tbody tr').each(function() {
+                                    var row = $(this);
+                                    if (row.find('.container-number').val() === container.container_number) {
+                                        row.find('.container-id').val(container.id);
+                                    }
+                                });
+                            });
+                            $('#bookingForm').off('submit').submit();
+                        } else {
+                            alert('Error creating containers!');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('An error occurred:', xhr);
+                    }
+                });
+            } else {
+                $('#bookingForm').off('submit').submit();
+            }
+        });
     });
 </script>
 @endpush

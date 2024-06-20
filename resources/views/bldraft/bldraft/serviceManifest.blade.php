@@ -85,7 +85,7 @@
                                 {{ optional($blDraft->dischargePort)->name }}
                                 </td>
                                 <td class="tableStyle" style="border-style: hidden;">Date of Sailing </br>
-                                @if(optional($blDraft->booking)->transhipment_port != null && $blDraft->booking->quotation->shipment_type == "Import")
+                                @if(optional($blDraft->booking)->transhipment_port != null && $blDraft->booking->shipment_type == "Import")
                                     {{ optional($etdfristvoayege)->etd }} 
                                     @else
                                     {{ optional($etdvoayege)->etd }}
@@ -205,7 +205,7 @@
                                     {{ optional($blDraft->dischargePort)->name }}
                                     </td>
                                     <td class="tableStyle" style="border-style: hidden;">Date of Sailing </br>
-                                    @if(optional($blDraft->booking)->transhipment_port != null && $blDraft->booking->quotation->shipment_type == "Import")
+                                    @if(optional($blDraft->booking)->transhipment_port != null && $blDraft->booking->shipment_type == "Import")
                                     {{ optional($etdfristvoayege)->etd }} 
                                     @else
                                     {{ optional($etdvoayege)->etd }}

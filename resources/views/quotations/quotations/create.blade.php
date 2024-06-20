@@ -159,7 +159,7 @@
                                 @enderror
                             </div>
                             <div class="form-group col-md-4">
-                                <label for="ffw_id">Forwarder Customer</label>
+                                <label for="ffw_id">Forwarder Name</label>
                                 <select class="selectpicker form-control" id="ffw_id" data-live-search="true" name="ffw_id" data-size="10" title="{{trans('forms.select')}}">
                                     @foreach ($ffw as $item)
                                     <option value="{{$item->id}}" {{$item->id == old('ffw_id') ? 'selected':''}}>{{$item->name}}</option>
@@ -342,17 +342,6 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group col-md-3">
-                                <label>Requset Type<span class="text-warning"> *</span></label>
-                                    <select class="selectpicker form-control" id="requset"  data-size="10" title="{{trans('forms.select')}}">
-                                        <option value="Normal">Normal</option>
-                                        <option value="Reefer">Reefer</option>
-                                        <option value="Special">Special</option>
-                                    </select>
-                            </div>
-                        </div>
-
                         <table id="ofr" class="table table-bordered">
                             <thead>
                                 <tr>

@@ -43,7 +43,7 @@
                                 <div class="form-group col-md-4">
                                     <label for="codeInput">Container Number <span class="text-warning"> * </span></label>
                                     <div class="input-container">
-                                        <input type="text" class="form-control" id="codeInput" name="code"
+                                        <input type="text" class="form-control container-number" id="codeInput" name="code"
                                                value="{{old('code')}}" placeholder="Container Number"
                                                autocomplete="off" required>
                                         <span class="fa-2x mt-1 mySpan"></span>

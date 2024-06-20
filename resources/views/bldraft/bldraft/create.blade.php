@@ -369,11 +369,11 @@
                                 </td>
 
                                 <td>
-                                    <input type="text" id="Packs" name="blDraftdetails[{{ $key }}][packs]" class="form-control input"  autocomplete="off" placeholder="Packs" required>
+                                    <input type="text" id="Packs" value="{{$bookingContainer->packs}}" name="blDraftdetails[{{ $key }}][packs]" class="form-control input"  autocomplete="off" placeholder="Packs" required>
                                 </td>
 
                                 <td>
-                                    <input type="text" id="Packs" name="blDraftdetails[{{ $key }}][pack_type]" class="form-control input"  autocomplete="off" placeholder="Packs Type" required>
+                                    <input type="text" id="Packs" value="{{$bookingContainer->pack_type}}"  name="blDraftdetails[{{ $key }}][pack_type]" class="form-control input"  autocomplete="off" placeholder="Packs Type" required>
                                 </td>
 
                                 <td>
@@ -385,7 +385,7 @@
                                 </td>
 
                                 <td>
-                                    <input type="text" id="net_weight" name="blDraftdetails[{{ $key }}][net_weight]" class="form-control input"  autocomplete="off" placeholder="Net Weight" required>
+                                    <input type="text" id="net_weight" value="{{$bookingContainer->net_weight}}" name="blDraftdetails[{{ $key }}][net_weight]" class="form-control input"  autocomplete="off" placeholder="Net Weight" required>
                                 </td>
 
                                 <td>

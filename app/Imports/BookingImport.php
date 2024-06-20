@@ -57,12 +57,12 @@ class BookingImport implements ToModel,WithHeadingRow
             'container_type' => $row['container_type'],
             'haz' => $row['haz'],
             'weight' => $row['weight'],
-            'vgm' => $row['vgm'],
+            'net_weight' => $row['net_weight'],
+            'packs' => $row['packs'],
+            'pack_type' => $row['pack_type'],
+            'description' => $row['description'],
         ]);
 
         return $bookingDetail;
     }
-
-
-    
 }
