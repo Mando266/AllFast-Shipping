@@ -69,6 +69,49 @@ class BookingController extends Controller
         ]);
     }
 
+    public function export()
+    {
+        $this->authorize(__FUNCTION__, Booking::class);
+        $booking = Booking::filter(new QuotationIndexFilter(request()))->orderBy('id', 'desc')
+            ->where('company_id', Auth::user()->company_id)->where('shipment_type','Import')->with('bookingContainerDetails')->paginate(30);
+        $exportbooking = request();
+        $voyages = Voyages::with('vessel')->where('company_id', Auth::user()->company_id)->get();
+        $bookingNo = Booking::where('company_id', Auth::user()->company_id)->get();
+        $quotation = Quotation::where('company_id', Auth::user()->company_id)->get();
+        $ports = Ports::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
+
+        $customers = Customers::where('company_id', Auth::user()->company_id)->whereHas(
+            'CustomerRoles',
+            function ($query) {
+                return $query->where('role_id', 1);
+            }
+        )->with('CustomerRoles.role')->orderBy('id')->get();
+
+        $ffw = Customers::where('company_id', Auth::user()->company_id)->whereHas('CustomerRoles', function ($query) {
+            return $query->where('role_id', 6);
+        })->with('CustomerRoles.role')->get();
+
+        $consignee =  Customers::where('company_id', Auth::user()->company_id)->whereHas('CustomerRoles', function ($query) {
+            return $query->where('role_id', 2);
+        })->with('CustomerRoles.role')->get();
+
+        $line = Lines::where('company_id', Auth::user()->company_id)->get();
+        $containers = Containers::where('company_id', Auth::user()->company_id)->get();
+
+        return view('booking.booking.export', [
+            'items' => $booking,
+            'bookingNo' => $bookingNo,
+            'exportbooking' => $exportbooking,
+            'voyages' => $voyages,
+            'quotation' => $quotation,
+            'ports' => $ports,
+            'customers' => $customers,
+            'consignee' => $consignee,
+            'ffw' => $ffw,
+            'line' => $line,
+            'containers' => $containers,
+        ]);
+    }
 
     public function selectImportQuotation()
     {
@@ -116,6 +159,12 @@ class BookingController extends Controller
         $ffw = Customers::where('company_id', Auth::user()->company_id)->whereHas('CustomerRoles', function ($query) {
             return $query->where('role_id', 6);
         })->with('CustomerRoles.role')->get();
+        $notify = Customers::where('company_id', Auth::user()->company_id)->whereHas(
+            'CustomerRoles',
+            function ($query) {
+                return $query->where('role_id', 3);
+            }
+        )->with('CustomerRoles.role')->get();
         $consignee = Customers::where('company_id', Auth::user()->company_id)->whereHas(
             'CustomerRoles',
             function ($query) {
@@ -129,7 +178,7 @@ class BookingController extends Controller
             }
         )->with('CustomerRoles.role')->get();
         $terminals = Terminals::get();
-        if (request('quotation_id') == 'draft') {
+        if (request('quotation_id') == '0') {
             $quotation = new Quotation();
         } else {
             $quotation = Quotation::findOrFail(request('quotation_id'));
@@ -143,7 +192,7 @@ class BookingController extends Controller
         $terminal = Terminals::get();
 
         $vessels = Vessels::where('company_id', Auth::user()->company_id)->get();
-        if (request('quotation_id') == 'draft') {
+        if (request('quotation_id') == '0') {
             $voyages = Voyages::with('vessel', 'voyagePorts')->where('company_id', Auth::user()->company_id)->get();
         } else {
             $voyages = Voyages::with('vessel', 'voyagePorts')->where('company_id', Auth::user()->company_id)->whereHas(
@@ -155,7 +204,7 @@ class BookingController extends Controller
         }
 
         $equipmentTypeIds = [];
-        if (request('quotation_id') == 'draft') {
+        if (request('quotation_id') == '0') {
             $equipmentTypes = ContainersTypes::orderBy('id')->get();
             $containers = Containers::where('company_id', Auth::user()->company_id)->get();
         } else {
@@ -178,7 +227,7 @@ class BookingController extends Controller
             $activityLocations = Ports::where('country_id', $quotation->countrydis)->get();
         } elseif ($quotation->shipment_type == 'Import') {
             $activityLocations = Ports::where('country_id', $quotation->countryload)->get();
-        }elseif (request('quotation_id') == 'draft') {
+        }elseif (request('quotation_id') == '0') {
             $activityLocations = Ports::get();
         }
 
@@ -187,6 +236,7 @@ class BookingController extends Controller
         return view('booking.booking.create', [
             'ffw' => $ffw,
             'consignee' => $consignee,
+            'notify' =>$notify,
             'containers' => $containers,
             'agents' => $agents,
             'terminals' => $terminals,
@@ -256,7 +306,7 @@ class BookingController extends Controller
 
     public function store(Request $request)
     {
-
+  //dd($request->input());
         $request->validate([
             'place_of_delivery_id' => ['required', 'different:place_of_acceptence_id'],
             'discharge_port_id' => ['required', 'different:load_port_id'],
@@ -264,7 +314,23 @@ class BookingController extends Controller
             'place_of_delivery_id.different' => 'Place Of Delivery The Same Place Of Acceptence',
             'discharge_port_id.different' => 'Load Port The Same Discharge Port',
         ]);
-
+        if($request->input('movement') == 'FCL/FCL' || $request->input('movement') == null){
+            $uniqueContainers = array();
+            foreach ($request->containerDetails as $container) {
+                if (!in_array(
+                        $container['container_number'],
+                        $uniqueContainers
+                    ) || $container['container_number'] == null) {
+                    if ($container['container_number'] != null) {
+                        array_push($uniqueContainers, $container['container_number']);
+                    }
+                } else {
+                    return redirect()->back()->with('error', 'Container Numbers Must be unique')->withInput(
+                        $request->input()
+                    );
+                }
+            }
+        }
         $user = Auth::user();
 
         $ReferanceNumber = Booking::where('company_id', $user->company_id)->where('ref_no', $request->ref_no)->first();
@@ -315,12 +381,12 @@ class BookingController extends Controller
             'quotation_id' => $request->input('quotation_id'),
             'customer_id' => $request->input('customer_id'),
             'customer_consignee_id' => $request->input('customer_consignee_id'),
-            'equipment_type_id' => $request->input('equipment_type_id'),
+            'reciver_customer' => $request->input('reciver_customer'),
             'bl_release' => $request->input('bl_release'),
             'place_of_acceptence_id' => $request->input('place_of_acceptence_id'),
             'load_port_id' => $request->input('load_port_id'),
             'pick_up_location' => $request->input('pick_up_location'),
-            'place_return_id' => $request->input('place_return_id'),
+            // 'place_return_id' => $request->input('place_return_id'),
             'shipper_ref_no' => $request->input('shipper_ref_no'),
             'place_of_delivery_id' => $request->input('place_of_delivery_id'),
             'discharge_port_id' => $request->input('discharge_port_id'),
@@ -328,19 +394,14 @@ class BookingController extends Controller
             'voyage_id' => $request->input('voyage_id'),
             'voyage_id_second' => $request->input('voyage_id_second'),
             'terminal_id' => $request->input('terminal_id'),
-            'load_terminal_id' => $request->input('load_terminal_id'),
-            'agent_id' => $request->input('agent_id'),
-            'discharge_etd' => $request->input('discharge_etd'),
-            'load_port_cutoff' => $request->input('load_port_cutoff'),
-            'load_port_dayes' => $request->input('load_port_dayes'),
             'tariff_service' => $request->input('tariff_service'),
             'commodity_code' => $request->input('commodity_code'),
-            'activity_location_id' => $request->input('activity_location_id'),
             'commodity_description' => $request->input('commodity_description'),
             'soc' => $request->input('soc') != null ? 1 : 0,
             'imo' => $request->input('imo') != null ? 1 : 0,
             'rf' => $request->input('rf') != null ? 1 : 0,
             'oog' => $request->input('oog') != null ? 1 : 0,
+            'coc' => $request->input('coc') != null ? 1 : 0,
             'ffw_id' => $request->input('ffw_id'),
             'booking_confirm' => $request->input('booking_confirm'),
             'notes' => $request->input('notes'),
@@ -351,23 +412,29 @@ class BookingController extends Controller
             'shipment_type' => $request->input('shipment_type'),
             'movement'=> $request->input('movement'),
             'exportal_id'=> $request->input('exportal_id'),
+            'importer_id'=> $request->input('importer_id'),
+            'booking_type'=> $request->input('booking_type'),
+            'import_free_time'=> $request->input('import_free_time'),
         ]);
         $has_gate_in = 0;
         foreach ($containerDetailsWithIds as $details) {
-            if ($details['container_id'] != null && $details['container_id'] != 000) {
+            if ($details['container_id'] != null) {
                 $has_gate_in = 1;
             }
             BookingContainerDetails::create([
                 'seal_no' => $details['seal_no'],
-                'qty' => $details['qty'],
+                'qty' => $details['qty'] ?? 1,
                 'container_id' => $details['container_id'],
                 'booking_id' => $booking->id,
-                'container_type' => $booking->equipment_type_id,
+                'container_type' => $details['container_type'],
                 'haz' => $details['haz'],
                 'activity_location_id' => $details['activity_location_id'],
-                'weight' => $details['weight'],
-                'vgm' => $details['vgm'],
-            ]);
+                'weight' => $details['weight'], //gross 
+                'net_weight'=>$details['net_weight'],
+                'packs'=>$details['packs'],
+                'pack_type'=>$details['pack_type'], 
+                'descripion'=>$details['descripion'],  
+              ]);
         }
 
         $booking->has_gate_in = $has_gate_in;
@@ -392,7 +459,7 @@ class BookingController extends Controller
             $setting = Setting::find(1);
             $booking->delivery_no = $setting->delivery_no += 1;
             $setting->save();
-        }elseif (Auth::user()->company_id == 1 &&  optional($quotation)->shipment_type == "Export") {
+        }elseif (Auth::user()->company_id == 1 && optional($quotation)->shipment_type == "Export") {
             $setting = Setting::find(1);
             $booking->ref_no = 'DAH' . substr($booking->loadPort->code, -3) . substr($booking->dischargePort->code, -3)
             . sprintf(
@@ -469,6 +536,27 @@ class BookingController extends Controller
             'secondVoyagePort' => $secondVoyagePort,
             'firstVoyagePortImport' => $firstVoyagePortImport,
             'secondVoyagePortImport' => $secondVoyagePortImport,
+        ]);
+    }
+
+    public function arrivalNotification($id)
+    {
+        $booking = Booking::with(
+            'bookingContainerDetails.containerType',
+            'bookingContainerDetails.container',
+            'voyage.vessel',
+            'secondvoyage.vessel'
+        )->find($id);
+        $firstVoyagePort = VoyagePorts::where('voyage_id', $booking->voyage_id)->where(
+            'port_from_name',
+            optional($booking->loadPort)->id
+        )->first();
+    
+
+        //dd($booking);
+        return view('booking.booking.arrivalNotification', [
+            'booking' => $booking,
+            'firstVoyagePort' => $firstVoyagePort,
         ]);
     }
 
@@ -709,7 +797,7 @@ class BookingController extends Controller
             }
         )->with('CustomerRoles.role')->get();
 
-        if (request('quotation_id') == 'draft' || $booking->quotation_id == null) {
+        if (request('quotation_id') == '0' || $booking->quotation_id == null) {
             $quotation = new Quotation();
             $terminals = Terminals::where('company_id', Auth::user()->company_id)->get();
         } else {
@@ -779,10 +867,7 @@ class BookingController extends Controller
         }
 
         $line = Lines::where('company_id', Auth::user()->company_id)->get();
-        $transhipmentContainers = Containers::where('company_id', Auth::user()->company_id)->where(
-            'is_transhipment',
-            1
-        )->get();
+       
 
         return view('booking.booking.edit', [
             'quotationRate' => $quotationRate,
@@ -803,7 +888,6 @@ class BookingController extends Controller
             'quotation' => $quotation,
             'activityLocations' => $activityLocations,
             'line' => $line,
-            'transhipmentContainers' => $transhipmentContainers,
         ]);
     }
 

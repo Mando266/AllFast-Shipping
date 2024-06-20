@@ -17,7 +17,7 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <img src="{{asset('assets/img/msl.png')}}" style="width: 400px;" alt="logo">
+                            <img src="{{asset('assets/img/allfastLogo.png')}}" style="width: 400px;" alt="logo">
                         </div>
                         <div class="col-md-6 tableStyle text-right underline" style="font-size: 30px; font-weight:bold !important">
                             {{optional($booking->principal)->name}}
@@ -65,13 +65,7 @@
                         </tr>
                         <tr>
                         <td class="col-md-9 tableStyle text-right underline"></td>
-                            @if(optional($booking->principal)->code == 'PLS')
-                            <td class="col-md-3 tableStyle text-right underline" >{{optional($booking->principal)->code}} SOC</td>
-                            @elseif(optional($booking->principal)->code == 'MAS')
-                            <td class="col-md-3 tableStyle text-right underline" >{{optional($booking->principal)->code}} COC</td>
-                            @else
                             <td class="col-md-3 tableStyle text-right underline" >{{optional($booking->principal)->code}} </td>
-                            @endif
                         </tr>
                         <tr>
                             <td class=" tableStyle text-right underline" colspan="2">برجاء من سيادتكم بالموافقة على دخول وتعتيق الحاويات أدناه وذلك لشحنها</td>

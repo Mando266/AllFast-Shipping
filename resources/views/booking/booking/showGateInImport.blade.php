@@ -17,7 +17,7 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <img src="{{asset('assets/img/msl.png')}}" style="width: 400px;" alt="logo">
+                            <img src="{{asset('assets/img/allfastLogo.png')}}" style="width: 400px;" alt="logo">
                         </div>
                         <div class="col-md-6 tableStyle text-right underline" style="font-size: 30px; font-weight:bold !important">
                             {{optional($booking->principal)->name}}
@@ -95,8 +95,8 @@
                             <td class="col-md-3 tableStyle text-right underline" ></td>
                         </tr>
                         <tr>
-                            <td class="col-md-9 tableStyle" style="padding-left: 80px;">{{optional($booking->consignee)->name}} <br>
-                            {{optional($booking->consignee)->address}} &nbsp {{optional($booking->consignee->country)->name}} &nbsp {{optional($booking->consignee)->landline}}</td>
+                            <td class="col-md-9 tableStyle" style="padding-left: 80px;">{{optional(optional($booking)->consignee)->name}} <br>
+                            {{optional($booking->consignee)->address}} &nbsp {{optional(optional($booking->consignee)->country)->name}} &nbsp {{optional(optional($booking)->consignee)->landline}}</td>
                             <td class="col-md-3 tableStyle text-right underline" >العميل</td>
                         </tr>
                         <tr>
@@ -104,11 +104,8 @@
                             <td class="col-md-3 tableStyle text-right underline" >B/L NO </td>
                         </tr>
                         <tr>
-                            @if(optional($booking)->transhipment_port == null)
                             <td class="col-md-9 tableStyle" style="padding-left: 80px;">{{ optional(optional($booking)->voyage)->vessel->name }} / {{ optional(optional($booking)->voyage)->voyage_no}}</td>
-                            @else
-                            <td class="col-md-9 tableStyle" style="padding-left: 80px;">{{ optional(optional($booking->voyage)->secondvoyage)->name }} / {{ optional($booking->voyage)->voyage_no}}</td>
-                            @endif
+                            
                             <td class="col-md-3 tableStyle text-right underline" >الباخرة / رحلة</td>
                         </tr>
 
@@ -175,11 +172,9 @@
             <td class="col-md-2 tableStyle" style="border: 1px solid #000; border-right-style: hidden; border-left-style: hidden; font-size: 14px; padding: .75rem;">
                 {{optional($detail->containerType)->code}}
             </td>
-            <td class="col-md-2 tableStyle" style="border: 1px solid #000; border-right-style: hidden; border-left-style: hidden; font-size: 14px; padding: .75rem;">
-                {{$detail->seal_no}}
-            </td>
+           
             <td class="col-md-2 tableStyle" style="border: 1px solid #000; border-left-style: hidden; font-size: 14px; padding: .75rem;">
-            {{$detail->weight}}
+            {{$detail->haz}}
             </td>
                 <!-- {{$detail->qty}}  Containers -->
 
@@ -194,8 +189,6 @@
                     <tbody>
                         <tr>
                             <td class="col-md-4 tableStyle text-center">قسم الوارد </td>
-                            <td class="col-md-8 tableStyle text-right underline"> / مقاول النقل </td>
-
                         </tr>
                     </tbody>
                 </table>

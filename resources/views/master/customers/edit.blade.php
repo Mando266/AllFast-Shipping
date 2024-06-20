@@ -80,10 +80,10 @@
                                     @enderror
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label for="cityInput">City <span class="text-warning"> * </span></label>
+                                    <label for="cityInput">City</label>
                                     <input type="text" class="form-control" id="cityInput" name="city"
                                            value="{{old('city',$customer->city)}}"
-                                           placeholder="City" autocomplete="off" required>
+                                           placeholder="City" autocomplete="off">
                                     @error('city')
                                     <div style="color: red;">
                                         {{$message}}
@@ -91,10 +91,10 @@
                                     @enderror
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label for="cityInput">Address <span class="text-warning"> * </span></label>
+                                    <label for="cityInput">Address </label>
                                     <input type="text" class="form-control" id="addressInput" name="address"
                                            value="{{old('address',$customer->address)}}"
-                                           placeholder="Address" autocomplete="off" required>
+                                           placeholder="Address" autocomplete="off">
                                     @error('city')
                                     <div style="color: red;">
                                         {{$message}}
@@ -104,10 +104,10 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group col-md-4">
-                                    <label for="phoneInput">Phone <span class="text-warning"> * </span></label>
+                                    <label for="phoneInput">Phone </label>
                                     <input type="text" class="form-control" id="phoneInput" name="phone"
                                            value="{{old('phone',$customer->phone)}}"
-                                           placeholder="Phone" autocomplete="off" required>
+                                           placeholder="Phone" autocomplete="off" >
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="landline">Landline</label>
@@ -116,19 +116,19 @@
                                            placeholder="Landline" autocomplete="off">
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label for="tax_card_noInput">Tax Card <span class="text-warning"> * </span></label>
+                                    <label for="tax_card_noInput">Tax Card </label>
                                     <input type="text" class="form-control" id="tax_card_noInput" name="tax_card_no"
                                            value="{{old('tax_card_no',$customer->tax_card_no)}}"
-                                           placeholder="Tax Card" autocomplete="off" required>
+                                           placeholder="Tax Card" autocomplete="off" >
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group col-md-4">
-                                    <label for="emailInput">Email <span class="text-warning"> * </span></label>
+                                    <label for="emailInput">Email </label>
                                     <input type="text" class="form-control" id="emailInput" name="email"
                                            value="{{old('email',$customer->email)}}"
-                                           placeholder="Email" autocomplete="off" required>
+                                           placeholder="Email" autocomplete="off" >
                                 </div>
                                 <!-- <div class="form-group col-md-4">
                                     <label for="sales_person_idInput">Sales Person</label>

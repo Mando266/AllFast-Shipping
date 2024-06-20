@@ -15,12 +15,12 @@
                     </div> 
                         <div class="row">
                             <div class="col-md-12 text-right mb-5">
-                            @permission('Invoice-List')
+                            @permission('Receipt-List')
                             <a href="{{route('export.receipt')}}" class="btn btn-warning">Export</a>
                             @endpermission
-                            @permission('Invoice-List')
+                            @permission('Receipt-Create')
                             <a href="{{route('receipt.selectinvoice')}}" class="btn btn-primary">New Receipt</a>
-                            @endif
+                            @endpermission
                             </div>
                         </div>
                     </br>
@@ -133,7 +133,7 @@
                                             
                                             <td class="text-center">
                                                 <ul class="table-controls">                                                
-                                                @permission('Invoice-Show')
+                                                @permission('Receipt-Show')
                                                 <li>
                                                     <a href="{{route('receipt.show',['receipt'=>$receipt->id])}}" data-toggle="tooltip"  target="_blank"  data-placement="top" title="" data-original-title="show">
                                                         <i class="far fa-eye text-primary"></i>

@@ -42,7 +42,7 @@
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="codeInput">Container Number</label>
-                                    <input type="text" class="form-control" id="codeInput" name="code"
+                                    <input type="text" class="form-control container-number" id="codeInput" name="code"
                                            value="{{old('code',$container->code)}}"
                                            placeholder="Container Numbere" autocomplete="off">
                                     @error('code')

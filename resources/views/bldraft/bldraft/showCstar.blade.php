@@ -18,20 +18,20 @@
                     </br>
                     </br>
 
-                    @php
+                        @php
                             $net_weight = 0;
                             $gross_weight = 0;
                             $measurement = 0;
                             $packages = 0;
                         @endphp
-                            @foreach($blDraft->blDetails as $blkey => $bldetails)
-                                @php
-                                    $packages = $packages + (float)$bldetails->packs;
-                                    $net_weight = $net_weight + (float)$bldetails->net_weight;
-                                    $gross_weight = $gross_weight + (float)$bldetails->gross_weight;
-                                    $measurement = $measurement + (float)$bldetails->measurement;
-                                @endphp
-                            @endforeach
+                        @foreach($blDraft->blDetails as $blkey => $bldetails)
+                            @php
+                                $packages = $packages + (float)$bldetails->packs;
+                                $net_weight = $net_weight + (float)$bldetails->net_weight;
+                                $gross_weight = $gross_weight + (float)$bldetails->gross_weight;
+                                $measurement = $measurement + (float)$bldetails->measurement;
+                            @endphp
+                        @endforeach
                     <table class="col-md-12 tableStyle" style="margin-bottom: 0rem;">
                         <tbody>
                             <tr>

@@ -275,11 +275,11 @@
                                         <a href="{{route('container-movement.index')}}"> Movements Activity codes </a>
                                     </li>
                                 @endpermission
-                                <!-- @permission('Movements-List')
+                                @permission('Movements-List')
                                     <li>
                                         <a href="{{route('movements.index')}}"> Movements</a>
                                     </li>
-                                @endpermission -->
+                                @endpermission
                                 <!--
                                 @permission('Demurrage-List')
                                 <li>
@@ -358,7 +358,6 @@
             </li>
             @endpermission
 
-            @if(Auth::user()->is_super_admin == 1)
 
             <ul class="list-unstyled menu-categories" id="accordionExample" style="padding:0px;">
             @permission('Booking-List')
@@ -378,28 +377,30 @@
 
                                 @permission('Booking-List')
                                 <li>
-                                    <a href="{{route('booking.index')}}">Import Booking Gates</a>
+                                    <a href="{{route('booking.index')}}">Import Booking</a>
                                 </li>
                                 @endpermission
 
 
-                                @permission('BlDraft-List')
+                                <!-- @permission('BlDraft-List')
                                 <li>
                                     <a href="{{route('bldraft.index')}}"> Bl Gates </a>
                                 </li>
-                                @endpermission
+                                @endpermission -->
 
-                                @permission('XML-List')
+                                <!-- @permission('XML-List')
                                 <li>
                                     <a href="{{route('xml.index')}}"> Manifest XML Gates </a>
                                 </li>
-                                @endpermission
+                                @endpermission -->
                                 </ul>
                         </li>
                         @endpermission
             </li>
             @endpermission
         </ul>
+        @if(Auth::user()->is_super_admin == 1)
+
         @permission('Trucker-List')
             <li class="menu">
                         <a href="#component9" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
