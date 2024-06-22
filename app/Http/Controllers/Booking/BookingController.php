@@ -763,102 +763,64 @@ class BookingController extends Controller
     public function edit(Booking $booking)
     {
         $this->authorize(__FUNCTION__, Booking::class);
-        $quotationRate = Quotation::where('company_id', Auth::user()->company_id)->where('status', 'approved')->with(
-            'customer',
-            'equipmentsType'
-        )->get();
-        $booking_details = BookingContainerDetails::where('booking_id', $booking->id)->get();
-        $ffw = Customers::where('company_id', Auth::user()->company_id)->whereHas('CustomerRoles', function ($query) {
-            return $query->where('role_id', 6);
-        })->with('CustomerRoles.role')->get();
-        $consignee = Customers::where('company_id', Auth::user()->company_id)->whereHas(
-            'CustomerRoles',
-            function ($query) {
-                return $query->where('role_id', 2);
-            }
-        )->with('CustomerRoles.role')->get();
-        $customers = Customers::where('company_id', Auth::user()->company_id)->whereHas(
-            'CustomerRoles',
-            function ($query) {
-                return $query->where('role_id', 1);
-            }
-        )->with('CustomerRoles.role')->get();
 
-        if (request('quotation_id') == '0' || $booking->quotation_id == null) {
-            $quotation = new Quotation();
-            $terminals = Terminals::where('company_id', Auth::user()->company_id)->get();
-        } else {
-            $quotation = Quotation::findOrFail(request('quotation_id'));
-            $terminals = Terminals::where('company_id', Auth::user()->company_id)->where(
-                'port_id',
-                $quotation->discharge_port_id
-            )->get();
-        }
+        // Load related data
+        $quotationRate = Quotation::where('company_id', Auth::user()->company_id)
+            ->where('status', 'approved')
+            ->with('customer', 'equipmentsType')
+            ->get();
+
+        // Ensure bookingContainerDetails are loaded
+        $booking->load('bookingContainerDetails.containerType', 'bookingContainerDetails.container');
+
+        $ffw = Customers::where('company_id', Auth::user()->company_id)
+            ->whereHas('CustomerRoles', function ($query) {
+                return $query->where('role_id', 6);
+            })->with('CustomerRoles.role')->get();
+
+        $consignee = Customers::where('company_id', Auth::user()->company_id)
+            ->whereHas('CustomerRoles', function ($query) {
+                return $query->where('role_id', 2);
+            })->with('CustomerRoles.role')->get();
+
+        $customers = Customers::where('company_id', Auth::user()->company_id)
+            ->whereHas('CustomerRoles', function ($query) {
+                return $query->where('role_id', 1);
+            })->with('CustomerRoles.role')->get();
+
+        $quotation = Quotation::find($booking->quotation_id);
+
+        $terminals = $quotation
+            ? Terminals::where('company_id', Auth::user()->company_id)
+                ->where('port_id', $quotation->discharge_port_id)
+                ->get()
+            : Terminals::where('company_id', Auth::user()->company_id)->get();
+
         $agents = Agents::where('company_id', Auth::user()->company_id)->where('is_active', 1)->get();
         $equipmentTypes = ContainersTypes::orderBy('id')->get();
-        $terminal = Terminals::where('company_id', Auth::user()->company_id)->get();
         $vessels = Vessels::where('company_id', Auth::user()->company_id)->get();
-        if (request('quotation_id') == 'draft' || $booking->quotation_id == null || $booking->transhipment_port != null ) {
-            $voyages = Voyages::with('vessel', 'voyagePorts')->where('company_id', Auth::user()->company_id)->get();
-        } else {
-            $voyages = Voyages::with('vessel', 'voyagePorts')->where('company_id', Auth::user()->company_id)->whereHas(
-                'voyagePorts',
-                function ($query) use ($quotation) {
-                    $query->where('port_from_name', $quotation->load_port_id);
-                }
-            )->get();
-        }
-        $ports = Ports::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
 
+        $voyages = Voyages::with('vessel', 'voyagePorts')
+            ->where('company_id', Auth::user()->company_id)
+            ->when($quotation && $quotation->shipment_type != 'Import', function ($query) use ($quotation) {
+                $query->whereHas('voyagePorts', function ($query) use ($quotation) {
+                    $query->where('port_from_name', $quotation->load_port_id);
+                });
+            })->get();
+
+        $ports = Ports::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
         $containers = Containers::where('company_id', Auth::user()->company_id)->get();
 
-        if($quotation->shipment_type == 'Export' && $booking->quotation_id != null){
-            $containers = Containers::where('company_id', Auth::user()->company_id)->whereHas(
-                'activityLocation',
-                function ($query) use ($quotation) {
-                    $query->where('country_id', $quotation->countrydis)->where(
-                        'container_type_id',
-                        $quotation->equipment_type_id
-                    );
-                }
-            )->where('status', 2)->get();
-        }elseif($booking->quotation_id != null){
-            $containers = Containers::where('company_id', Auth::user()->company_id)->where(
-                'container_type_id',
-                $quotation->equipment_type_id
-            )->get();
-        }
-        if($booking->quotation_id != null){
-            $oldContainers = Containers::where('company_id', Auth::user()->company_id)->where(
-            'container_type_id',
-                $quotation->equipment_type_id
-            )->get();
-        }else{
-            $oldContainers = Containers::where('company_id', Auth::user()->company_id)->get();
-        }
+        // Fetch old containers related to the booking
+        $oldContainers = $booking->bookingContainerDetails->map(function ($detail) {
+            return $detail->container;
+        });
+
         $activityLocations = Ports::where('company_id', Auth::user()->company_id)->get();
-
-        if ($quotation->shipment_type == 'Export' && $booking->quotation_id != null) {
-            $activityLocations = Ports::where('country_id', $quotation->countrydis)->where(
-                'company_id',
-                Auth::user()->company_id
-            )->get();
-        } elseif ($quotation->shipment_type != 'Export' && $booking->quotation_id != null) {
-            $activityLocations = Ports::where('country_id', $quotation->countryload)->where(
-                'company_id',
-                Auth::user()->company_id
-            )->get();
-        }else{
-            $activityLocations = Ports::where('company_id', Auth::user()->company_id)->get();
-
-        }
-
         $line = Lines::where('company_id', Auth::user()->company_id)->get();
-       
 
         return view('booking.booking.edit', [
             'quotationRate' => $quotationRate,
-            'booking_details' => $booking_details,
             'booking' => $booking,
             'ffw' => $ffw,
             'consignee' => $consignee,
@@ -868,80 +830,92 @@ class BookingController extends Controller
             'terminals' => $terminals,
             'equipmentTypes' => $equipmentTypes,
             'ports' => $ports,
-            'terminal' => $terminal,
-            'customers' => $customers,
             'vessels' => $vessels,
             'voyages' => $voyages,
             'quotation' => $quotation,
             'activityLocations' => $activityLocations,
             'line' => $line,
+            'customers' => $customers, // Add customers to the view
+
         ]);
     }
+
+
 
     public function update(Request $request, Booking $booking)
     {
         $request->validate([
-            'voyage_id' => ['required'],
-            'commodity_description' => ['required'],
-            'bl_release' => ['required'],
-            'customer_id' => ['required'],
-            'containerDetails' => ['required'],
+            'voyage_id' => 'required',
+            'commodity_description' => 'required',
+            'bl_release' => 'required',
+            'customer_id' => 'required',
+            'containerDetails' => 'required',
         ], [
-            'containerDetails.required' => 'Container Details Cannot be empty',
+            'containerDetails.required' => 'Container Details cannot be empty',
         ]);
 
+        // Retrieve related data or fail silently if not found
         $quotation = Quotation::find($request->quotation_id);
-        $etaDate = VoyagePorts::where('voyage_id',$request->voyage_id)->where('port_from_name',$request->load_port_id)->pluck('eta')->first();
+        $etaDate = VoyagePorts::where('voyage_id', $request->voyage_id)
+            ->where('port_from_name', $request->load_port_id)
+            ->pluck('eta')
+            ->first();
 
-        if($booking->quotation_id != null){
-            if($quotation->shipment_type == 'Export'){
-                    if($etaDate <= $quotation->validity_from && $etaDate >= $quotation->validity_to){
-                        return redirect()->back()->with('error','Invalid Date '.$etaDate.' Date Must Be Between '.$quotation->validity_from.' and '.$quotation->validity_to)
-                        ->withInput($request->input());
-                    }
+        // Validation against quotation dates
+        if ($quotation && $quotation->shipment_type == 'Export') {
+            if ($etaDate <= $quotation->validity_from || $etaDate >= $quotation->validity_to) {
+                return redirect()->back()
+                    ->with('error','Invalid Date '.$etaDate.' Date Must Be Between '.$quotation->validity_from.' and '.$quotation->validity_to)
+                    ->withInput();
             }
         }
 
-    if($request->input('movement') == 'FCL/FCL'){
-        $uniqueContainers = array();
-        foreach ($request->containerDetails as $container) {
-            if (!in_array(
-                    $container['container_id'],
-                    $uniqueContainers
-                ) || $container['container_id'] == null || $container['container_id'] == "000") {
-                if ($container['container_id'] != "000" || $container['container_id'] != null) {
-                    array_push($uniqueContainers, $container['container_id']);
+        try {
+            DB::beginTransaction();
+
+            // Basic booking information update
+            $inputs = $request->except(['_token', 'containerDetails', 'removed']);
+            $booking->update($inputs);
+
+            // Handle removal of container details if any
+            $removedIds = explode(',', $request->input('removed', ''));
+            BookingContainerDetails::whereIn('id', $removedIds)->delete();
+
+            // Update or create new container details
+            foreach ($request->input('containerDetails', []) as $details) {
+                if (isset($details['id']) && $details['id']) {
+                    BookingContainerDetails::find($details['id'])->update($details);
+                } else {
+                    $container = Containers::firstOrCreate(
+                        ['code' => $details['container_number']],
+                        [
+                            'container_type_id' => $details['container_type'],
+                            'activity_location_id' => $details['activity_location_id'] ?? 1,
+                            'company_id' => auth()->user()->company_id,
+                        ]
+                    );
+
+                    $details['container_id'] = $container->id;
+                    $details['booking_id'] = $booking->id;
+                    BookingContainerDetails::create($details);
                 }
-            } else {
-                return redirect()->back()->with('error', 'Container Numbers Must be unique')->withInput(
-                    $request->input()
-                );
             }
+
+            // Handling file uploads if any
+            if ($request->hasFile('certificat')) {
+                $path = $request->file('certificat')->store('certificates', 'public');
+                $booking->update(['certificat' => $path]);
+            }
+
+            DB::commit();
+            return redirect()->route('booking.index')->with('success', 'Booking updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Booking Update Failed: '.$e->getMessage());
+            return back()->withErrors('Update failed! Please try again.')->withInput();
         }
     }
-        $user = Auth::user();
-        $ReferanceNumber = Booking::where('id', '!=', $booking->id)->where('company_id', $user->company_id)->where(
-            'ref_no',
-            $request->ref_no
-        )->count();
 
-        if ($ReferanceNumber > 0) {
-            return back()->with('error', 'The Booking Refrance Number Already Exists');
-        }
-
-        $this->authorize(__FUNCTION__, Booking::class);
-        $inputs = request()->all();
-        unset($inputs['containerDetails'], $inputs['_token'], $inputs['removed']);
-        $booking->update($inputs);
-        BookingContainerDetails::destroy(explode(',', $request->removed));
-        $booking->createOrUpdateContainerDetails($request->containerDetails);
-        if ($request->hasFile('certificat')) {
-            $path = $request->file('certificat')->getClientOriginalName();
-            $request->certificat->move(public_path('certificat'), $path);
-            $booking->update(['certificat' => "certificat/" . $path]);
-        }
-        return redirect()->route('booking.index')->with('success', trans('Booking.Updated.Success'));
-    }
 
     public function destroy($id)
     {
