@@ -381,7 +381,11 @@
                                 </li>
                                 @endpermission
 
-
+                                @permission('Booking-List')
+                                <li>
+                                    <a href="{{route('booking.export')}}">Export Booking</a>
+                                </li>
+                                @endpermission
                                 <!-- @permission('BlDraft-List')
                                 <li>
                                     <a href="{{route('bldraft.index')}}"> Bl Gates </a>

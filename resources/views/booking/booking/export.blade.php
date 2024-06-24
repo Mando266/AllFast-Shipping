@@ -21,12 +21,12 @@
                             </br>
                             <div class="col-md-12 text-right mb-5">
                                 @permission('Booking-Create')
-                                <a href="{{route('booking.selectImportQuotation')}}" class="btn btn-primary">New Import Booking</a>
+                                <a href="{{route('booking.selectExportQuotation')}}" class="btn btn-primary">New Export Booking</a>
                                 @endpermission
                                 @permission('Booking-List')
                                 <button id="export-current" class="btn btn-warning" type="button">Export</button>
                                 <button id="export-current-loadlist" class="btn btn-info" type="button">
-                                    Discharge List
+                                    Load List
                                 </button>
                                 @endpermission
                             </div>
@@ -230,11 +230,11 @@
                                     <th>discharge port</th>
                                     <th>Equipment Type</th>
                                     <th>qty</th>
-                                    <!-- <th>Containers Status</th> -->
+                                    <th>Containers Status</th>
                                     <th>Booking Creation</th>
                                     <th>MT/FL</th>
                                     <th>Booking Status</th>
-                                    <th>D.O</th>
+                                    <th>S.O</th>
                                     <th>Gate In</th>
                                     <th>Gate Out</th>
                                     <th class='text-center' style='width:100px;'></th>
@@ -296,28 +296,44 @@
                                             </table>
                                         </td>
                                         <td>{{ $qty }}</td>
-                                        <!-- <td>
+                                        <td>
                                             {{ $assigned }} Assigned<br>
                                             {{ $unassigned }} Unassigned
-                                        </td> -->
+                                        </td>
                                         <td>{{{$item->created_at}}}</td>
                                         <td>{{{$item->booking_type}}}</td>  
                                         <td class="text-center">
-                                            @if($item->booking_confirm == 1)
-                                                <span class="badge badge-info"> Confirm </span>
-                                            @elseif($item->booking_confirm == 3)
-                                                <span class="badge badge-warning"> Draft </span>
-                                            @elseif($item->booking_confirm == 2)
-                                                <span class="badge badge-danger"> Cancelled </span>
-                                            @endif
+                                            <ul class="table-controls">
+                                                @if($item->booking_confirm == "1")
+                                                    @permission('Booking-Create')
+                                                    @if($item->has_bl == 0)
+                                                        <li>
+                                                            <a href="{{route('bldraft.create',['booking_id'=>$item->id])}}"
+                                                               data-toggle="tooltip" data-placement="top" title=""
+                                                               data-original-title="show">
+                                                                <i class="fas fa-plus text-primary"></i>
+                                                            </a>
+                                                        </li>
+                                                    @else
+                                                        @if(optional($item->bldraft)->bl_status == 1)
+                                                            <span class="badge badge-info"> Confirmed </span>
+                                                        @else
+                                                            <span class="badge badge-warning"> Draft </span>
+                                                        @endif
+                                                    @endif
+                                                    @endpermission
+
+                                                @endif
+                                            </ul>
                                         </td>
+
                       
                                         <td class="text-center">
                                             @permission('Booking-Show')
                                             <ul class="table-controls">
                                                 @if($item->booking_confirm == 1)
                                                     <li>
-                                                            <a href="{{route('booking.deliveryOrder',['booking'=>$item->id])}}"
+                                                            <a href="{{route('booking.showShippingOrder',['booking'=>$item->id])}}"
                                                                target="_blank">
                                                                 <i class="fas fa-file-pdf text-primary"
                                                                    style='font-size:large;'></i>
@@ -332,7 +348,7 @@
                                             <ul class="table-controls">
                                                 @if($item->booking_confirm == 1)
                                                     <li>
-                                                            <a href="{{route('booking.selectGateInImport',['booking'=>$item->id])}}"
+                                                            <a href="{{route('booking.showGateIn',['booking'=>$item->id])}}"
                                                                target="_blank">
                                                                 <i class="fas fa-file-pdf text-primary"
                                                                    style='font-size:large;'></i>
@@ -369,7 +385,7 @@
                                                         </a>
                                                     </li>
                                                 @endif
-                                                <!-- @permission('Booking-Edit')
+                                                @permission('Booking-Edit')
                                                 <li>
                                                     <a href="{{route('booking.edit',['booking'=>$item->id,'quotation_id'=>$item->quotation_id])}}"
                                                        data-toggle="tooltip" data-placement="top" title=""
@@ -377,10 +393,10 @@
                                                         <i class="far fa-edit text-success"></i>
                                                     </a>
                                                 </li>
-                                                @endpermission -->
+                                                @endpermission
                                                     @permission('Booking-Show')
                                                     <li>
-                                                    <a href="{{route('booking.arrivalNotification',['booking'=>$item->id])}}"
+                                                    <a href="{{route('booking.show',['booking'=>$item->id])}}"
                                                     data-toggle="tooltip" data-placement="top" title=""
                                                            data-original-title="show">
                                                             <i class="far fa-eye text-primary"></i>

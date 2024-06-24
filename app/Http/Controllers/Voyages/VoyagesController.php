@@ -164,7 +164,7 @@ class VoyagesController extends Controller
         $legs = Legs::orderBy('id')->get();
         $lines = Lines::where('company_id',$user->company_id)->orderBy('id')->get();
         $terminals = [];
-        $ports = Ports::where('company_id',$user->company_id)->orderBy('id')->get();
+        $ports = Ports::orderBy('id')->get();
         return view('voyages.voyages.create',[
             'vessels'=>$vessels,
             'legs'=>$legs,
@@ -283,8 +283,8 @@ class VoyagesController extends Controller
         $vessels = Vessels::where('company_id',Auth::user()->company_id)->orderBy('name')->get();
         $legs = Legs::orderBy('id')->get();
         $lines = Lines::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
-        $terminals = Terminals::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
-        $ports = Ports::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
+        $terminals = Terminals::orderBy('id')->get();
+        $ports = Ports::orderBy('id')->get();
 
         return view('voyages.voyages.edit',[
             'voyage_ports'=>$voyage_ports,
@@ -328,7 +328,7 @@ class VoyagesController extends Controller
                     }
                 }
         }
-        $this->authorize(__FUNCTION__,VoyagePorts::class);
+        $this->authorize(__FUNCTION__,Voyages::class);
         $inputs = request()->all();
         unset($inputs['voyageport'],$inputs['_token'],$inputs['removed']);
         $voyage->update($inputs);

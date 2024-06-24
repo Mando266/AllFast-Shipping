@@ -1,25 +1,31 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="layout-px-spacing" style="background-color: #fff;">
+<div class="layout-px-spacing">
     <div class="row layout-top-spacing">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
             <div class="widget widget-one">
-                <div class="widget-content widget-content-area">
+                <div class="widget-heading">
                     <div class="container" style="border:none;">
                         <div class="row">
                             <div class="col-md-3 text-left">
                                 <img src="{{asset('assets/img/allfastLogo.png')}}" style="width: 250px;" alt="logo">
                             </div>
-                            <div class="col-md-6 text-center title">
-                                اذن تسليم رقم &nbsp {{$booking->deleviry_no}}
+                            <div class="col-md-6 text-center title" style="color:black">
+                            {{$booking->delivery_no}} &nbsp  اذن تسليم رقم 
                                 <br>
                                 رقم الطريق {{optional(optional($booking->voyage->voyagePorts)->where('port_from_name',$booking->discharge_port_id)->first())->road_no}}
                             </div>
-                            <div class="col-md-3 text-right">
+                            <div class="col-md-3 text-right" style="color:black">
                                 <div class="date">{{ \Carbon\Carbon::now()->format('d/m/Y') }}</div>
                             </div>
                         </div>
+                    </div>
+                    <div class="row">
+                            <div class="col-md-12 text-right title" style="color:black">
+                                إلي السيد \ مدير مصلحة الجمارك
+                                </div>
+                            </div>
                     </div>
                     <br>
                     @php
@@ -57,6 +63,12 @@
                         $measurement = $measurement + (float)$detail->measurement;
                     @endphp
                 @endforeach
+                @php
+                    use Carbon\Carbon;
+                    $importFreeTime = optional($booking)->import_free_time ?? 0;
+                    $eta = optional($voyagePort)->eta;
+                    $resultDate = $eta ? Carbon::parse($eta)->addDays($importFreeTime)->toDateString() : 'No ETA available';
+                @endphp
                     <div class="myDiv">
                         <table class="col-md-12 tableStyle">
                             <tbody>
@@ -130,6 +142,11 @@
                                     <td class="col-md-4 text-center">{{ $gross_weight }}</td>
                                     <td class="col-md-4 text-right">الوزن كجم</td>
                                 </tr>
+                                <tr>
+                                    <td class="col-md-4 text-left">ACID</td>
+                                    <td class="col-md-4 text-center">{{ $booking->acid}}</td>
+                                    <td class="col-md-4 text-right">ACID</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -151,10 +168,20 @@
                         </div>
                     </div>
                     <br>
-
-
-                    <br>
-
+                    <div class="myDiv">
+                        <table class="col-md-12 tableStyle">
+                            <tbody>
+                                <tr>
+                                    <td class="col-md-12 text-right">فترة السماح : {{ optional($booking)->import_free_time }} أيام</td>
+                                </tr>
+                                <tr>
+                                    <td class="col-md-12 text-right"> الحاويات فى فتره السماح من الغرامة حتى {{$resultDate}}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </br>
                     <!-- Container Details Section -->
                     <div class="myDiv">
                         <div class="row">
@@ -189,28 +216,21 @@
                             </table>
                         </div>
                     </div>
-
                     <br>
-                    <div class="container" style="border:none;">
+
+                    <div class="notes">
                         <table class="col-md-12 tableStyle">
                             <tbody>
-                                <tr>
-                                    <td class="col-md-12 text-right">فترة السماح :- {{ optional($booking->quotation)->import_detention }} أيام</td>
-                                </tr>
                                 <tr>
                                     <td class="col-md-12 text-right">شركة أوول فاست شيبينج اجينسى غير مسؤلة عن الوزن و المقاس المبين بعاليه و البضاعة تم تعبئتها و تفريغها تحت مسؤلية الشاحن و المستلم دون ادنى مسؤلية على الخط الملاحى او الوكيل الملاحى وعلى الجهات الرقابية والجمركيه اخذ كافة الاجراءات الجمركية والقانونية اللازمة. ومراجعة المشمول ومحتوياته و الخط الملاحى باعتباره مالك الحاوية فقط</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="row">
                         <div class="col-md-12 text-center">
-                            <button onclick="window.print()" class="btn btn-primary hide mt-3">Print This Delivery Order</button>
-                            <a href="{{ route('booking.index') }}" class="btn btn-danger hide mt-3">{{ trans('forms.cancel') }}</a>
+                            <!-- <button onclick="window.print()" class="btn btn-primary hide  mt-3">Print</button> -->
                         </div>
-                    </div>
                 </div>
-            </div>
         </div>
     </div>
 </div>

@@ -32,7 +32,7 @@
 
                 <div class="col-md-12 text-center">
 
-                <img src="{{asset('assets/img/msl.png')}}" style="width: 350px;" alt="logo">
+                <img src="{{asset('assets/img/allfastLogo.png')}}" style="width: 350px;" alt="logo">
 
                 </div>
 </br>
@@ -131,19 +131,13 @@
 
                         <tr>
 
-                            <td class="tableStyle" style="width: 50%;">First Vessel / Voyage : @if($booking->voyage != null){{ $booking->voyage->vessel->name }} / {{ $booking->voyage->voyage_no}} @endif</td>
+                            <td class="tableStyle" style="width: 50%;">Vessel / Voyage : @if($booking->voyage != null){{ $booking->voyage->vessel->name }} / {{ $booking->voyage->voyage_no}} @endif</td>
 
                             <td class="tableStyle" style="width: 50%;">ETA: {{optional($firstVoyagePort)->eta}}</br></br>ETD: {{optional($firstVoyagePort)->etd}}</td>
 
                         </tr>
 
-                        <tr>
-
-                            <td class="tableStyle" style="width: 50%;">Second Vessel / Voyage : @if($booking->secondvoyage != null){{ $booking->secondvoyage->vessel->name }} / {{ $booking->secondvoyage->voyage_no}} @endif</td>
-
-                            <td class="tableStyle" style="width: 50%;">ETD: {{optional($secondVoyagePort)->etd}}</td>
-
-                        </tr>
+              
 
                     </tbody>
 
@@ -179,17 +173,14 @@
 
                         <tr>
 
-                            <td class="tableStyle" >Pick Up Location : @foreach($booking->bookingContainerDetails->unique('activity_location_id') as $bookingContainerDetail)
+                            <td class="tableStyle"  style="width: 50%;" >Pick Up Location : @foreach($booking->bookingContainerDetails->unique('activity_location_id') as $bookingContainerDetail)
 
                                - {{ optional($bookingContainerDetail->activityLocation)->pick_up_location }}
 
                             @endforeach
 
                             </td>
-
-                            <td class="tableStyle" >Return Location : {{optional($booking->placeOfReturn)->name}}</td>
-
-                            <td class="tableStyle" >Container Operator : {{optional($booking->principal)->name}}</td>
+                            <td class="tableStyle"  style="width: 50%;" >Container Operator : {{optional($booking->principal)->name}}</td>
 
 
 
@@ -199,21 +190,6 @@
 
                 </table>
 
-                <table class="col-md-12 tableStyle">
-
-                    <tbody>
-
-                        <tr>
-
-                            <td class="tableStyle" style="width: 50%;">Discharge Port ETA : {{$booking->discharge_etd}}</td>
-
-                            <td class="tableStyle" style="width: 50%;">Load Port Cutoff : {{$booking->load_port_cutoff}}</td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
 
                 <table class="col-md-12 tableStyle">
 
@@ -223,7 +199,7 @@
 
                             <td class="tableStyle" style="width: 50%;">BL Release : {{optional($booking->agent)->name}}</td>
 
-                            <td class="tableStyle" style="width: 50%;">Load Port Free Days : {{$booking->load_port_dayes}}</td>
+                            <td class="tableStyle" style="width: 50%;"></td>
 
                         </tr>
 
@@ -278,17 +254,11 @@
                             <td class="tableStyle thstyle">Items #</td>
 
                             <td class="tableStyle thstyle">Size Type</td>
-
-                            <td class="tableStyle thstyle">Seal No</td>
-
-                            <td class="tableStyle thstyle">QTY</td>
-
                             <td class="tableStyle thstyle">Container No</td>
-
+                            <td class="tableStyle thstyle">QTY</td>
+                            <td class="tableStyle thstyle">Seal No</td>
                             <td class="tableStyle thstyle">Weight</td>
-
                             <td class="tableStyle thstyle">Haz / Reefer / OOG Details / Haz Approval Ref.</td>
-
                         </tr>
 
                         @foreach($booking->bookingContainerDetails as $details)
@@ -298,17 +268,11 @@
                             <td class="tableStyle">{{ $loop->iteration }}</td>
 
                             <td class="tableStyle">{{ optional($details->containerType)->name }}</td>
-
-                            <td class="tableStyle">{{ $details->seal_no }}</td>
-
-                            <td class="tableStyle">{{ $details->qty }}</td>
-
                             <td class="tableStyle">{{ optional($details->container)->code }}</td>
-
+                            <td class="tableStyle">{{ $details->qty }}</td>
+                            <td class="tableStyle">{{ $details->seal_no }}</td>
                             <td class="tableStyle">{{ $details->weight}}</td>
-
                             <td class="tableStyle">{{ $details->haz}}</td>
-
                         </tr>
 
                         @endforeach
