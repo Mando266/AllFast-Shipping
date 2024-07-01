@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Bl\BlDraft;
+use Illuminate\Http\Request;
+use App\Models\Master\Containers;
 use App\Http\Controllers\Controller;
 use App\Models\Containers\Movements;
-use App\Models\Master\Containers;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 
 class DententionController extends Controller
@@ -13,17 +14,17 @@ class DententionController extends Controller
     //
     public function getBlnoToBookingNo(Request $request)
     {
-        $blNo = Movements::where('company_id', $request->company_id)
-            ->where('booking_no', $request->id)
-            ->whereNotNull('bl_no')
-            ->select('bl_no')
-            ->distinct('bl_no')
-            ->pluck('bl_no')
-        ;
-
+        $blNo = BlDraft::where('company_id', $request->company_id)
+            ->where('booking_id', $request->id)
+            ->whereNotNull('ref_no')
+            ->select('ref_no')
+            ->distinct('ref_no')
+            ->pluck('ref_no');
+            
         return Response::json([
             'blNo' => $blNo,
         ], 200);
+        
     }
 
     public function getBlContainers(Request $request)
