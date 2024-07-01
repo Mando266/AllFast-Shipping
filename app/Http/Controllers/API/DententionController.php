@@ -28,7 +28,6 @@ class DententionController extends Controller
 
     public function getBlContainers(Request $request)
     {
-        dd($request->all());
         $bl_no = $request->bl;
         $mov = Movements::where('company_id', $request->company_id);
         if (in_array('all', $bl_no)) {
