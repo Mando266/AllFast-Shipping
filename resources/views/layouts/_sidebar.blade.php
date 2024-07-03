@@ -333,6 +333,9 @@
                                         <a href="{{route('storage.index')}}">Storage Calculation</a>
                                     </li>
                                 @endpermission
+                                    <li>
+                                        <a href="{{route('dententions.index')}}"> {{ trans('menu.dentention') }} </a>
+                                    </li>
                         </ul>
             </li>
             @endpermission

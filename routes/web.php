@@ -252,7 +252,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/preview', [PreviewController::class, 'index'])->name('preview.index');
     Route::prefix('storage')->namespace('Storage')->group(function () {
         Route::resource('storage', 'StorageController');
-
+        // Route::get('storage',[StorageController::class,'index'])->name('storage.index');
+    });
+    Route::prefix('dentention')->namespace('Dentention')->group(function () {
+        Route::resource('dententions', 'DententionController');
         // Route::get('storage',[StorageController::class,'index'])->name('storage.index');
     });
     Route::prefix('lessor')->namespace('Master')->group(function () {
@@ -298,4 +301,3 @@ Route::group(['middleware' => 'auth'], function () {
 Auth::routes(['register' => false]);
 require 'mail.php';
 require 'dev.php';
-
