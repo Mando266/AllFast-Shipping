@@ -4,10 +4,12 @@ namespace App\Http\Controllers\API;
 
 use App\Models\Bl\BlDraft;
 use Illuminate\Http\Request;
+use App\Models\Booking\Booking;
 use App\Models\Master\Containers;
 use App\Http\Controllers\Controller;
 use App\Models\Containers\Movements;
 use Illuminate\Support\Facades\Response;
+use App\Models\Booking\BookingContainerDetails;
 
 class DententionController extends Controller
 {
@@ -29,15 +31,22 @@ class DententionController extends Controller
 
     public function getBlContainers(Request $request)
     {
-        $bl_no = $request->bl;
-        $mov = Movements::where('company_id', $request->company_id);
-        if (in_array('all', $bl_no)) {
-            $mov->where('booking_no', $request->booking_no);
-        } else {
-            $mov->whereIn('bl_no', $bl_no);
-        }
-        $mov = $mov->distinct()->pluck('container_id')->toarray();
-        $containers = Containers::select('id', 'code')->whereIn('id', $mov)->get();
-        return $containers;
+        $containersBooking = BookingContainerDetails::where('booking_id', $request->booking_no)
+                                                ->distinct()
+                                                ->pluck('container_id')->toarray();
+        $mov = Movements::where('company_id', $request->company_id)
+                            ->where('booking_no', $request->booking_no)
+                            ->distinct()->pluck('container_id')->toarray();
+                            
+        $containers = Containers::select('id', 'code');
+        
+        $containersMov = $containers->whereIn('id', $mov)->get();
+        $missingContainers = $containers->whereIn('id',  array_diff($containersBooking, $mov))->pluck('code')->toarray();
+
+        return [
+            'containersMov' => $containersMov,
+            'missingContainers' => $missingContainers
+        ];
     }
+
 }
