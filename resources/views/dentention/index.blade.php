@@ -35,6 +35,14 @@
                                 </ul>
                             </div>
                         @endif
+                        
+            <div class="alert alert-arrow-left alert-icon-left alert-light-warning"  id="warning_alert_msg"  role="alert" style="display: none;">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <svg xmlns="http://www.w3.org/2000/svg" data-dismiss="alert" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x close"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span> </span>
+            </div>
                         <form action="{{route('dententions.store')}}" method="POST">
                             @csrf
 
@@ -45,7 +53,7 @@
 
     
                             <div class="form-row">
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-6">
                                     <label for="BLNo">Booking No</label>
                                     <select class="selectpicker form-control" id="booking_no" data-live-search="true"
                                             name="booking_no" data-size="10"
@@ -55,21 +63,8 @@
                                         @endforeach
                                     </select>
                                 </div>
-                              
-                                <div class="form-group col-md-4">
-                                    <input type="hidden" id="old_blno" value="{{ isset($input) ? json_encode($input['bl_no']) : '' }}">
-                                    <label>BL NO</label>
-                                    <select class="selectpicker form-control" id="blno" data-live-search="true"
-                                            name="bl_no[]" data-size="10" 
-                                            title="{{trans('forms.select')}}" required multiple>
-                                            <option
-                                                value="all" {{ "all" == old('bl_no',isset($input) ? $input['bl_no'] : '') ? 'selected':'hidden'}}>
-                                            All
-                                        </option>
-                                    </select>
-                                </div>
 
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-6">
                                     <label for="Date">Container No</label>
                                     <select class="selectpicker form-control" id="port" data-live-search="true"
                                             name="container_ids[]" data-size="10"
@@ -152,7 +147,6 @@
                                         <table id="charges" class="table table-bordered">
                                             <thead>
                                             <tr>
-                                                <th class="col-md-2 text-center">BLNo</th>
                                                 <th class="col-md-2 text-center">Container No</th>
                                                 <th class="col-md-1 text-center">Cycle Status</th>
                                                 <th class="col-md-1 text-center">From Mov.Code</th>
@@ -167,7 +161,6 @@
                                             <tbody>
                                             @foreach($calculation['containers'] as $item)
                                                 <tr>
-                                                    <td class="col-md-2 text-center">{{$item['bl_no']}}</td>
                                                     <td class="col-md-2 text-center">{{$item['container_no']}} {{$item['container_type']}}</td>
                                                     <td class="col-md-2 text-center">{{$item['status']}}</td>
                                                     <td class="col-md-1 text-center">{{$item['from_code']}}</td>
@@ -315,65 +308,39 @@
 
             <script>
                 let company_id = "{{auth()->user()->company_id}}";
-                let blno_val = '{{ implode(',',$input['bl_no'] ??[]) }}'
-                blno_val = blno_val.split(',').filter(item => item !== '')
+                
 
                 let selectedCodes = '{{ implode(',',$input['container_ids'] ??[]) }}'
                 selectedCodes = selectedCodes.split(',').filter(item => item !== '')
-                
                 $(function() {
-                    if(blno_val.length){
+                    if($('#booking_no').val()){
                         $('#booking_no').change();
-                        $('#port').trigger('show.bs.select');
                     }
                 });
 
                 $('#booking_no').change(function (e) {
-                    let blno = $('#blno');
-                    let id = $('#booking_no').val();
-                    blno.empty();
-                    blno.append(`<option value='all'  ${blno_val.includes( 'all') ? 'selected' : ''}>All</option>`);
-                    $.ajax({
-                        url: '{{route("api.blno")}}',
-                        type: 'GET',
-                        data: {
-                            id: id,
-                            company_id: company_id,
-                        }
-                    }).done(function (data) {
-                        $.each(data.blNo, function (index, value) {
-                            let selected = blno_val.includes(value) ? 'selected' : '';
-                            let option =
-                                `<option value='${value}'  ${selected} > ${value} </option>`;
-                            blno.append(option);
-                        });
-                        blno.selectpicker('refresh');
-                    })
-                });
-
-
-                $('#port').on('show.bs.select', function () {
-                    let container = $('#port');
-                    let bl = $('#blno').val();
-                    let booking_no = $('#booking_no').val();
+                     let container = $('#port'); 
+                     let booking_no = $('#booking_no').val();  
                     container.empty();
-                    container.append(`<option value='all' ${selectedCodes.includes( 'all') ? 'selected' : ''}>All</option>`);
+                    container.append(`<option value='all'  ${selectedCodes.includes( 'all') ? 'selected' : ''}>All</option>`);
                     $.ajax({
                         url: '{{route("api.blContainers")}}',
                         type: 'GET',
                         data: {
-                            bl: bl,
                             booking_no: booking_no,
                             company_id: company_id,
                         }
                     }).done(function (data) {
-                        $.each(data, function (index, value) {
+                        if(data.missingContainers.length){
+                            $('#warning_alert_msg span').text(`containers with this code ( ${ data.missingContainers.join(",")} )has no movement`);
+                            $('#warning_alert_msg').show();
+                        }
+                        $.each(data.containersMov, function (index, value) {
                              let selected = selectedCodes.includes(""+value.id) ? 'selected' : '';
                             container.append( `<option value='${value.id}' ${selected}> ${value.code} </option>`);
                         });
                         container.selectpicker('refresh');
                     })
-
                 });
             </script>
         @endpush
