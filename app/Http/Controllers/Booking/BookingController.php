@@ -514,28 +514,15 @@ class BookingController extends Controller
             'voyage.vessel',
             'secondvoyage.vessel'
         )->find($id);
-        $firstVoyagePort = VoyagePorts::where('voyage_id', $booking->voyage_id)->where(
-            'port_from_name',
-            optional($booking->loadPort)->id
-        )->first();
-        $secondVoyagePort = VoyagePorts::where('voyage_id', $booking->voyage_id_second)->where(
-            'port_from_name',
-            optional($booking->loadPort)->id
-        )->first();
-        $firstVoyagePortImport = VoyagePorts::where('voyage_id', $booking->voyage_id)->where(
+
+        $voyagePort = VoyagePorts::where('voyage_id', $booking->voyage_id)->where(
             'port_from_name',
             optional($booking->dischargePort)->id
         )->first();
-        $secondVoyagePortImport = VoyagePorts::where('voyage_id', $booking->voyage_id_second)->where(
-            'port_from_name',
-            optional($booking->dischargePort)->id
-        )->first();
+
         return view('booking.booking.deliveryOrder', [
             'booking' => $booking,
-            'firstVoyagePort' => $firstVoyagePort,
-            'secondVoyagePort' => $secondVoyagePort,
-            'firstVoyagePortImport' => $firstVoyagePortImport,
-            'secondVoyagePortImport' => $secondVoyagePortImport,
+            'voyagePort' => $voyagePort,
         ]);
     }
 
