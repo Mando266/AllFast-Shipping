@@ -506,7 +506,7 @@ class BookingController extends Controller
             'exportal_id'=> $request->input('exportal_id'),
             'importer_id'=> $request->input('importer_id'),
             'booking_type'=> $request->input('booking_type'),
-            'import_free_time'=> $request->input('import_free_time'),
+            'free_time'=> $request->input('free_time'),
             'payment_kind'=> $request->input('payment_kind'),
 
         ]);
@@ -926,7 +926,7 @@ class BookingController extends Controller
                 }
             )->get();
         }
-        $ports = Ports::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
+        $ports = Ports::orderBy('id')->get();
 
         $containers = Containers::where('company_id', Auth::user()->company_id)->get();
 
@@ -954,7 +954,7 @@ class BookingController extends Controller
         }else{
             $oldContainers = Containers::where('company_id', Auth::user()->company_id)->get();
         }
-        $activityLocations = Ports::where('company_id', Auth::user()->company_id)->get();
+        $activityLocations = Ports::get();
 
         if ($quotation->shipment_type == 'Export' && $booking->quotation_id != null) {
             $activityLocations = Ports::where('country_id', $quotation->countrydis)->where(
@@ -967,7 +967,7 @@ class BookingController extends Controller
                 Auth::user()->company_id
             )->get();
         }else{
-            $activityLocations = Ports::where('company_id', Auth::user()->company_id)->get();
+            $activityLocations = Ports::get();
 
         }
 
@@ -1001,12 +1001,14 @@ class BookingController extends Controller
         $request->validate([
             'voyage_id' => ['required'],
             'commodity_description' => ['required'],
-            'bl_release' => ['required'],
-            'customer_id' => ['required'],
-            'containerDetails' => ['required'],
-        ], [
-            'containerDetails.required' => 'Container Details Cannot be empty',
-        ]);
+            //'bl_release' => ['required'],
+            // 'customer_id' => ['required'],
+            // 'containerDetails' => ['required'],
+        ]
+        // ,[
+        //     'containerDetails.required' => 'Container Details Cannot be empty',
+        // ]
+    );
 
         $quotation = Quotation::find($request->quotation_id);
         $etaDate = VoyagePorts::where('voyage_id',$request->voyage_id)->where('port_from_name',$request->load_port_id)->pluck('eta')->first();

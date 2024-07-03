@@ -369,7 +369,7 @@
                                                         </a>
                                                     </li>
                                                 @endif
-                                                <!-- @permission('Booking-Edit')
+                                                @permission('Booking-Edit')
                                                 <li>
                                                     <a href="{{route('booking.edit',['booking'=>$item->id,'quotation_id'=>$item->quotation_id])}}"
                                                        data-toggle="tooltip" data-placement="top" title=""
@@ -377,7 +377,7 @@
                                                         <i class="far fa-edit text-success"></i>
                                                     </a>
                                                 </li>
-                                                @endpermission -->
+                                                @endpermission
                                                     @permission('Booking-Show')
                                                     <li>
                                                     <a href="{{route('booking.arrivalNotification',['booking'=>$item->id])}}"

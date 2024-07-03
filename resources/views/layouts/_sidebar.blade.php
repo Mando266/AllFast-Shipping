@@ -288,7 +288,6 @@
                                 @endpermission -->
                                 </ul>
                 </li>
-        @if(Auth::user()->is_super_admin == 1)
 
             @permission('Demurrage-List')
                     <li class="menu">
@@ -328,15 +327,14 @@
                                         <a href="{{route('storage.create')}}"> Dentention Calculation </a>
                                     </li>
                                 @endpermission
-                                @permission('Invoice-List')
+                                <!-- @permission('Invoice-List')
                                     <li>
                                         <a href="{{route('storage.index')}}">Storage Calculation</a>
                                     </li>
-                                @endpermission
+                                @endpermission -->
                         </ul>
             </li>
             @endpermission
-            @endif
             @permission('Quotation-List')
             <li class="menu">
                         <a href="#component8" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
@@ -386,11 +384,13 @@
                                     <a href="{{route('booking.export')}}">Export Booking</a>
                                 </li>
                                 @endpermission
-                                <!-- @permission('BlDraft-List')
+                                @permission('BlDraft-List')
+                                @if(Auth::user()->company_id == 2)
                                 <li>
                                     <a href="{{route('bldraft.index')}}"> Bl Gates </a>
                                 </li>
-                                @endpermission -->
+                                @endif
+                                @endpermission
 
                                 <!-- @permission('XML-List')
                                 <li>
@@ -403,9 +403,8 @@
             </li>
             @endpermission
         </ul>
-        @if(Auth::user()->is_super_admin == 1)
 
-        @permission('Trucker-List')
+        <!-- @permission('Trucker-List')
             <li class="menu">
                         <a href="#component9" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
                             <div class="">
@@ -435,7 +434,7 @@
                             </li>
                         </ul>
             </li>
-            @endpermission
+            @endpermission -->
             @permission('Invoice-List')
                 <li class="menu">
                         <a href="#component10" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle">
@@ -463,11 +462,11 @@
                                     <a href="{{route('receipt.index')}}">Receipt Gates</a>
                                 </li>
                                 @endpermission
-                                @permission('Invoice-List')
+                                <!-- @permission('Invoice-List')
                                 <li>
                                     <a href="{{route('creditNote.index')}}">Credit Note</a>
                                 </li>
-                                @endpermission
+                                @endpermission -->
                                 @permission('Refund-List')
                                 <li>
                                     <a href="{{route('refund.index')}}">Refund Gates</a>
@@ -482,7 +481,6 @@
                         </ul>
             </li>
             @endpermission
-            @endif
     </nav>
 </div>
 <style>

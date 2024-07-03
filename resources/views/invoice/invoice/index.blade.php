@@ -133,8 +133,6 @@
                                         <th>Bl No</th>
                                         <th>Voyage</th>
                                         <th>Vessel</th>
-                                        <th>ETA</th>
-                                        <th>ETD</th>
                                         <th>Date</th>
                                         <th>Invoice Type</th>
                                         <th>payment kind</th>
@@ -146,13 +144,12 @@
                                         <th>Payment Status</th>
                                         <th>Receipts</th>
                                         <th class='text-center' style='width:100px;'></th>
-                                        <th class='text-center' style='width:100px;'>Portal</th>
+                                        <!-- <th class='text-center' style='width:100px;'>Portal</th> -->
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse ($invoices as $invoice)
                                     @php
-
                                     $vat = $invoice->vat;
                                     $vat = $vat / 100;
                                     $total = 0;
@@ -183,34 +180,6 @@
                                     if($total_eg_after_vat != 0){
                                         $total_eg = $total_eg + $total_eg_after_vat;
                                     }
-                                    
-                                        if($invoice->booking != null){
-                                        $VoyagePort = $etd->where('voyage_id',optional($invoice->booking)->voyage_id)
-                                            ->where('port_from_name',optional(optional($invoice->booking)->loadPort)->id)->first();
-                                        }else{
-                                        $VoyagePort = $etd->where('voyage_id',optional(optional($invoice->bldraft)->booking)->voyage_id)
-                                        ->where('port_from_name',optional(optional(optional($invoice->bldraft)->booking)->loadPort)->id)->first();
-                                        }
-
-                                        $rate = $invoice->rate ?? 1;
-                                        if(optional(optional($invoice->bldraft)->booking)->voyage_id_second != null && optional(optional($invoice->bldraft)->booking)->transhipment_port != null){
-
-                                            if($rate == 'eta'){
-                                                $rate = optional(optional(optional($invoice->bldraft)->booking)->secondvoyage)->exchange_rate;
-                                            }elseif($rate == 'etd'){
-                                                $rate = optional(optional(optional($invoice->bldraft)->booking)->secondvoyage)->exchange_rate_etd;
-                                            }else{
-                                                $rate = $invoice->customize_exchange_rate;
-                                            }
-                                        }else{
-                                            if($rate == 'eta'){
-                                                $rate = optional(optional($invoice->bldraft)->voyage)->exchange_rate;
-                                            }elseif($rate == 'etd'){
-                                                $rate = $invoice->bldraft->voyage->exchange_rate_etd;
-                                            }else{
-                                                $rate = $invoice->customize_exchange_rate;
-                                            }
-                                        }
                                     @endphp
 
                                         <tr>
@@ -218,19 +187,12 @@
                                             <td>{{optional($invoice)->invoice_no}}</td>
                                             <td>{{$invoice->customer}}</td>
                                             <td>{{optional($invoice->customerShipperOrFfw)->tax_card_no}}</td>
-                                            <td>{{$invoice->bldraft_id == 0 ? optional($invoice->booking)->ref_no : optional($invoice->bldraft)->ref_no}}</td>
-                                            @if(optional(optional(optional($invoice->bldraft)->booking)->quotation)->shipment_type == "Import" && optional(optional(optional($invoice->bldraft)->booking)->quotation)->is_transhipment == 1)
-                                            <td>{{ $invoice->bldraft_id == 0 ? optional($invoice->voyage)->voyage_no : optional(optional($invoice->bldraft->booking)->secondvoyage)->voyage_no }}</td>
-                                            <td>{{ $invoice->bldraft_id == 0 ? optional(optional($invoice->voyage)->vessel)->name : optional(optional(optional($invoice->bldraft->booking)->secondvoyage)->vessel)->name }}</td>
-                                            @else
-                                            <td>{{ $invoice->bldraft_id == 0 ? optional($invoice->voyage)->voyage_no : optional($invoice->bldraft->voyage)->voyage_no }}</td>
-                                            <td>{{ $invoice->bldraft_id == 0 ? optional(optional($invoice->voyage)->vessel)->name : optional($invoice->bldraft->voyage->vessel)->name }}</td>
-                                            @endif
-                                            <td>{{optional($VoyagePort)->eta}}</td>
-                                            <td>{{optional($VoyagePort)->etd}}</td>
+                                            <td>{{optional($invoice->booking)->ref_no}}</td>
+                                            <td>{{optional(optional($invoice->booking)->voyage)->voyage_no}}</td>
+                                            <td>{{optional(optional(optional($invoice->booking)->voyage)->vessel)->name}}</td>
                                             <td>{{optional($invoice)->date}}</td>
                                             <td>{{optional($invoice)->type}}</td>
-                                            <td>{{optional($invoice->bldraft)->payment_kind}}</td>
+                                            <td>{{optional($invoice->booking)->payment_kind}}</td>
                                             @if( $invoice->add_egp != 'onlyegp')
                                             <td>{{$total}}</td>
                                             @else
@@ -239,10 +201,10 @@
                                             @if($invoice->add_egp == 'true' || $invoice->add_egp == 'onlyegp')
                                             <td>{{$total_eg}}</td>
                                             @else
-                                            <td></td>
+                                            <td></td> 
                                             @endif
-                                            <td>{{optional($invoice)->customize_exchange_rate == null ?  $rate : optional($invoice)->customize_exchange_rate}}</td>
-                                            <td>{{optional($receipt->user)->name}}</td>
+                                            <td>{{optional($invoice)->customize_exchange_rate}}</td>
+                                            <td>{{optional($invoice->user)->name}}</td>
 
                                             <td class="text-center">
                                                 @if($invoice->invoice_status == "confirm")
@@ -275,7 +237,7 @@
                                                  <ul class="table-controls">
                                                     @permission('Invoice-Edit')
                                                     <li>
-                                                        <a href="{{route('invoice.edit',['invoice'=>$invoice->id,'bldraft_id'=>$invoice->bldraft_id])}}" data-toggle="tooltip" target="_blank" data-placement="top" title="" data-original-title="edit">
+                                                        <a href="{{route('invoice.edit',['invoice'=>$invoice->id,'booking_ref'=>$invoice->booking_refv])}}" data-toggle="tooltip" target="_blank" data-placement="top" title="" data-original-title="edit">
                                                             <i class="far fa-edit text-success"></i>
                                                         </a>
                                                     </li>
@@ -302,7 +264,7 @@
                                                 @endif
                                                 </ul>
                                             </td>
-                                            <td class="text-center">
+                                            <!-- <td class="text-center">
                                                 @if($invoice->invoice_status == "confirm"  && $invoice->created_at >= '2024-01-01' && $invoice->portal_status == null)
                                                     <a href="{{route('invoice.get_invoice_json',['invoice'=>$invoice->id])}}" data-toggle="tooltip"  target="_blank"  data-placement="top" title="" data-original-title="show">
                                                         <button type="submit" class="btn btn-primary mt-3">Json</button>
@@ -312,7 +274,7 @@
                                                 @elseif($invoice->portal_status == 'Submitted')
                                                     <button class="btn btn-info mt-3">Submitted</button>
                                                 @endif
-                                            </td>
+                                            </td> -->
                                         </tr>
                                     @empty
                                         <tr class="text-center">

@@ -356,13 +356,13 @@
                                 </div>
                                 <div class="form-group col-md-3">
                                     <label>Import Free Time <span class="text-warning"> * </span></label>
-                                    <input type="text" class="form-control" id="import_free_time" name="import_free_time" value="{{old('import_free_time')}}"
+                                    <input type="text" class="form-control" id="free_time" name="free_time" value="{{old('free_time')}}"
                                         placeholder="Import Free Time" autocomplete="off">
                                 </div>
                                 @else
                                 <input type="hidden" name="payment_kind" class="form-control" autocomplete="off" value="{{optional($quotation)->payment_kind}}">
-                                <input type="hidden" name="import_free_time" class="form-control" autocomplete="off" value="{{optional($quotation)->import_detention}}">
-                                @endif
+                                <input type="hidden" name="free_time" class="form-control" autocomplete="off" value="{{optional($quotation)->import_detention}}">
+                            @endif
                             <div class="form-group col-md-3">
                                 <label for="tariff_service">Tariff Service</label>
                                 @if($quotation->ref_no != null)

@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.bldraft') 
 
 @section('content')
 <div class="layout-px-spacing">
@@ -7,6 +7,9 @@
             <div class="widget widget-one">
                 <div class="widget-heading">
                     <div class="container" style="border:none;">
+                    <div class="col-md-12 text-left">
+                            <button onclick="window.print()" class="btn btn-primary hide  mt-3">Print</button>
+                        </div>
                         <div class="row">
                             <div class="col-md-3 text-left">
                                 <img src="{{asset('assets/img/allfastLogo.png')}}" style="width: 250px;" alt="logo">
@@ -65,8 +68,8 @@
                 @endforeach
                 @php
                     use Carbon\Carbon;
-                    $importFreeTime = optional($booking)->import_free_time ?? 0;
-                    $eta = optional($voyagePort)->eta;
+                    $importFreeTime = optional($booking)->free_time ?? 0;
+                    $eta = optional($voyagePort)->etd;
                     $resultDate = $eta ? Carbon::parse($eta)->addDays($importFreeTime)->toDateString() : 'No ETA available';
                 @endphp
                     <div class="myDiv">
@@ -84,7 +87,7 @@
                                 </tr>
                                 <tr>
                                     <td class="col-md-4 text-left">Arrival Date</td>
-                                    <td class="col-md-4 text-center">{{ optional($voyagePort)->eta }}</td>
+                                    <td class="col-md-4 text-center">{{ optional($voyagePort)->etd }}</td>
                                     <td class="col-md-4 text-right">تاريخ الوصول</td>
                                 </tr>
                                 <tr>
@@ -96,6 +99,10 @@
                                     <td class="col-md-4 text-left">POL</td>
                                     <td class="col-md-4 text-center">{{ optional($booking->loadPort)->name }}</td>
                                     <td class="col-md-4 text-right">ميناء الشحن</td>
+                                </tr>
+                                <td class="col-md-4 text-left">POD</td>
+                                    <td class="col-md-4 text-center">{{ optional($booking->dischargePort)->name }}</td>
+                                    <td class="col-md-4 text-right">ميناء الوصول</td>
                                 </tr>
                                 <tr>
                                     <td class="col-md-4 text-left">Storage yard</td>
@@ -134,7 +141,7 @@
                                 </tr>
                                 <tr>
                                     <td class="col-md-4 text-left">Free Time</td>
-                                    <td class="col-md-4 text-center">{{ optional($booking)->import_free_time }}</td>
+                                    <td class="col-md-4 text-center">{{ optional($booking)->free_time }}</td>
                                     <td class="col-md-4 text-right">السماح</td>
                                 </tr>
                                 <tr>
@@ -146,6 +153,16 @@
                                     <td class="col-md-4 text-left">ACID</td>
                                     <td class="col-md-4 text-center">{{ $booking->acid}}</td>
                                     <td class="col-md-4 text-right">ACID</td>
+                                </tr>
+                                <tr>
+                                    <td class="col-md-4 text-left">Importer ID</td>
+                                    <td class="col-md-4 text-center">{{ $booking->importer_id}}</td>
+                                    <td class="col-md-4 text-right">Importer ID</td>
+                                </tr>
+                                <tr>
+                                    <td class="col-md-4 text-left">Exporter ID</td>
+                                    <td class="col-md-4 text-center">{{ $booking->exportal_id}}</td>
+                                    <td class="col-md-4 text-right">Exporter ID</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -172,7 +189,7 @@
                         <table class="col-md-12 tableStyle">
                             <tbody>
                                 <tr>
-                                    <td class="col-md-12 text-right">فترة السماح : {{ optional($booking)->import_free_time }} أيام</td>
+                                    <td class="col-md-12 text-right">فترة السماح : {{ optional($booking)->free_time }} أيام</td>
                                 </tr>
                                 <tr>
                                     <td class="col-md-12 text-right"> الحاويات فى فتره السماح من الغرامة حتى {{$resultDate}}

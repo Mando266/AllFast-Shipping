@@ -19,7 +19,7 @@
                               enctype="multipart/form-data">
                             @csrf
                             <div class="form-row">
-                                <input type="hidden" name="bldraft_id" value="{{request()->input('bldraft_id')}}">
+                                <input type="hidden" name="booking_ref" value="{{request()->input('booking_ref')}}">
                                 <div class="form-group col-md-6">
                                     <label for="customer">Customer<span
                                                 class="text-warning"> * (Required.) </span></label>
@@ -27,12 +27,12 @@
                                             data-live-search="true" data-size="10"
                                             title="{{trans('forms.select')}}" required>
                                         @if($bldraft != null)
-                                            @if(optional($bldraft->booking->forwarder)->name != null)
-                                                <option value="{{optional($bldraft->booking)->ffw_id}}">{{ optional($bldraft->booking->forwarder)->name }}
+                                            @if(optional($bldraft->forwarder)->name != null)
+                                                <option value="{{optional($bldraft)->ffw_id}}">{{ optional($bldraft->forwarder)->name }}
                                                     Forwarder
                                                 </option>
-                                            @elseif(optional($bldraft->booking->consignee)->name != null)
-                                                <option value="{{optional($bldraft->booking)->customer_consignee_id}}">{{ optional($bldraft->booking->consignee)->name }}
+                                            @elseif(optional($bldraft->consignee)->name != null)
+                                                <option value="{{optional($bldraft)->customer_consignee_id}}">{{ optional($bldraft->consignee)->name }}
                                                     Consignee
                                                 </option>
                                             @endif
@@ -41,9 +41,11 @@
                                                     Notify
                                                 </option>
                                             @endif
+                                            @if(optional($bldraft->customer)->name != null)
                                             <option value="{{optional($bldraft)->customer_id}}">{{ optional($bldraft->customer)->name }}
                                                 Shipper
                                             </option>
+                                            @endif
                                         @endif
                                     </select>
                                     @error('customer_id')
@@ -60,15 +62,11 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group col-md-3">
-                                    <label>Place Of Acceptence</label>
-                                    @if(optional($bldraft)->place_of_acceptence_id != null)
-                                        <input type="text" class="form-control" placeholder="Place Of Acceptence"
-                                               autocomplete="off"
-                                               value="{{(optional($bldraft->placeOfAcceptence)->code)}}"
+                                    <label for="Date">Booking Ref</label>
+                                        <input type="text" class="form-control" placeholder="Booking Ref"
+                                               autocomplete="off" value="{{(optional($bldraft)->ref_no)}}"
                                                style="background-color:#fff" disabled>
-                                    @endif
                                 </div>
-
                                 <div class="form-group col-md-3">
                                     <label>Load Port</label>
                                     @if(optional($bldraft)->load_port_id != null)
@@ -78,10 +76,10 @@
                                     @endif
                                 </div>
                                 <div class="form-group col-md-3">
-                                    <label for="Date">Booking Ref</label>
-                                    @if(optional($bldraft)->booking_id != null)
-                                        <input type="text" class="form-control" placeholder="Booking Ref"
-                                               autocomplete="off" value="{{(optional($bldraft->booking)->ref_no)}}"
+                                    <label>Discharge Port</label>
+                                    @if(optional($bldraft)->discharge_port_id != null)
+                                        <input type="text" class="form-control" placeholder="Discharge Port"
+                                               autocomplete="off" value="{{(optional($bldraft->dischargePort)->code)}}"
                                                style="background-color:#fff" disabled>
                                     @endif
                                 </div>
@@ -91,57 +89,25 @@
                                             data-live-search="true" data-size="10"
                                             title="{{trans('forms.select')}}" disabled>
                                         @foreach ($voyages as $item)
-                                            @if(optional($bldraft)->voyage_id != null && optional($bldraft->booking)->transhipment_port != null)
                                                 <option value="{{$item->id}}" {{$item->id == old('voyage_id',$bldraft->voyage_id) ? 'selected':''}}>{{$item->vessel->name}}
                                                     / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
-                                            @elseif(optional($bldraft->booking)->voyage_id_second != null && optional($bldraft->booking)->transhipment_port != null)
-                                                <option value="{{$item->id}}" {{$item->id == old('voyage_id',$bldraft->booking->voyage_id_second) ? 'selected':''}}>{{$item->vessel->name}}
-                                                    / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
-                                            @endif
                                         @endforeach
                                     </select>
                                 </div>
 
                             </div>
                             <div class="form-row">
-                                <div class="form-group col-md-3">
-                                    <label>Discharge Port</label>
-                                    @if(optional($bldraft)->discharge_port_id != null)
-                                        <input type="text" class="form-control" placeholder="Discharge Port"
-                                               autocomplete="off" value="{{(optional($bldraft->dischargePort)->code)}}"
-                                               style="background-color:#fff" disabled>
-                                    @endif
-                                </div>
-
-                                <div class="form-group col-md-3">
-                                    <label>Port of Delivery</label>
-                                    @if(optional($bldraft)->place_of_delivery_id != null)
-                                        <input type="text" class="form-control" placeholder="Port of Delivery"
-                                               autocomplete="off"
-                                               value="{{(optional($bldraft->placeOfDelivery)->code)}}"
-                                               style="background-color:#fff" disabled>
-                                    @endif
-                                </div>
-                                <div class="form-group col-md-3">
-                                    <label>Equipment Type</label>
-                                    @if(optional($bldraft)->equipment_type_id != null)
-                                        <input type="text" class="form-control" placeholder="Equipment Type"
-                                               name="bl_kind" autocomplete="off"
-                                               value="{{(optional($bldraft->equipmentsType)->name)}}"
-                                               style="background-color:#fff" disabled>
-                                    @endif
-                                </div>
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-4">
                                     <label for="status">Invoice Status<span class="text-warning"> * </span></label>
                                     <select class="form-control" data-live-search="true" name="invoice_status"
                                             title="{{trans('forms.select')}}" required>
+                                            @permission('Invoice-Draft')
                                                 <option value="draft">Draft</option>
-                                            @permission('Invoice-Ready_to_Confirm')
+                                            @endpermission
+                                            @permission('Invoice-ReadyToConfirm')
                                                 <option value="ready_confirm">Ready To Confirm</option>
                                             @endpermission
-                                            @if($bldraft->bl_status == 1 && Auth::user()->id == 15)
-                                                <option value="confirm">Confirm</option>
-                                            @endif
+
                                     </select>
                                     @error('invoice_status')
                                     <div style="color:red;">
@@ -149,47 +115,15 @@
                                     </div>
                                     @enderror
                                 </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-4">
                                     <label for="Date">Date</label>
                                     <input type="date" class="form-control" name="date" placeholder="Date"
                                            autocomplete="off" required value="{{old('date',date('Y-m-d'))}}">
                                 </div>
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-4">
                                     <label>QTY</label>
                                     <input type="text" class="form-control" placeholder="Qty" name="qty"
                                            autocomplete="off" value="{{$qty}}" style="background-color:#fff" disabled>
-                                </div>
-                                <div class="form-group col-md-2">
-                                    <label>TAX Hold</label>
-                                    <input type="text" class="form-control" placeholder="TAX %" name="tax_discount"
-                                           autocomplete="off" style="background-color:#fff" value="0">
-                                </div>
-                                <div class="col-md-2 form-group ">
-                                    <label>Exchange Rate</label>
-                                    <input class="form-control"  type="text" name="customize_exchange_rate" id="exchange_rate" placeholder="Exchange Rate" autocomplete="off" value='47.15' required>
-                                </div>
-                                <div class="form-group col-md-2">
-                                    <div style="padding: 30px;">
-                                        <input class="form-check-input" type="radio" name="add_egp" id="add_egp"
-                                               value="true" checked>
-                                        <label class="form-check-label" for="add_egp">
-                                            EGP AND USD
-                                        </label>
-                                        <br>
-                                        <input class="form-check-input" type="radio" name="add_egp" id="add_egp"
-                                               value="false">
-                                        <label class="form-check-label" for="add_egp">
-                                            USD
-                                        </label>
-                                        <br>
-                                        <input class="form-check-input" type="radio" name="add_egp" id="add_egp"
-                                               value="onlyegp">
-                                        <label class="form-check-label" for="add_egp">
-                                            EGP
-                                        </label>
-                                    </div>
                                 </div>
                             </div>
                             <div class="form-row">
@@ -198,7 +132,39 @@
                                     <input type="text" class="form-control" placeholder="VAT %" name="vat"
                                            autocomplete="off" value="14" style="background-color:#fff" required>
                                 </div>
+                                <div class="form-group col-md-3">
+                                    <label>TAX Hold</label>
+                                    <input type="text" class="form-control" placeholder="TAX %" name="tax_discount"
+                                           autocomplete="off" style="background-color:#fff" value="0">
+                                </div>
+                                <div class="col-md-3 form-group">
+                                    <label>Exchange Rate</label>
+                                    @if(request()->input('add_egp') == 'USD')
+                                    <input class="form-control"  type="text" name="customize_exchange_rate" id="exchange_rate" placeholder="Exchange Rate" autocomplete="off" value='48' required>
+                                    @else
+                                    <input class="form-control"  type="hidden" name="customize_exchange_rate" id="exchange_rate" placeholder="Exchange Rate" autocomplete="off" value='1' required>
+                                    @enfif
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <div style="padding: 30px;">
+                                        @if(request()->input('add_egp') == 'USD')
+                                        <input class="form-check-input" type="radio" name="add_egp" id="add_egp"
+                                               value="false" checked>
+                                        <label class="form-check-label" for="add_egp">
+                                            USD
+                                        </label>
+                                        <br>
+                                        @else
+                                        <input class="form-check-input" type="radio" name="add_egp" id="add_egp"
+                                               value="onlyegp" checked>
+                                        <label class="form-check-label" for="add_egp">
+                                            EGP
+                                        </label>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
+                       
                             <div class="form-row">
                                 <div class="col-md-12 form-group">
                                     <label> Notes </label>

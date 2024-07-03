@@ -27,25 +27,31 @@
                             <div class="form-group col-md-2">
                                 <label for="Invoice">Invoice No</label>
                                     <input type="text" id="Invoice" class="form-control"  name="invoice_no"
-                                    placeholder="Invoice No" autocomplete="off" value="{{old('invoice_no',$invoice->invoice_no)}}" required>
+                                    placeholder="Invoice No" autocomplete="off" value="{{old('invoice_no',$invoice->invoice_no)}}" disabled>
                             </div> 
-                            <input type="hidden" name="bldraft_id" value="{{request()->input('bldraft_id')}}">
                                 <div class="form-group col-md-6">
                                 <label for="customer">Customer<span class="text-warning"> * (Required.) </span></label>
-                                <select class="selectpicker form-control" name="customer_id" id="customer" data-live-search="true" data-size="10"
-                                 title="{{trans('forms.select')}}" required>
+                                <select class="selectpicker form-control" name="customer_id" id="customer" data-live-search="true" data-size="10" title="{{ trans('forms.select') }}" required>
                                     @if($bldraft != null)
-                                        @if(optional($bldraft->booking->forwarder)->name != null)
-                                            <option value="{{optional($bldraft->booking)->ffw_id}}" {{optional($bldraft->booking)->ffw_id == old('customer_id',$invoice->customer_id) ? 'selected':''}}>{{ optional($bldraft->booking->forwarder)->name }} Forwarder</option>
-                                        @elseif(optional($bldraft->booking->consignee)->name != null)
-                                            <option value="{{optional($bldraft->booking)->customer_consignee_id}}" {{optional($bldraft->booking)->customer_consignee_id == old('customer_id',$invoice->customer_id) ? 'selected':''}}>{{ optional($bldraft->booking->consignee)->name }} Consignee</option>
-                                        @endif
-                                        @if(optional($bldraft->customerNotify)->name != null)
-                                            <option value="{{optional($bldraft)->customer_notifiy_id}}"{{optional($bldraft->booking)->customer_notifiy_id == old('customer_id',$invoice->customer_id) ? 'selected':''}} >{{ optional($bldraft->customerNotify)->name }}
-                                                Notify
+                                        @if(optional($bldraft->forwarder)->name != null)
+                                            <option value="{{ optional($bldraft)->ffw_id }}" {{ optional($bldraft)->ffw_id == old('customer_id', $invoice->customer_id) ? 'selected' : '' }}>
+                                                {{ optional($bldraft->forwarder)->name }} Forwarder
+                                            </option>
+                                        @elseif(optional($bldraft->consignee)->name != null)
+                                            <option value="{{ optional($bldraft)->customer_consignee_id }}" {{ optional($bldraft)->customer_consignee_id == old('customer_id', $invoice->customer_id) ? 'selected' : '' }}>
+                                                {{ optional($bldraft->consignee)->name }} Consignee
                                             </option>
                                         @endif
-                                        <option value="{{optional($bldraft)->customer_id}}" {{optional($bldraft)->customer_id == old('customer_id',$invoice->customer_id) ? 'selected':''}}>{{ optional($bldraft->customer)->name }} Shipper</option>
+                                        @if(optional($bldraft->customerNotify)->name != null)
+                                            <option value="{{ optional($bldraft)->customer_notifiy_id }}" {{ optional($bldraft)->customer_notifiy_id == old('customer_id', $invoice->customer_id) ? 'selected' : '' }}>
+                                                {{ optional($bldraft->customerNotify)->name }} Notify
+                                            </option>
+                                        @endif
+                                        @if(optional($bldraft->customer)->name != null)
+                                            <option value="{{ optional($bldraft)->customer_id }}" {{ optional($bldraft)->customer_id == old('customer_id', $invoice->customer_id) ? 'selected' : '' }}>
+                                                {{ optional($bldraft->customer)->name }} Shipper
+                                            </option>
+                                        @endif
                                     @endif
                                 </select>
                                 @error('customer_id')
@@ -60,34 +66,29 @@
                                     placeholder="Customer Name" autocomplete="off" value="{{old('customer',$invoice->customer)}}" required>
                             </div> 
                         </div>
-                        <div class="form-row">
-                        <div class="form-group col-md-3" >
-                                    <label>Place Of Acceptence</label>
-                                        @if(optional($bldraft)->place_of_acceptence_id != null)
-                                        <input type="text" class="form-control" placeholder="Place Of Acceptence" autocomplete="off" value="{{(optional($bldraft->placeOfAcceptence)->code)}}" style="background-color:#fff" disabled>
-                                        @endif
-                                </div> 
-
-                                <div class="form-group col-md-3" >
-                                    <label>Load Port</label>
-                                        @if(optional($bldraft)->load_port_id != null)
-                                        <input type="text" class="form-control" placeholder="Load Port" autocomplete="off" value="{{(optional($bldraft->loadPort)->code)}}" style="background-color:#fff" disabled>
-                                        @endif
-                                </div> 
+                        <div class="form-row"> 
                             <div class="form-group col-md-3" >
                                 <label for="Date">Booking Ref</label>
-                                    @if(optional($bldraft)->booking_id != null)
-                                    <input type="text" class="form-control" placeholder="Booking Ref" autocomplete="off" value="{{(optional($bldraft->booking)->ref_no)}}" style="background-color:#fff" disabled>
+                                    <input type="text" class="form-control" placeholder="Booking Ref" autocomplete="off" value="{{(optional($bldraft)->ref_no)}}" style="background-color:#fff" disabled>
+                            </div> 
+                            <div class="form-group col-md-3" >
+                                <label>Load Port</label>
+                                    @if(optional($bldraft)->load_port_id != null)
+                                    <input type="text" class="form-control" placeholder="Load Port" autocomplete="off" value="{{(optional($bldraft->loadPort)->code)}}" style="background-color:#fff" disabled>
                                     @endif
+                            </div> 
+                            <div class="form-group col-md-3" >
+                                        <label>Discharge Port</label>
+                                        @if(optional($bldraft)->discharge_port_id != null)
+                                        <input type="text" class="form-control" placeholder="Discharge Port" autocomplete="off" value="{{(optional($bldraft->dischargePort)->code)}}" style="background-color:#fff" disabled>
+                                        @endif
                             </div> 
                             <div class="form-group col-md-3">
                                 <label for="voyage_id">Vessel / Voyage </label>
                                 <select class="selectpicker form-control" id="voyage_id" data-live-search="true" name="voyage_id"  data-size="10"
                                     title="{{trans('forms.select')}}" disabled>
                                     @foreach ($voyages as $item)
-                                    @if(optional($bldraft->booking)->voyage_id_second != null && optional($bldraft->booking)->transhipment_port != null && optional($bldraft->booking)->transhipment_port != null)
-                                        <option value="{{$item->id}}" {{$item->id == old('voyage_id',$bldraft->booking->voyage_id_second) ? 'selected':''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
-                                    @elseif(optional($bldraft)->voyage_id != null )
+                                    @if(optional($bldraft)->voyage_id != null )
                                         <option value="{{$item->id}}" {{$item->id == old('voyage_id',$bldraft->voyage_id) ? 'selected':''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
                                     @endif
                                     @endforeach
@@ -95,35 +96,18 @@
                             </div>
 
                             </div> 
-                            <div class="form-row">
-                                <div class="form-group col-md-3" >
-                                        <label>Discharge Port</label>
-                                        @if(optional($bldraft)->discharge_port_id != null)
-                                        <input type="text" class="form-control" placeholder="Discharge Port" autocomplete="off" value="{{(optional($bldraft->dischargePort)->code)}}" style="background-color:#fff" disabled>
-                                        @endif
-                                </div> 
-
-                                <div class="form-group col-md-3" >
-                                    <label>Port of Delivery</label>
-                                        @if(optional($bldraft)->place_of_delivery_id != null)
-                                        <input type="text" class="form-control" placeholder="Port of Delivery" autocomplete="off" value="{{(optional($bldraft->placeOfDelivery)->code)}}" style="background-color:#fff" disabled>
-                                        @endif
-                                </div> 
-                                <div class="form-group col-md-3" >
-                                    <label>Equipment Type</label>
-                                        @if(optional($bldraft)->equipment_type_id != null)
-                                        <input type="text" class="form-control" placeholder="Equipment Type"  autocomplete="off" value="{{(optional($bldraft->equipmentsType)->name)}}" style="background-color:#fff" disabled>
-                                        @endif
-                                </div> 
+                            <div class="form-row">        
                                 @if($invoice->invoice_status != "confirm")
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-4">
                                     <label for="status">Invoice Status<span class="text-warning"> * </span></label>
                                     <select class="form-control" data-live-search="true" name="invoice_status" title="{{trans('forms.select')}}" required>
+                                        @permission('Invoice-Draft')
                                         <option value="draft" {{ old('invoice_status',$invoice->invoice_status) == "draft" ? 'selected':'' }}>Draft</option>
-                                        @permission('Invoice-Ready_to_Confirm')
+                                        @endpermission
+                                        @permission('Invoice-ReadyToConfirm')
                                         <option value="ready_confirm" {{ old('invoice_status',$invoice->invoice_status) == "ready_confirm" ? 'selected':'' }}>Ready To Confirm</option>
                                         @endpermission
-                                        @if(Auth::user()->id == 15 || Auth::user()->id == 24 )
+                                        @if(auth()->user()->can('Invoice-Confirm') && $invoice->invoice_status == "ready_confirm")
                                         <option value="confirm" {{ old('invoice_status',$invoice->invoice_status) == "confirm" ? 'selected':'' }}>Confirm</option>
                                         @endif
                                     </select>
@@ -134,55 +118,15 @@
                                     @enderror
                                 </div>
                                 @endif
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group col-md-3" >
+                                <div class="form-group col-md-4" >
                                     <label for="Date">Date</label>
                                         <input type="date" class="form-control" name="date" placeholder="Date" autocomplete="off" value="{{old('date',date('Y-m-d'))}}">
                                 </div>
-                                <div class="form-group col-md-2" >
+                                <div class="form-group col-md-4" >
                                     <label>QTY</label>
                                         <input type="text" class="form-control" placeholder="Qty"  name="qty" autocomplete="off" value="{{$qty}}" style="background-color:#fff" disabled>
                                 </div>
-                                @if($invoice->type == "invoice")
-
-                                <div class="form-group col-md-2" >
-                                    <label>TAX</label>
-                                        <input type="text" class="form-control" placeholder="TAX %" name="tax_discount"  value="{{old('tax_discount',$invoice->tax_discount)}}" autocomplete="off"  style="background-color:#fff" >
-                                </div>
-                                <div class="col-md-2 form-group ">
-                                    <label>Exchange Rate</label>
-                                    <input class="form-control"  type="text" name="customize_exchange_rate" id="exchange_rate" placeholder="Exchange Rate" autocomplete="off" value="{{old('customize_exchange_rate',$invoice->customize_exchange_rate)}}" required>
-                                </div>
-                                <div class="form-group col-md-3" >
-                                    <div style="padding: 30px;">
-                                        @if($invoice->invoice_status != "confirm")
-                                        <input class="form-check-input" type="radio" name="add_egp" id="add_egp" value="true" {{ "true" == old('add_egp',$invoice->add_egp) ? 'checked':''}}>
-                                        <label class="form-check-label" for="add_egp">
-                                            EGP AND USD
-                                        </label>
-                                        <br>
-                                        @endif
-                                        <input class="form-check-input" type="radio" name="add_egp" id="add_egp" value="false" {{ "false" == old('add_egp',$invoice->add_egp) ? 'checked':''}}>
-                                        <label class="form-check-label" for="add_egp">
-                                          USD
-                                        </label>
-                                        <br>
-                                        <input class="form-check-input" type="radio" name="add_egp" id="add_egp" value="onlyegp" {{ "onlyegp" == old('add_egp',$invoice->add_egp) ? 'checked':''}}>
-                                        <label class="form-check-label" for="add_egp">
-                                          EGP
-                                        </label>
-                                        
-                                    </div>
-                                </div>
-                                @else
-                                <div class="col-md-2 form-group ">
-                                    <label>Exchange Rate</label>
-                                    <input class="form-control"  type="text" name="customize_exchange_rate" id="custom_rate_input" placeholder="Exchange Rate" autocomplete="off" value="{{old('customize_exchange_rate',$invoice->customize_exchange_rate ?? '47.15')}}" required>
-                                </div>
-                                @endif
-                            </div> 
-
+                            </div>
                             <div class="form-row">
                                 @if($invoice->type == "invoice")
                                 <div class="form-group col-md-3">
@@ -190,18 +134,43 @@
                                     <input type="text" class="form-control" id="vat" name="vat" value="{{old('vat',$invoice->vat)}}">
                                 </div>
                                 @endif
-
                                 @if($invoice->type == "invoice")
                                 <div class="form-group col-md-3" >
-                                    <label>Total USD</label>
-                                        <input type="text" class="form-control" id="total_usd"  value="{{round($total,2)}}" autocomplete="off"  style="background-color:#fff" readonly>
+                                    <label>TAX</label>
+                                        <input type="text" class="form-control" placeholder="TAX %" name="tax_discount"  value="{{old('tax_discount',$invoice->tax_discount)}}" autocomplete="off"  style="background-color:#fff" >
                                 </div>
+                                @if($invoice->add_egp == 'false')
+                                    <div class="col-md-3 form-group">
+                                        <label>Exchange Rate</label>
+                                        <input class="form-control"  type="text" name="customize_exchange_rate" id="exchange_rate" placeholder="Exchange Rate" autocomplete="off" value="{{old('customize_exchange_rate',$invoice->customize_exchange_rate)}}" required>
+                                    </div>
+                                @else 
+                                    <input class="form-control"  type="hidden" name="customize_exchange_rate" id="exchange_rate" placeholder="Exchange Rate" autocomplete="off" value="1">
+                                @endif
+
                                 <div class="form-group col-md-3" >
-                                    <label>Total EGP</label>
-                                        <input type="text" class="form-control" id="total_egp"  value="{{round($total_eg,2)}}" autocomplete="off"  style="background-color:#fff" readonly>
+                                    <div style="padding: 30px;">
+                                    @if($invoice->add_egp == "false")
+                                        <input class="form-check-input" type="radio" name="add_egp" id="add_egp" value="false" {{ "false" == old('add_egp',$invoice->add_egp) ? 'checked':''}}>
+                                        <label class="form-check-label" for="add_egp">
+                                          USD
+                                        </label>
+                                        @else
+                                        <br>
+                                        <input class="form-check-input" type="radio" name="add_egp" id="add_egp" value="onlyegp" {{ "onlyegp" == old('add_egp',$invoice->add_egp) ? 'checked':''}}>
+                                        <label class="form-check-label" for="add_egp">
+                                          EGP
+                                        </label>
+                                    @endif
+                                    </div>
+                                </div>
+                                @else
+                                <div class="col-md-2 form-group">
+                                    <label>Exchange Rate</label>
+                                    <input class="form-control"  type="text" name="customize_exchange_rate" id="custom_rate_input" placeholder="Exchange Rate" autocomplete="off" value="{{old('customize_exchange_rate',$invoice->customize_exchange_rate ?? '48')}}" required>
                                 </div>
                                 @endif
-                            </div>
+                            </div> 
                             <div class="form-row">
                                 <div class="col-md-12 form-group">
                                     <label> Notes </label>
@@ -233,7 +202,7 @@
                                 <input type="hidden" value ="{{ $item->id }}" name="invoiceChargeDesc[{{ $key }}][id]">
                                 <td>
                                     <select class="selectpicker form-control" id="charge_description" data-live-search="true" name="invoiceChargeDesc[{{$key}}][charge_description]" data-size="10"
-                                        title="{{trans('forms.select')}}" autofocus >
+                                        title="{{trans('forms.select')}}" autofocus disabled>
                                         @foreach ($charges as $charge)
                                             <option value="{{$charge->name}}" {{$charge->name == old('charge_description',$item->charge_description)? 'selected':''}}>{{$charge->name}}</option>
                                         @endforeach
@@ -350,15 +319,16 @@
             $('#charges tbody tr').each(function() {
                 var sizeSmall = parseFloat($(this).find('input[name$="[size_small]"]').val());
                 var enabled = $(this).find('input[name$="[enabled]"]:checked').val();
+                var addVat = $(this).find('input[name$="[add_vat]"]:checked').val();
                 var totalAmount = enabled == 1 ? sizeSmall * qty : sizeSmall;
                 var egpAmount = totalAmount * exchangeRate;
-                var egpVat = egpAmount * (1 + vatRate);
-                var usdvat =  totalAmount * (1 + vatRate)
+                var egpVat = addVat == 1 ? egpAmount * (1 + vatRate) : egpAmount;
+                var usdVat = addVat == 1 ? totalAmount * (1 + vatRate) : totalAmount;
 
                 $(this).find('input[name$="[total_amount]"]').val(totalAmount.toFixed(2));
                 $(this).find('input[name$="[total_egy]"]').val(egpAmount.toFixed(2));
                 $(this).find('input[name$="[egp_vat]"]').val(egpVat.toFixed(2));
-                $(this).find('input[name$="[usd_vat]"]').val(usdvat.toFixed(2));
+                $(this).find('input[name$="[usd_vat]"]').val(usdVat.toFixed(2));
 
                 totalUsd += totalAmount;
                 totalEgp += egpAmount;
@@ -377,17 +347,20 @@
         calculateTotals();
 
         // Event listeners for changes in the charge rows
-        $('body').on('input', 'input[name$="[size_small]"], input[name="qty"], input[name$="[enabled]"]', function() {
+        $('body').on('input', 'input[name$="[size_small]"], input[name="qty"], input[name$="[enabled]"], input[name$="[add_vat]"]', function() {
             calculateTotals();
         });
 
         // Handle VAT calculation
         function handleVatInput() {
-            var vatRate = parseFloat($('#vat').val()) / 100;
             $('#charges tbody tr').each(function() {
-                var egpAmount = parseFloat($(this).find('input[name$="[total_egy]"]').val());
-                var egpVat = egpAmount * (1 + vatRate);
-                $(this).find('input[name$="[egp_vat]"]').val(egpVat.toFixed(2));
+                var addVat = $(this).find('input[name$="[add_vat]"]:checked').val();
+                if (addVat == 1) {
+                    var egpAmount = parseFloat($(this).find('input[name$="[total_egy]"]').val());
+                    var vatRate = parseFloat($('#vat').val()) / 100;
+                    var egpVat = egpAmount * (1 + vatRate);
+                    $(this).find('input[name$="[egp_vat]"]').val(egpVat.toFixed(2));
+                }
             });
         }
 
@@ -401,8 +374,8 @@
         $('#customer').on('change', function() {
             var customer = $(this).val();
             $.get(`/api/master/customers/${customer}`).then(function(data) {
-                var notIfiy = data.customer[0];
-                $('#notifiy').val(' ' + notIfiy.name);
+                var notify = data.customer[0];
+                $('#notifiy').val(' ' + notify.name);
             });
         });
 
@@ -419,18 +392,16 @@
 
 <script>
     var removed = [];
-    function removeItem( item )
-    {
+    function removeItem(item) {
         removed.push(item);
         console.log(removed);
         document.getElementById("removed").value = removed;
     }
-    $(document).ready(function(){
-        $("#charges").on("click", ".remove", function () {
-        $(this).closest("tr").remove();
-        // update total_egp and usd to calculate all rows 
-            calculateTotals()
-
+    $(document).ready(function() {
+        $("#charges").on("click", ".remove", function() {
+            $(this).closest("tr").remove();
+            // update total_egp and usd to calculate all rows 
+            calculateTotals();
         });
     });
 </script>
@@ -450,7 +421,6 @@
     }
     
     $(document).on('input', '#custom_rate_input_1, #size_small_1, #total_amount_1', function() {
-
         calculateAmounts();
     });
 
@@ -475,4 +445,5 @@
         });
     });
 </script>
+
 @endpush

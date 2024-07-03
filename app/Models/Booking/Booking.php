@@ -55,6 +55,9 @@ class   Booking extends Model implements PermissionSeederContract
     public function consignee(){
         return $this->belongsTo(Customers::class,'customer_consignee_id','id');
     }
+    public function customerNotify(){
+        return $this->belongsTo(Customers::class,'customer_notifiy_id','id');
+    }
     public function voyage(){
         return $this->belongsTo(Voyages::class,'voyage_id','id');
     }
