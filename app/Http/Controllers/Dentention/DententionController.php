@@ -55,8 +55,8 @@ class DententionController extends Controller
                 $periodCalc = collect();
                 $containerTotal = 0;
                 $startMovement = Movements::where('container_id', $container->id)
-                    ->where('movement_id', request()->from ?? $movementDCHFId)
-                    ->where('booking_no', $request->booking_no)->first();
+                                            ->where('movement_id', request()->from ?? $movementDCHFId)
+                                            ->where('booking_no', $request->booking_no)->first();
                 $startMovementDate = $startMovement->movement_date;
                 if ($request->to_date == null && $request->to == null) {
                     $endMovement = Movements::where('container_id', $container->id)
@@ -66,29 +66,26 @@ class DententionController extends Controller
                     $endMovement = Movements::where('container_id', $container->id)
                         ->where('movement_date', '>', $request->to_date)->oldest()->first();
                 } elseif ($request->to_date == null && $request->to != null) {
-                    $endMovement = Movements::where('container_id', $container->id)->where('movement_id', $request->to)
-                        ->oldest()->first();
+                    $endMovement = Movements::where('container_id', $container->id)
+                                            ->where('movement_id', $request->to)
+                                            ->oldest()->first();
                 } else {
                     $endMovement = Movements::where('container_id', $container->id)->where('movement_id', $request->to)
                         ->where('movement_date', '<=', $request->to_date)->oldest()->first();
                 }
                 if ($endMovement == null || ($request->to_date < $endMovement->movement_date && !is_null($request->to_date))) {
-                    $endMovementdate = $request->to_date;
+                    $endMovementDate = $request->to_date;
                 } else {
-                    $endMovementdate = $endMovement->movement_date;
+                    $endMovementDate = $endMovement->movement_date;
                 }
                 
                 $diffBetweenDates = 0;
                 if ($endMovement) {
-                    $daysCount = Carbon::parse($endMovementdate)->diffInDays($startMovementDate);
+                    $daysCount = Carbon::parse($endMovementDate)->diffInDays($startMovementDate);
                 } else {
                     $status = 'in_completed';
                     $daysCount = Carbon::parse(now())->diffInDays($startMovementDate);
                 }
-
-                // if (request('from_date') != null) {
-                //     $diffBetweenDates = Carbon::parse($startMovementDate)->diffInDays(request('from_date'));
-                // }
                 $daysCount = $daysCount + $apply_first_day + $apply_last_day;
                 $tempDaysCount = $daysCount;
                 $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
@@ -200,12 +197,12 @@ class DententionController extends Controller
                 // Adding Container with periods
                 $grandTotal = $grandTotal + $containerTotal;
                 $tempCollection = collect([
-                    'bl_no' => $endMovement->bl_no ?? '',
+                    // 'bl_no' => $endMovement->bl_no ?? '',
                     'container_no' => $container->code,
                     'status' => trans("home.$status"),
                     'container_type' => $container->containersTypes->name,
-                    'from' => request('from_date') != null ? request('from_date') : $startMovementDate,
-                    'to' => $endMovement != null ? (optional($endMovement)->movement_date != null ? $endMovement->movement_date : $endMovement) : now(),
+                    'from' =>  $startMovementDate,
+                    'to' => $endMovementDate,
                     'from_code' => optional(optional($startMovement)->movementcode)->code,
                     'to_code' => $endMovement != null ? (optional($endMovement)->movement_date != null ? $endMovement->movementcode->code : $endMovement) : now(),
                     'total' => $containerTotal,
@@ -235,20 +232,17 @@ class DententionController extends Controller
                         ->where('movement_date', '<=', $request->to_date)->oldest()->first();
                 }
                 if ($endMovement == null || ($request->to_date < $endMovement->movement_date && !is_null($request->to_date))) {
-                    $endMovementdate = $request->to_date;
+                    $endMovementDate = $request->to_date;
                 } else {
-                    $endMovementdate = $endMovement->movement_date;
+                    $endMovementDate = $endMovement->movement_date;
                 }
                 $diffBetweenDates = 0;
                 if ($endMovement) {
-                    $daysCount = Carbon::parse($endMovementdate)->diffInDays($startMovementDate);
+                    $daysCount = Carbon::parse($endMovementDate)->diffInDays($startMovementDate);
                 } else {
                     $status = 'in_completed';
                     $daysCount = Carbon::parse(now())->diffInDays($startMovementDate);
                 }
-// if (request('from_date') != null) {
-                //     $diffBetweenDates = Carbon::parse($startMovementDate)->diffInDays(request('from_date'));
-                // }
 
                 $daysCount = $daysCount + $apply_first_day + $apply_last_day;
                 $tempDaysCount = $daysCount;
@@ -413,12 +407,12 @@ class DententionController extends Controller
                 // Adding Container with periods
                 $grandTotal = $grandTotal + $containerTotal;
                 $tempCollection = collect([
-                    'bl_no' => $endMovement->bl_no ?? '',
+                    // 'bl_no' => $endMovement->bl_no ?? '',
                     'container_no' => $container->code,
                     'status' => trans("home.$status"),
                     'container_type' => $container->containersTypes->name,
-                    'from' => request('from_date') != null ? request('from_date') : $startMovementDate,
-                    'to' => $endMovement != null ? (optional($endMovement)->movement_date != null ? $endMovement->movement_date : $endMovement) : now(),
+                    'from' =>  $startMovementDate,
+                    'to' => $endMovementDate,
                     'from_code' => optional(optional($startMovement)->movementcode)->code,
                     'to_code' => $endMovement != null ? (optional($endMovement)->movement_date != null ? $endMovement->movementcode->code : $endMovement) : now(),
                     'total' => $containerTotal,
@@ -437,7 +431,6 @@ class DententionController extends Controller
             'calculation' => $calculation,
             'input' => $request->input(),
         ];
-        // dd($request->input());
 
         return redirect()->route('dententions.index')->with($data);
     }
