@@ -137,14 +137,14 @@
                                     <input type="text" class="form-control" placeholder="TAX %" name="tax_discount"
                                            autocomplete="off" style="background-color:#fff" value="0">
                                 </div>
-                                <div class="col-md-3 form-group">
-                                    <label>Exchange Rate</label>
                                     @if(request()->input('add_egp') == 'USD')
-                                    <input class="form-control"  type="text" name="customize_exchange_rate" id="exchange_rate" placeholder="Exchange Rate" autocomplete="off" value='48' required>
+                                    <div class="col-md-3 form-group">
+                                        <label>Exchange Rate</label>
+                                        <input class="form-control"  type="text" name="customize_exchange_rate" id="exchange_rate" placeholder="Exchange Rate" autocomplete="off" value='48' required>
+                                    </div>
                                     @else
                                     <input class="form-control"  type="hidden" name="customize_exchange_rate" id="exchange_rate" placeholder="Exchange Rate" autocomplete="off" value='1' required>
-                                    @enfif
-                                </div>
+                                    @endif
                                 <div class="form-group col-md-3">
                                     <div style="padding: 30px;">
                                         @if(request()->input('add_egp') == 'USD')

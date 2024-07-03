@@ -1,17 +1,18 @@
 <?php
 
+use Illuminate\Http\Request;
+use App\Models\Master\Company;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AgentCountry;
-use App\Http\Controllers\API\BlDraftController;
-use App\Http\Controllers\API\CompanyDataController;
-use App\Http\Controllers\API\CountriesController;
-use App\Http\Controllers\API\DemurrageController;
 use App\Http\Controllers\API\PortController;
 use App\Http\Controllers\API\PriceController;
-use App\Http\Controllers\API\StorageContainersController;
+use App\Http\Controllers\API\BlDraftController;
+use App\Http\Controllers\API\CountriesController;
+use App\Http\Controllers\API\DemurrageController;
+use App\Http\Controllers\API\CompanyDataController;
 use App\Http\Controllers\Invoice\InvoiceController;
-use App\Models\Master\Company;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\DententionController;
+use App\Http\Controllers\API\StorageContainersController;
 
 /*
 |--------------------------------------------------------------------------
@@ -60,3 +61,5 @@ Route::get('/get-ports', [PortController::class, 'getPorts'])->name('api.get-por
 Route::get('get_invoice_json/{id}','Invoice\InvoiceController@invoiceJson');
 Route::get('validate/demurrage/{companyId}/{portId}/{from}/{to}/{triffType}', [DemurrageController::class, 'checkTriffOverlap']);
 
+Route::get('/blno', [DententionController::class,'getBlnoToBookingNo'])->name('api.blno');
+Route::get('/bl-containers', [DententionController::class,'getBlContainers'])->name('api.blContainers');

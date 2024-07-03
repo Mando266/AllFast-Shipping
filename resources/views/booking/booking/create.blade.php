@@ -68,8 +68,8 @@
                                 <div class="form-check">
                                     @foreach ($fields as $field => $label)
                                         <input type="checkbox" id="{{ $field }}" name="{{ $field }}" value="1"
-                                            {{ $quotation->$field == 1 ? 'checked' : '' }}
-                                            {{ $isDraft ? '' : 'disabled' }}>
+                                            {{ $quotation->$field == 1 ? 'checked' : 'disabled' }}
+                                            {{ $isDraft ? '' : '' }}>
                                         <a style="font-size: 15px; color: #3b3f5c; letter-spacing: 1px; margin-right: 10px;"> {{ $label }} </a>
                                     @endforeach
                                 </div>

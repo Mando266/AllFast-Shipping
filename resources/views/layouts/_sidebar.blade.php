@@ -322,16 +322,21 @@
                             </div>
                         </a>
                         <ul class="collapse submenu list-unstyled" id="component7" data-parent="#accordionExample">
-                                @permission('Demurrage-List')
+                                <!-- @permission('Demurrage-List')
                                     <li>
                                         <a href="{{route('storage.create')}}"> Dentention Calculation </a>
                                     </li>
-                                @endpermission
+                                @endpermission -->
                                 <!-- @permission('Invoice-List')
                                     <li>
                                         <a href="{{route('storage.index')}}">Storage Calculation</a>
                                     </li>
                                 @endpermission -->
+                                @permission('Demurrage-List')
+                                <li>
+                                        <a href="{{route('dententions.index')}}"> {{ trans('menu.dentention') }} </a>
+                                </li>
+                                @endif
                         </ul>
             </li>
             @endpermission
