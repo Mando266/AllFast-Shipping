@@ -226,9 +226,13 @@ class DententionController extends Controller
                     $endMovement = Movements::where('container_id', $container->id)
                         ->where('movement_date', '>=', $startMovementDate)->oldest()->first();
 
-                } elseif ($request->to_date == null) {
-                    $endMovement = Movements::where('container_id', $container->id)->where('movement_id', $movementRCVCId)
-                        ->where('movement_date', '>', $startMovementDate)->oldest()->first();
+                               } elseif ($request->to_date != null && $request->to == null) {
+                    $endMovement = Movements::where('container_id', $container->id)
+                        ->where('movement_date', '>', $request->to_date)->oldest()->first();
+                } elseif ($request->to_date == null && $request->to != null) {
+                    $endMovement = Movements::where('container_id', $container->id)
+                                            ->where('movement_id', $request->to)
+                                            ->oldest()->first();
                 } else {
                     $endMovement = Movements::where('container_id', $container->id)->where('movement_id', $request->to)
                         ->where('movement_date', '<=', $request->to_date)->oldest()->first();
@@ -238,6 +242,7 @@ class DententionController extends Controller
                 } else {
                     $endMovementDate = $endMovement->movement_date;
                 }
+                
                 $diffBetweenDates = 0;
                 if ($endMovement) {
                     $daysCount = Carbon::parse($endMovementDate)->diffInDays($startMovementDate);
@@ -250,13 +255,10 @@ class DententionController extends Controller
                 $tempDaysCount = $daysCount;
                 $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
 
-                foreach ($slab->periods as $period) {
-                    if (request()->service == 3 || request()->service == 1) {
-                        //we are in the free time period
+                foreach (optional($slab)->periods as $period) {
                         if ($freeTime > $period->number_off_dayes) {
                             if ($tempDaysCount != 0) {
                                 if ($period->number_off_dayes < $tempDaysCount) {
-                                    // remaining days more than period days
                                     $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
                                     $freeTime = $freeTime - $period->number_off_dayes;
                                     $shownDays = $period->number_off_dayes;
@@ -353,57 +355,7 @@ class DententionController extends Controller
                                 }
                             }
                         }
-                    } else {
-                        if ($tempDaysCount != 0) {
-                            if ($period->number_off_dayes < $tempDaysCount) {
-                                // remaining days more than period days
-                                $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
-                                $periodtotal = $period->rate * $period->number_off_dayes;
-                                if ($diffBetweenDates != 0) {
-                                    if ($diffBetweenDates >= $period->number_off_dayes) {
-                                        $diffBetweenDates = $diffBetweenDates - $period->number_off_dayes;
-                                        $periodtotal = 0;
-                                    } else {
-                                        $periodtotal = $period->rate * ($period->number_off_dayes - $diffBetweenDates);
-                                        $diffBetweenDates = 0;
-                                    }
-                                    $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
-                                }
-                                $containerTotal = $containerTotal + $periodtotal;
-                                $tempCollection = collect([
-                                    'name' => $period->period,
-                                    'days' => $period->number_off_dayes,
-                                    'rate' => $period->rate,
-                                    'total' => $periodtotal,
-                                ]);
-                                // Adding period
-                                $periodCalc->add($tempCollection);
-                            } else {
-                                // remaining days less than period days
-                                $periodtotal = $period->rate * $tempDaysCount;
-                                if ($diffBetweenDates != 0) {
-                                    if ($diffBetweenDates >= $tempDaysCount) {
-                                        $diffBetweenDates = $diffBetweenDates - $tempDaysCount;
-                                        $periodtotal = 0;
-                                    } else {
-                                        $periodtotal = $period->rate * ($tempDaysCount - $diffBetweenDates);
-                                        $diffBetweenDates = 0;
-                                    }
-                                    $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
-                                }
-                                $containerTotal = $containerTotal + $periodtotal;
-                                $tempCollection = collect([
-                                    'name' => $period->period,
-                                    'days' => $tempDaysCount,
-                                    'rate' => $period->rate,
-                                    'total' => $periodtotal,
-                                ]);
-                                // Adding period
-                                $periodCalc->add($tempCollection);
-                                $tempDaysCount = 0;
-                            }
-                        }
-                    }
+
                 }
 
                 // Adding Container with periods
