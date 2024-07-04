@@ -321,7 +321,6 @@ class InvoiceController extends Controller
             'equipment_type'=>$request->equipment_type,
             'company_id'=>Auth::user()->company_id,
             'user_id'=>Auth::user()->id,
-
             'invoice_no'=>'',
             'date'=>$request->date,
             'rate'=>$request->exchange_rate,

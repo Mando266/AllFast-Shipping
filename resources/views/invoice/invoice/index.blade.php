@@ -203,7 +203,11 @@
                                             @else
                                             <td></td> 
                                             @endif
+                                            @if($invoice->add_egp == 'false')
                                             <td>{{optional($invoice)->customize_exchange_rate}}</td>
+                                            @else 
+                                            <td></td>
+                                            @endif
                                             <td>{{optional($invoice->user)->name}}</td>
 
                                             <td class="text-center">

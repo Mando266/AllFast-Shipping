@@ -129,8 +129,13 @@
                             <div class="form-row">
                                 <div class="col-md-3 form-group">
                                     <label> VAT % </label>
-                                    <input type="text" class="form-control" placeholder="VAT %" name="vat"
+                                    @if(optional($bldraft)->shipment_type == Import)
+                                        <input type="text" class="form-control" placeholder="VAT %" name="vat"
                                            autocomplete="off" value="14" style="background-color:#fff" required>
+                                    @else
+                                    <input type="text" class="form-control" placeholder="VAT %" name="vat"
+                                           autocomplete="off" value="0" style="background-color:#fff" required>
+                                    @endif
                                 </div>
                                 <div class="form-group col-md-3">
                                     <label>TAX Hold</label>
