@@ -184,7 +184,11 @@
                                     <tr>
                                         <th class="text-center">Charge Description</th>
                                         <th class="text-center">Amount</th>
-                                        <th class="text-center">Add VAT</th>
+                                        <th class="text-center d-flex flex-column align-items-center">Add VAT
+                                            <span class="form-check pb-3">
+                                                <input class="form-check-input" type="checkbox" id="selectAllVat">
+                                            </span>
+                                        </th>                                        
                                         <th class="text-center">Multiply QTY</th>
                                         <th class="text-center">TOTAL USD</th>
                                         <th class="text-center">USD After VAT</th>
@@ -309,6 +313,15 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
+        
+        // Function to handle the select all checkbox for VAT
+        $('#selectAllVat').change(function() {
+            var isChecked = $(this).is(':checked');
+            $('#charges tbody tr').each(function() {
+                $(this).find('input[name$="[add_vat]"][value="' + (isChecked ? '1' : '0') + '"]').prop('checked', true);
+            });
+        });
+
         function calculateTotals() {
             var exchangeRate = parseFloat($('#exchange_rate').val());
             var qty = parseFloat($('input[name="qty"]').val());
