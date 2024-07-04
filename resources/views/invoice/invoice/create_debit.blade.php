@@ -102,13 +102,12 @@
                             <div class="form-group col-md-3">
                                 <label for="status">Invoice Status<span class="text-warning"> * </span></label>
                                 <select class="form-control" data-live-search="true" name="invoice_status" title="{{trans('forms.select')}}" required>
-                                    <option value="draft">Draft</option>
-                                    @permission('Invoice-Ready_to_Confirm')
+                                    @permission('Invoice-Draft')
+                                        <option value="draft">Draft</option>
+                                    @endpermission
+                                    @permission('Invoice-ReadyToConfirm')
                                         <option value="ready_confirm">Ready To Confirm</option>
                                     @endpermission
-                                    @if($bldraft->bl_status == 1 && Auth::user()->id == 15 && Auth::user()->id == 24)
-                                        <option value="confirm">Confirm</option>
-                                    @endif
                                 </select>
                                 @error('invoice_status')
                                 <div style="color:red;">

@@ -72,7 +72,7 @@ class BlDraftController extends Controller
         $booking = Booking::findOrFail(request('booking_id'));
         //dd($booking);
         $equipmentTypes = ContainersTypes::orderBy('id')->get();
-        $ports = Ports::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
+        $ports = Ports::orderBy('id')->get();
         $containers = Containers::where('company_id',Auth::user()->company_id)->where('status',2)->orderBy('id')->get();
         $voyages = Voyages::with('vessel','voyagePorts')->where('company_id',Auth::user()->company_id)->
         // whereHas('voyagePorts', function ($query) use($booking ){
@@ -124,29 +124,28 @@ class BlDraftController extends Controller
         if ($request->input('bl_status') == 0){
         $request->validate([
             'customer_id' => ['required'],
-            'place_of_acceptence_id' => ['required'],
+            // 'place_of_acceptence_id' => ['required'],
             'load_port_id' => ['required'],
-            'place_of_delivery_id' => ['required','different:place_of_acceptence_id'],
+            // 'place_of_delivery_id' => ['required','different:place_of_acceptence_id'],
             'discharge_port_id' => ['required','different:load_port_id'],
             'voyage_id' => ['required'],
         ],[
-            'place_of_delivery_id.different'=>'Place Of Delivery The Same  Place Of Acceptence',
+            // 'place_of_delivery_id.different'=>'Place Of Delivery The Same  Place Of Acceptence',
             'discharge_port_id.different'=>'Load Port The Same  Discharge Port',
         ]);
         }else{
             $request->validate([
                 'customer_id' => ['required'],
-                'place_of_acceptence_id' => ['required'],
+                // 'place_of_acceptence_id' => ['required'],
                 'load_port_id' => ['required'],
-                'place_of_delivery_id' => ['required','different:place_of_acceptence_id'],
+                // 'place_of_delivery_id' => ['required','different:place_of_acceptence_id'],
                 'discharge_port_id' => ['required','different:load_port_id'],
                 'voyage_id' => ['required'],
                 'date_of_issue' =>['required'],
                 'payment_kind' =>['required'],
                 'bl_kind' =>['required'],
-                'date_of_issue' =>['required'],
             ],[
-                'place_of_delivery_id.different'=>'Place Of Delivery The Same  Place Of Acceptence',
+                // 'place_of_delivery_id.different'=>'Place Of Delivery The Same  Place Of Acceptence',
                 'discharge_port_id.different'=>'Load Port The Same  Discharge Port',
             ]);
         }

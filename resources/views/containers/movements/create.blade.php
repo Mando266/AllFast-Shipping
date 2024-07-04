@@ -58,7 +58,7 @@
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="movement_dateInput">Movement Date <span class="text-warning"> * (Required.) </span></label>
-                                <input type="date" class="form-control" id="movement_dateInput" name="movement_date" value="{{old('movement_date')}}"
+                                <input type="datetime-local" class="form-control" id="movement_dateInput" name="movement_date" value="{{old('movement_date')}}"
                                      autocomplete="off" >
                                 @error('movement_date')
                                 <div class="invalid-feedback">
@@ -269,38 +269,6 @@
                                 @enderror
                             </div>
                         </div>
-
-                        <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label for="RemarkesInput">Free Time</label>
-                                @if(isset($movement))
-                                <input type="text" class="form-control" id="RemarkesInput" name="free_time" value="{{$movement->free_time}}"
-                                    placeholder="Free Time" autocomplete="off">
-                                @else
-                                <input type="text" class="form-control" id="RemarkesInput" name="free_time" value="{{old('free_time')}}"
-                                    placeholder="Free Time" autocomplete="off">
-                                @endif
-                                @error('free_time')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="RemarkesInput">Free Time Origin</label>
-                                @if(isset($movement))
-                                <input type="text" class="form-control" id="RemarkesInput" name="free_time_origin" value="{{$movement->free_time_origin}}"
-                                    placeholder="Free Time" autocomplete="off">
-                                @else
-                                <input type="text" class="form-control" id="RemarkesInput" name="free_time_origin" value="{{old('free_time_origin')}}"
-                                    placeholder="Free Time" autocomplete="off">
-                                @endif
-                                @error('free_time_origin')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
                             <div class="form-group col-md-4">
                                 <label for="billInput">Bill Of Lading</label>
                                 @if(isset($movement))

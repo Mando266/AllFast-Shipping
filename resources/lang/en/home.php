@@ -7,5 +7,5 @@ return array (
   'in_completed' => 'In Completed',
   'completed' => 'Completed',
   'add_first' => 'Apply First Day',
-  'add_last' => 'ExecuteLast Day',
+  'add_last' => 'Execute Last Day',
 );

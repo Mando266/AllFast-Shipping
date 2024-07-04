@@ -41,7 +41,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-12">
                             <label for="invoice">Invoice No</label>
-                            <!-- <select class="selectpicker form-control" id="invoice" data-live-search="true" name="invoice_id" data-size="10"
+                            <select class="selectpicker form-control" id="invoice" data-live-search="true" name="invoice_id" data-size="10"
                              title="{{trans('forms.select')}}" required>
                             <option value="">Select...</option>
                             @foreach ($invoiceRef as $item)     
@@ -51,17 +51,6 @@
                             @if($item->qty != 0) &nbsp;&nbsp; No Of Containers: {{$item->qty}} @endif
                             &nbsp;&nbsp; Total: {{$item->add_egp == "onlyegp" ? $item->chargeDesc->sum('total_egy')." EGP" : $item->chargeDesc->sum('total_amount')." USD"}}
                         </option>
-                                @endforeach
-                            </select> -->
-                            <select class="selectpicker form-control" id="invoice" data-live-search="true" name="invoice_id[]" data-size="10" title="{{trans('forms.select')}}" required multiple>
-                                <option value="">Select...</option>
-                                @foreach ($invoiceRef as $item)
-                                    <option value="{{$item->id}}" {{ in_array($item->id, old('invoice_ids', request()->input('invoice_ids', []))) ? 'selected' : '' }}>
-                                        InvoiceNo: {{$item->invoice_no}} &nbsp;&nbsp; BL No: {{optional($item->bldraft)->ref_no}}
-                                        &nbsp;&nbsp; Customer: {{$item->customer}}
-                                        @if($item->qty != 0) &nbsp;&nbsp; No Of Containers: {{$item->qty}} @endif
-                                        &nbsp;&nbsp; Total: {{$item->add_egp == "onlyegp" ? $item->chargeDesc->sum('total_egy')." EGP" : $item->chargeDesc->sum('total_amount')." USD"}}
-                                    </option>
                                 @endforeach
                             </select>
                         </div>

@@ -47,6 +47,7 @@ class DententionController extends Controller
         $bookingFreeTime = $this->getBookingFreeTime($request->booking_no);
         $containerCalc = collect();
         $status = 'in_completed';
+
         if (in_array('all', $request->container_ids)) {
             $mov = Movements::where('booking_no', $request->booking_no)->where('company_id', Auth::user()->company_id)
                 ->distinct()->get()->pluck('container_id')->toarray();
@@ -75,15 +76,18 @@ class DententionController extends Controller
                     $endMovement = Movements::where('container_id', $container->id)->where('movement_id', $request->to)
                         ->where('movement_date', '<=', $request->to_date)->oldest()->first();
                 }
+
                 if (optional($endMovement)->movement_id == $movementRCVCId) {
                     $status = 'completed';
                 }
+
                 if ($endMovement == null || ($request->to_date < $endMovement->movement_date && !is_null($request->to_date))) {
                     $endMovementDate = $request->to_date;
                 } else {
                     $endMovementDate = $endMovement->movement_date;
                 }
                 $diffBetweenDates = 0;
+
                 if ($endMovementDate) {
                     $daysCount = Carbon::parse($endMovementDate)->diffInDays($startMovementDate);
                 } else {
@@ -381,7 +385,7 @@ class DententionController extends Controller
                 $containerCalc->add($tempCollection);
             }
         }
-        
+
         $calculation = collect([
             'grandTotal' => $grandTotal,
             'currency' => optional($demurrage)->currency,

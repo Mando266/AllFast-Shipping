@@ -149,6 +149,10 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/create-container', [BookingController::class, 'createContainer']);
         Route::get('selectImportQuotation', [BookingController::class, 'selectImportQuotation'])
             ->name('booking.selectImportQuotation');
+        Route::get('selectExportQuotation', [BookingController::class, 'selectExportQuotation'])
+        ->name('booking.selectExportQuotation');
+        Route::get('exportcreate', [BookingController::class, 'exportcreate'])
+        ->name('booking.exportcreate');
 
         Route::get('export', [BookingController::class, 'export'])
         ->name('booking.export');

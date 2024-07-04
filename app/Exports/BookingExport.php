@@ -35,14 +35,10 @@ class BookingExport implements FromCollection, WithHeadings
             "SHIPPER",
             "FORWARDER",
             "CONSIGNEE",
-            "Frist Vessel",
-            "Frist VOYAGE",
+            "Vessel",
+            "VOYAGE",
             "LEG",
             "ETA",
-            "Second Vessel",
-            "Second VOYAGE",
-            "Second LEG",
-            "Second ETA",
             "Shipment Type",
             "Main Line",
             "Vessel Operator",
@@ -119,15 +115,13 @@ class BookingExport implements FromCollection, WithHeadings
                 } elseif ($booking->is_transhipment == 0 && $booking->quotation_id == 0) {
                     $shipping_status = 'Draft';
                 } else {
-                    $shipping_status = optional($booking->quotation)->shipment_type;
+                    $shipping_status = optional($booking)->shipment_type;
                 }
 
                 $loadPort = VoyagePorts::where('voyage_id', optional($booking->voyage)->id)->where('port_from_name', optional($booking->loadPort)->id)->first();
                 $dischargePort = VoyagePorts::where('voyage_id', optional($booking->voyage)->id)->where('port_from_name', optional($booking->dischargePort)->id)->first();
+                //dd($dischargePort);
                 $transhipmentPort = VoyagePorts::where('voyage_id', optional($booking->voyage)->id)->where('port_from_name', optional($booking->transhipmentPort)->id)->first();
-                $loadPortSecond = VoyagePorts::where('voyage_id', optional($booking->secondvoyage)->id)->where('port_from_name', optional($booking->loadPort)->id)->first();
-                $dischargePortSecond = VoyagePorts::where('voyage_id', optional($booking->secondvoyage)->id)->where('port_from_name', optional($booking->dischargePort)->id)->first();
-                $transhipmentPortSecond = VoyagePorts::where('voyage_id', optional($booking->secondvoyage)->id)->where('port_from_name', optional($booking->transhipmentPort)->id)->first();
                 $tempCollection = collect([
                     'quotation_ref_no' => optional($booking->quotation)->ref_no,
                     'ref_no' => $booking->ref_no,
@@ -138,11 +132,7 @@ class BookingExport implements FromCollection, WithHeadings
                     'voyage_id' => optional($booking->voyage)->voyage_no,
                     'leg' => optional(optional($booking->voyage)->leg)->name,
                     'eta' => $shipping_status == "Export" ? optional($loadPort)->eta : ($shipping_status == "Import" ? optional($dischargePort)->eta : optional($transhipmentPort)->eta),
-                    'second_vessel' => optional(optional($booking->secondvoyage)->vessel)->name,
-                    'voyage_id_second' => optional($booking->secondvoyage)->voyage_no,
-                    'leg_2' => optional(optional($booking->secondvoyage)->leg)->name,
-                    'eta_2' => $shipping_status == "Export" ? optional($loadPortSecond)->eta : ($shipping_status == "Import" ? optional($dischargePortSecond)->eta : optional($transhipmentPortSecond)->eta),
-                    'shipping_status' => optional($booking->quotation)->shipment_type,
+                    'shipping_status' => optional($booking)->shipment_type,
                     'main_line' => optional($booking->principal)->name,
                     'operator' => optional($booking->operator)->name,
                     'placeOfAcceptence' => optional($booking->placeOfAcceptence)->name,
@@ -164,9 +154,9 @@ class BookingExport implements FromCollection, WithHeadings
                     'assigned' => $assigned,
                     'unassigned' => $unassigned,
                     'booking_type' => optional(optional($booking)->quotation)->quotation_type ?: optional($booking)->booking_type,
-                    'payment_kind' => optional(optional($booking)->quotation)->payment_kind,
-                    'booking_agency' => optional(optional($booking->quotation)->bookingagancy)->name,
-                    'Payment As Per Agreement' => optional($booking->quotation)->agency_bookingr_ref,
+                    'payment_kind' => optional(optional($booking)->quotation)->payment_kind ?: optional($booking)->payment_kind,
+                    'booking_agency' => optional(optional($booking)->bookingagancy)->name,
+                    // 'Payment As Per Agreement' => optional($booking->quotation)->agency_bookingr_ref,
                 ]);
                 $exportBookings->add($tempCollection);
             }
