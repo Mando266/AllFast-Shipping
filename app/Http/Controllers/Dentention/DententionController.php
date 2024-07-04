@@ -415,7 +415,7 @@ class DententionController extends Controller
                     'from' =>  $startMovementDate,
                     'to' => $endMovementDate,
                     'from_code' => optional(optional($startMovement)->movementcode)->code,
-                    'to_code' => $endMovement != null ? (optional($endMovement)->movement_date != null ? $endMovement->movementcode->code : $endMovement) : now(),
+                    'to_code' => optional(optional($endMovement)->movementcode)->code,
                     'total' => $containerTotal,
                     'periods' => $periodCalc,
                 ]);
