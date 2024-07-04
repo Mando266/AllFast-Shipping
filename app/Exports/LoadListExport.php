@@ -32,11 +32,8 @@ class LoadListExport implements FromCollection, WithHeadings
             "S.No",
             "Booking No",
             "Cstar Ref No",
-            "Frist Vessel",
-            "Frist VOYAGE",
-            "LEG",
-            "Second Vessel",
-            "Second VOYAGE",
+            "Vessel",
+            "VOYAGE",
             "LEG",
             "Load Port",
             "Final Dest",
@@ -62,7 +59,7 @@ class LoadListExport implements FromCollection, WithHeadings
             "BOOKING Type",
             "Payment Kind",
             "Booking Agency",
-            "Payment As Per Agreement",
+            // "Payment As Per Agreement",
         ];
     }
 
@@ -97,9 +94,6 @@ class LoadListExport implements FromCollection, WithHeadings
                             'first_vessel' => optional(optional($booking->voyage)->vessel)->name,
                             'voyage_id' => optional($booking->voyage)->voyage_no,
                             'leg' => optional(optional($booking->voyage)->leg)->name,
-                            'second_vessel' => optional(optional($booking->secondvoyage)->vessel)->name,
-                            'voyage_id_second' => optional($booking->secondvoyage)->voyage_no,
-                            'leg_2' => optional(optional($booking->secondvoyage)->leg)->name,
                             'Load Port' => optional($booking->loadPort)->code,
                             'Final Dest' => optional($booking->dischargePort)->code,
                             'transhipmentPort' => optional($booking->transhipmentPort)->name,
@@ -120,11 +114,11 @@ class LoadListExport implements FromCollection, WithHeadings
                             'Forwarder' => optional($booking->forwarder)->name,
                             'Description' => optional($booking)->commodity_description,
                             'booking_confirm' => $booking->booking_confirm,
-                            'shipment_type' => optional(optional($booking)->quotation)->shipment_type,
-                            'booking_type' => optional(optional($booking)->quotation)->quotation_type,
-                            'payment_kind' => optional(optional($booking)->quotation)->payment_kind,
+                            'shipment_type' => optional(optional($booking)->quotation)->shipment_type ?: optional($booking)->shipment_type,
+                            'booking_type' => optional(optional($booking)->quotation)->quotation_type ?: optional($booking)->booking_type,
+                            'payment_kind' => optional(optional($booking)->quotation)->payment_kind ?: optional($booking)->payment_kind,
                             'booking_agency' => optional(optional($booking->quotation)->bookingagancy)->name,
-                            'Payment As Per Agreement' => optional($booking->quotation)->agency_bookingr_ref,
+                        // 'Payment As Per Agreement' => optional($booking->quotation)->agency_bookingr_ref,
                         ]);
                         $exportBookings->add($tempCollection);
 
@@ -139,9 +133,6 @@ class LoadListExport implements FromCollection, WithHeadings
                                 'first_vessel' => optional($booking->voyage)->vessel->name,
                                 'voyage_id' => optional($booking->voyage)->voyage_no,
                                 'leg' => optional(optional($booking->voyage)->leg)->name,
-                                'second_vessel' => optional(optional($booking->secondvoyage)->vessel)->name,
-                                'voyage_id_second' => optional($booking->secondvoyage)->voyage_no,
-                                'leg_2' => optional(optional($booking->secondvoyage)->leg)->name,
                                 'Load Port' => optional($booking->loadPort)->code,
                                 'Final Dest' => optional($booking->dischargePort)->code,
                                 'transhipmentPort' => optional($booking->transhipmentPort)->name,
@@ -162,11 +153,11 @@ class LoadListExport implements FromCollection, WithHeadings
                                 'Forwarder' => optional($booking->forwarder)->name,
                                 'Description' => optional($booking)->commodity_description,
                                 'booking_confirm' => $booking->booking_confirm,
-                                'shipment_type' => optional(optional($booking)->quotation)->shipment_type,
+                                'shipment_type' => optional(optional($booking)->quotation)->shipment_type ?: optional($booking)->shipment_type,
                                 'booking_type' => optional(optional($booking)->quotation)->quotation_type ?: optional($booking)->booking_type,
-                                'payment_kind' => optional(optional($booking)->quotation)->payment_kind,
+                                'payment_kind' => optional(optional($booking)->quotation)->payment_kind ?: optional($booking)->payment_kind,
                                 'booking_agency' => optional(optional($booking->quotation)->bookingagancy)->name,
-                                'Payment As Per Agreement' => optional($booking->quotation)->agency_bookingr_ref,
+                                // 'Payment As Per Agreement' => optional($booking->quotation)->agency_bookingr_ref,
                             ]);
                             $exportBookings->add($tempCollection);
                         }

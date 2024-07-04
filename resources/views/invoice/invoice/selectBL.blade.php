@@ -22,7 +22,7 @@
                                 <label for="Bldraft">BlDraft Number <span class="text-warning"> * (Required.) </span></label>
                                 <select class="selectpicker form-control" id="Bldraft" data-live-search="true" name="bldraft_id" data-size="10"
                                  title="{{trans('forms.select')}}" required>
-                                 <option value="customize" >Customized Debit</option>
+                                 <!-- <option value="0" >Customized Debit</option> -->
                                     @foreach ($bldrafts as $item)
                                         <option value="{{$item->id}}" {{$item->id == old('bldraft_id',request()->input('bldraft_id')) ? 'selected':''}}>{{$item->ref_no}}</option>
                                     @endforeach

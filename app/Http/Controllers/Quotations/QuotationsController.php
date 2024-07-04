@@ -52,6 +52,12 @@ class QuotationsController extends Controller
         $ffw = Customers::where('company_id', Auth::user()->company_id)->whereHas('CustomerRoles', function ($query) {
             return $query->where('role_id', 6);
         })->with('CustomerRoles.role')->get();
+        $consignee = Customers::where('company_id', Auth::user()->company_id)->whereHas(
+            'CustomerRoles',
+            function ($query) {
+                return $query->where('role_id', 2);
+            }
+        )->with('CustomerRoles.role')->get();
         $country = Country::orderBy('name')->get();
         $principals = Lines::where('company_id', Auth::user()->company_id)
         ->whereHas('types', function ($query) {
@@ -61,7 +67,7 @@ class QuotationsController extends Controller
         ->whereHas('types', function ($query) {
             return $query->whereIn('type_id', [4, 2, 8]);
         })->get();
-        $booking_agency = Agents::where('company_id',Auth::user()->company_id)->where('is_active', 1)->get();
+        $booking_agency = Agents::where('id',Auth::user()->agent_id)->get();
 
         $isSuperAdmin = false;
         if (Auth::user()->is_super_admin) {
@@ -86,6 +92,7 @@ class QuotationsController extends Controller
             'principals' => $principals,
             'oprators'  => $oprators,
             'booking_agency' => $booking_agency,
+            'consignee' => $consignee,
         ]);
     }
 
@@ -94,17 +101,17 @@ class QuotationsController extends Controller
         $request->validate([
             'validity_from' => ['required'],
             'customer_id' => ['required'],
-            'place_of_acceptence_id' => ['required'],
+            // 'place_of_acceptence_id' => ['required'],
             'load_port_id' => ['required'],
-            'export_detention' => ['required'],
-            'import_detention' => ['required'],
-            'place_of_delivery_id' => ['required', 'different:place_of_acceptence_id'],
+            // 'export_detention' => ['required'],
+            // 'import_detention' => ['required'],
+            // 'place_of_delivery_id' => ['required', 'different:place_of_acceptence_id'],
             'discharge_port_id' => ['required', 'different:load_port_id'],
             'validity_to' => ['required', 'after:validity_from'],
             'commodity_des' => ['required'],
         ], [
             'validity_to.after' => 'Validaty To Should Be After Validaty From ',
-            'place_of_delivery_id.different' => 'Place Of Delivery The Same  Place Of Acceptence',
+            // 'place_of_delivery_id.different' => 'Place Of Delivery The Same  Place Of Acceptence',
             'discharge_port_id.different' => 'Load Port The Same  Discharge Port',
         ]);
 
@@ -156,7 +163,8 @@ class QuotationsController extends Controller
             //  $request->agent_id ==> Import Agent  ,  $request->discharge_agent_id   ==> Discharge Agent
 
             $quotations = Quotation::create([
-                'ref_no' => "",
+                'ref_no' => $request->input('ref_no'),
+                // 'ref_no' => "",
                 'agent_id' => $request->agent_id,
                 'quoted_by_id' => $user->id,
                 'company_id' => $user->company_id,
@@ -198,13 +206,15 @@ class QuotationsController extends Controller
                 'agency_bookingr_ref' => $request->input('agency_bookingr_ref'),
                 'operator_frieght_payment' => $request->input('operator_frieght_payment'),
                 'payment_location' => $request->input('payment_location'),
+                'customer_consignee_id'=>$request->input('customer_consignee_id'),
             ]);
             $refNo .= $quotations->id;
             $quotations->ref_no = $refNo;
             $quotations->save();
         } else {
             $quotations = Quotation::create([
-                'ref_no' => "",
+                'ref_no' => $request->input('ref_no'),
+                // 'ref_no' => "",
                 'discharge_agent_id' => $user->agent_id,
                 'company_id' => $user->company_id,
                 'quoted_by_id' => $user->id,
@@ -244,10 +254,11 @@ class QuotationsController extends Controller
                 'agency_bookingr_ref' => $request->input('agency_bookingr_ref'),
                 'operator_frieght_payment' => $request->input('operator_frieght_payment'),
                 'payment_location' => $request->input('payment_location'),
+                'customer_consignee_id'=>$request->input('customer_consignee_id'),
             ]);
-            $refNo .= $quotations->id;
-            $quotations->ref_no = $refNo;
-            $quotations->save();
+            // $refNo .= $quotations->id;
+            // $quotations->ref_no = $refNo;
+            // $quotations->save();
         }
 
         foreach ($request->input('quotationDis', []) as $quotationDis) {
@@ -293,7 +304,7 @@ class QuotationsController extends Controller
             return $query->where('role_id', 6);
         })->with('CustomerRoles.role')->get();
 
-        $booking_agency = Agents::where('company_id',Auth::user()->company_id)->where('is_active', 1)->get();
+        $booking_agency = Agents::where('id',Auth::user()->agent_id)->get();
         
         $isSuperAdmin = false;
         if (Auth::user()->is_super_admin) {
@@ -328,18 +339,18 @@ class QuotationsController extends Controller
         $request->validate([
             'validity_from' => ['required'],
             'customer_id' => ['required'],
-            'place_of_acceptence_id' => ['required'],
+            // 'place_of_acceptence_id' => ['required'],
             'load_port_id' => ['required'],
             'equipment_type_id' => ['required'],
-            'export_detention' => ['required'],
-            'import_detention' => ['required'],
-            'place_of_delivery_id' => ['required', 'different:place_of_acceptence_id'],
+            // 'export_detention' => ['required'],
+            // 'import_detention' => ['required'],
+            // 'place_of_delivery_id' => ['required', 'different:place_of_acceptence_id'],
             'discharge_port_id' => ['required', 'different:load_port_id'],
             'validity_to' => ['required', 'after:validity_from'],
             'commodity_des' => ['required'],
         ], [
             'validity_to.after' => 'Validaty To Should Be After Validaty From ',
-            'place_of_delivery_id.different' => 'Place Of Delivery The Same  Place Of Acceptence',
+            // 'place_of_delivery_id.different' => 'Place Of Delivery The Same  Place Of Acceptence',
             'discharge_port_id.different' => 'Load Port The Same  Discharge Port',
         ]);
 
@@ -350,7 +361,8 @@ class QuotationsController extends Controller
         // dd($request->removedDesc);
         // dd($quotation->discharge_agent_id != $request->discharge_agent_id || $request->equipment_type_id != $quotation->equipment_type_id);
         // dd($request->input());
-        $input = [
+        $input = [ 
+            'ref_no' => $request->ref_no,
             'validity_from' => $request->validity_from,
             'validity_to' => $request->validity_to,
             'customer_id' => $request->customer_id,
@@ -387,6 +399,7 @@ class QuotationsController extends Controller
             'agency_bookingr_ref' => $request->agency_bookingr_ref,
             'operator_frieght_payment' => $request->operator_frieght_payment,
             'payment_location' => $request->payment_location,
+            'customer_consignee_id'=>$request->input('customer_consignee_id'),
         ];
         if ($user->is_super_admin) {
             if ($quotation->discharge_agent_id != $request->discharge_agent_id || $request->equipment_type_id != $quotation->equipment_type_id) {

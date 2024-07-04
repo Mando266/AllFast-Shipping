@@ -68,8 +68,8 @@
                                 <div class="form-check">
                                     @foreach ($fields as $field => $label)
                                         <input type="checkbox" id="{{ $field }}" name="{{ $field }}" value="1"
-                                            {{ $quotation->$field == 1 ? 'checked' : '' }}
-                                            {{ $isDraft ? '' : 'disabled' }}>
+                                            {{ $quotation->$field == 1 ? 'checked' : 'disabled' }}
+                                            {{ $isDraft ? '' : '' }}>
                                         <a style="font-size: 15px; color: #3b3f5c; letter-spacing: 1px; margin-right: 10px;"> {{ $label }} </a>
                                     @endforeach
                                 </div>
@@ -82,7 +82,11 @@
                                 <select class="selectpicker form-control" id="customer_consignee_id" data-live-search="true" name="customer_consignee_id" data-size="10"
                                  title="{{trans('forms.select')}}" required>
                                     @foreach ($consignee as $item)
-                                        <option value="{{$item->id}}" {{$item->id == old('customer_consignee_id') ? 'selected':''}}>{{$item->name}} @foreach($item->CustomerRoles as $itemRole) - {{optional($itemRole->role)->name}}@endforeach</option>
+                                        @if($quotation->customer_consignee_id != null)
+                                        <option value="{{$item->id}}" {{$item->id == old('customer_consignee_id,$quotation->customer_consignee_id') ? 'selected':'disabled'}}>{{$item->name}}</option>
+                                        @else
+                                        <option value="{{$item->id}}" {{$item->id == old('customer_consignee_id') ? 'selected':''}}>{{$item->name}}</option>
+                                        @endif
                                     @endforeach
                                 </select>
                                 @error('customer_consignee_id')
@@ -191,24 +195,6 @@
 
                         <div class="form-row">
                             <div class="form-group col-md-4">
-                                <label for="place_of_acceptence_id">Place Of Acceptence </label>
-                                 <select class="selectpicker form-control" id="place_of_acceptence_id" data-live-search="true" name="place_of_acceptence_id" data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                    @foreach ($ports as $item)
-                                        @if($quotation->place_of_acceptence_id != null)
-                                        <option value="{{$item->id}}" {{$item->id == old('place_of_acceptence_id',$quotation->place_of_acceptence_id) ? 'selected':'disabled'}}>{{$item->name}}</option>
-                                        @else
-                                        <option value="{{$item->id}}" {{$item->id == old('place_of_acceptence_id',$quotation->place_of_acceptence_id) ? 'selected':''}}>{{$item->name}}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                @error('place_of_acceptence_id')
-                                <div style="color: red;">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            <div class="form-group col-md-4">
                                 <label for="load_port_id">Load Port <span class="text-warning"> * </span></label>
                                  <select class="selectpicker form-control" id="load_port_id" data-live-search="true" name="load_port_id" data-size="10"
                                  title="{{trans('forms.select')}}" required>
@@ -227,17 +213,23 @@
                                 @enderror
                             </div>
                             <div class="form-group col-md-4">
-                                <label for="shipper_ref_no">Shipper Ref No</label>
-                                <input type="text" class="form-control" id="shipper_ref_no" name="shipper_ref_no" value="{{old('shipper_ref_no')}}"
-                                    placeholder="Shipper Ref No" autocomplete="off">
-                                @error('shipper_ref_no')
+                                <label for="discharge_port_id">Discharge Port <span class="text-warning"> * </span></label>
+                                <select class="selectpicker form-control" id="discharge_port_id" data-live-search="true" name="discharge_port_id" data-size="10"
+                                 title="{{trans('forms.select')}}" required>
+                                    @foreach ($ports as $item)
+                                    @if($quotation->discharge_port_id != null)
+                                        <option value="{{$item->id}}" {{$item->id == old('discharge_port_id',$quotation->discharge_port_id) ? 'selected':'disabled'}}>{{$item->name}}</option>
+                                        @else
+                                        <option value="{{$item->id}}" {{$item->id == old('discharge_port_id',$quotation->discharge_port_id) ? 'selected':''}}>{{$item->name}}</option>
+                                    @endif
+                                    @endforeach
+                                </select>
+                                @error('discharge_port_id')
                                 <div style="color: red;">
                                     {{$message}}
                                 </div>
                                 @enderror
                             </div>
-                        </div>
-                        <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="place_of_delivery_id">Place Of Delivery <span class="text-warning"> * </span></label>
                                 <select class="selectpicker form-control" id="place_of_delivery_id" data-live-search="true" name="place_of_delivery_id" data-size="10"
@@ -256,19 +248,13 @@
                                 </div>
                                 @enderror
                             </div>
-                            <div class="form-group col-md-4">
-                                <label for="discharge_port_id">Discharge Port <span class="text-warning"> * </span></label>
-                                <select class="selectpicker form-control" id="discharge_port_id" data-live-search="true" name="discharge_port_id" data-size="10"
-                                 title="{{trans('forms.select')}}" required>
-                                    @foreach ($ports as $item)
-                                    @if($quotation->discharge_port_id != null)
-                                        <option value="{{$item->id}}" {{$item->id == old('discharge_port_id',$quotation->discharge_port_id) ? 'selected':'disabled'}}>{{$item->name}}</option>
-                                        @else
-                                        <option value="{{$item->id}}" {{$item->id == old('discharge_port_id',$quotation->discharge_port_id) ? 'selected':''}}>{{$item->name}}</option>
-                                    @endif
-                                    @endforeach
-                                </select>
-                                @error('discharge_port_id')
+                        </div>
+                        <div class="form-row">
+                        <div class="form-group col-md-4">
+                                <label for="shipper_ref_no">Shipper Ref No</label>
+                                <input type="text" class="form-control" id="shipper_ref_no" name="shipper_ref_no" value="{{old('shipper_ref_no')}}"
+                                    placeholder="Shipper Ref No" autocomplete="off">
+                                @error('shipper_ref_no')
                                 <div style="color: red;">
                                     {{$message}}
                                 </div>
@@ -294,7 +280,7 @@
                                     <label for="Transhipment">Transhipment Port</label>
                                     <select class="selectpicker form-control" id="transhipment_port" data-live-search="true" name="transhipment_port" data-size="10" title="{{trans('forms.select')}}">
                                         <option value="">Select...</option>
-                                        @foreach ($activityLocations as $item)
+                                        @foreach ($ports as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('transhipment_port') ? 'selected' : ''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -370,13 +356,13 @@
                                 </div>
                                 <div class="form-group col-md-3">
                                     <label>Import Free Time <span class="text-warning"> * </span></label>
-                                    <input type="text" class="form-control" id="import_free_time" name="import_free_time" value="{{old('import_free_time')}}"
+                                    <input type="text" class="form-control" id="free_time" name="free_time" value="{{old('free_time')}}"
                                         placeholder="Import Free Time" autocomplete="off">
                                 </div>
                                 @else
                                 <input type="hidden" name="payment_kind" class="form-control" autocomplete="off" value="{{optional($quotation)->payment_kind}}">
-                                <input type="hidden" name="import_free_time" class="form-control" autocomplete="off" value="{{optional($quotation)->import_detention}}">
-                                @endif
+                                <input type="hidden" name="free_time" class="form-control" autocomplete="off" value="{{optional($quotation)->import_detention}}">
+                            @endif
                             <div class="form-group col-md-3">
                                 <label for="tariff_service">Tariff Service</label>
                                 @if($quotation->ref_no != null)

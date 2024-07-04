@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.bldraft') 
 @section('content')
 <div class="layout-px-spacing" style="background-color: #fff;">
     <div class="row layout-top-spacing">
@@ -41,8 +41,8 @@
                 $mytime = Carbon\Carbon::now();
                 $containerCount = 0;
                 $firstContainerDetail = $booking->bookingContainerDetails->first();
-                $containerType = optional($firstContainerDetail->containerType)->name;
-                $haz = $firstContainerDetail->haz;
+                $containerType = optional(optional($firstContainerDetail)->containerType)->name;
+                $haz = optional($firstContainerDetail)->haz;
                 foreach($booking->bookingContainerDetails as $detail){
                     $containerCount = $containerCount + $detail->qty;
                     $containerType = optional($detail->containerType)->name;
@@ -52,6 +52,14 @@
                     $data = $haz;
                     $hazformat = implode(",<br>", explode(", ", $data));
                 @endphp
+                @php
+                    $gross_weight = 0;
+                @endphp
+                @foreach($booking->bookingContainerDetails as $detail)
+                    @php
+                        $gross_weight = $gross_weight + (float)$detail->weight;
+                    @endphp
+                @endforeach
                 <table class="col-md-12 tableStyle" >
                     <tbody>
                         <tr>
@@ -121,7 +129,7 @@
                         </tr>
                         <tr>
                             <td class="col-md-4 tableStyle underline" >Cargo / Weight</td>
-                            <td class="col-md-4 tableStyle text-center" >{{$booking->commodity_description}}</td>
+                            <td class="col-md-4 tableStyle text-center" >{{$booking->commodity_description}} - {{$gross_weight}}</td>
                             <td class="col-md-4 tableStyle text-right underline letter-spacing: 0px;">وصف البضاعة / وزن</td>
                         </tr>
                         <tr>

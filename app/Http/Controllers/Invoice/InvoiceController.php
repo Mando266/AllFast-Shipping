@@ -79,11 +79,16 @@ class InvoiceController extends Controller
 
     public function selectBLinvoice()
     {
-        $bldrafts = BlDraft::
-        //where('bl_status',1)->
-        where('company_id',Auth::user()->company_id)->get();
+        $bldrafts = BlDraft::select('*')
+        ->where('company_id', Auth::user()->company_id)
+        ->get();
+        $booking = Booking::select('*')
+            ->where('company_id', Auth::user()->company_id)
+            ->get();
+        $results = $bldrafts->merge($booking);
+    
         return view('invoice.invoice.selectBLinvoice',[
-            'bldrafts'=>$bldrafts,
+            'results'=>$results,
         ]);
     }
 
@@ -101,7 +106,7 @@ class InvoiceController extends Controller
 
         $charges = ChargesDesc::orderBy('id')->get();
 
-        if(request('bldraft_id') == "customize"){
+        if(request('booking_ref') == "0"){
             $ffws = Customers::where('company_id',Auth::user()->company_id)->whereHas('CustomerRoles', function ($query) {
                 return $query->where('role_id', 6);
             })->with('CustomerRoles.role')->get();
@@ -115,7 +120,7 @@ class InvoiceController extends Controller
                 return $query->where('role_id', 3);
             })->with('CustomerRoles.role')->get();
             $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
-            $ports = Ports::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
+            $ports = Ports::orderBy('id')->get();
             $equipmentTypes = ContainersTypes::orderBy('id')->get();
             $bookings  = Booking::orderBy('id','desc')->where('company_id',Auth::user()->company_id)->get();
 
@@ -131,54 +136,72 @@ class InvoiceController extends Controller
                 'charges'=>$charges,
         ]);
     }
-        $bldrafts = BlDraft::findOrFail(request('bldraft_id'));
+        $bldrafts = Booking::findOrFail(request('booking_ref'));
         $customers = Customers::where('company_id',Auth::user()->company_id)->get();
-        $bl_id = request()->input('bldraft_id');
+        $bl_id = request()->input('booking_ref');
         if ($bl_id != null) {
-            $bldraft = BlDraft::where('id', $bl_id)->with('blDetails')->first();
+            $bldraft = Booking::where('id', $bl_id)->with('bookingContainerDetails')->first();
         } else {
             $bldraft = null;
         }
-        $qty = $bldraft->blDetails->count();
+        $qty = $bldraft->bookingContainerDetails->count();
 
-        $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
+        $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
 
-        if(optional(optional(optional($bldraft)->booking)->quotation)->shipment_type == "Export"){
+        $equipmentTypeIds = $bldraft->bookingContainerDetails->pluck('container_type')->toArray();
 
-            $triffDetails = LocalPortTriff::where('port_id', $bldraft->load_port_id)
+        $equipmentTypes = collect(); // Initialize an empty collection
+        
+        // Check if $equipmentTypeIds is not empty, then fetch equipment types
+        if (!empty($equipmentTypeIds)) {
+            $equipmentTypes = ContainersTypes::whereIn('id', $equipmentTypeIds)
+                ->orderBy('id')
+                ->get();
+        }        
+        $equipmentTypeIds = $equipmentTypes->pluck('id')->toArray(); 
+
+        if (optional($bldraft)->shipment_type == "Export") {
+            // Fetch tariff details for Export shipment
+            $triffDetails = LocalPortTriff::where('company_id',Auth::user()->company_id)
+            ->where('port_id', $bldraft->load_port_id)
             ->where('validity_to', '>=', Carbon::now()->format("Y-m-d"))
-            ->with(["triffPriceDetailes" => function($q) use($bldraft) {
+            ->with(["triffPriceDetailes" => function($q) use($bldraft, $equipmentTypes) {
                 $q->where("is_import_or_export", 1)
-                ->where(function($query) use($bldraft) {
-                    $query->where("equipment_type_id", optional($bldraft->equipmentsType)->id)
-                    ->orWhere('equipment_type_id', '100');
-                });
-            },'triffPriceDetailes.charge'])
+                  ->where('standard_or_customise', 1)
+                  ->where('currency',request('add_egp'))
+                  ->where(function($query) use($bldraft, $equipmentTypes) {
+                      $query->whereIn("equipment_type_id", $equipmentTypes->pluck('id')->toArray())
+                            ->orWhere('equipment_type_id', '100');
+                  });
+                }, 'triffPriceDetailes.charge'])
+                ->first();
+        } else {
+            // Fetch tariff details for other shipment types (assuming not "Export")
+            $triffDetails = LocalPortTriff::where('company_id',Auth::user()->company_id)
+            ->where('port_id', $bldraft->discharge_port_id)
+            ->where('validity_to', '>=', Carbon::now()->format("Y-m-d"))
+            ->with(["triffPriceDetailes" => function($q) use($bldraft, $equipmentTypes) {
+                $q->where("is_import_or_export", 0)
+                  ->where('standard_or_customise', 1)
+                  ->where('currency',request('add_egp'))
+                  ->where(function($query) use($bldraft, $equipmentTypes) {
+                      $query->whereIn("equipment_type_id", $equipmentTypes->pluck('id')->toArray())
+                            ->orWhere('equipment_type_id', '100');
+                  });
+            }, 'triffPriceDetailes.charge'])
             ->first();
-        }else{
-
-            $triffDetails = LocalPortTriff::where('port_id', $bldraft->discharge_port_id)
-                ->where('validity_to', '>=', Carbon::now()->format("Y-m-d"))
-                ->with(["triffPriceDetailes" => function($q) use($bldraft) {
-                    $q->where("is_import_or_export", 0);
-                    $q->where('standard_or_customise',1)
-                    ->where(function($query) use($bldraft) {
-                        $query->where("equipment_type_id", optional($bldraft->equipmentsType)->id)
-                        ->orWhere('equipment_type_id', '100');
-                    });
-            },'triffPriceDetailes.charge'])
-            ->first();
+            // dd($triffDetails);
         }
         // id's of triff type export and import power charge
-        $powerTriffs = [7,8];
-        $cartData = json_decode(request('cart_data_for_invoice'));
-        foreach ($cartData ?? [] as $cart){
-            if(in_array(Demurrage::where('id',$cart->triffValue)->pluck('tariff_type_id')->first(),$powerTriffs)){
-                $cart->triffText = "Power Charge";
-            }else{
-                $cart->triffText = "Port Storage";
-            }
-        }
+        // $powerTriffs = [7,8];
+        // $cartData = json_decode(request('cart_data_for_invoice'));
+        // foreach ($cartData ?? [] as $cart){
+        //     if(in_array(Demurrage::where('id',$cart->triffValue)->pluck('tariff_type_id')->first(),$powerTriffs)){
+        //         $cart->triffText = "Power Charge";
+        //     }else{
+        //         $cart->triffText = "Port Storage";
+        //     }
+        // }
         return view('invoice.invoice.create_invoice', [
             'bldrafts' => $bldrafts,
             'cartData' => $cartData ?? null,
@@ -211,7 +234,7 @@ class InvoiceController extends Controller
 
             })->with('CustomerRoles.role')->get();
             $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
-            $ports = Ports::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
+            $ports = Ports::orderBy('id')->get();
             $equipmentTypes = ContainersTypes::orderBy('id')->get();
             $bookings  = Booking::orderBy('id','desc')->where('company_id',Auth::user()->company_id)->get();
             $customers = Customers::where('company_id',Auth::user()->company_id)->get();
@@ -252,11 +275,12 @@ class InvoiceController extends Controller
         ]);
     }
 
+
     public function store(Request $request)
     {
         $this->authorize(__FUNCTION__,Invoice::class);
 
-        if($request->bldraft_id == 'customize'){
+        if($request->booking_ref == 'customize'){
             request()->validate([
                 'customer' => ['required'],
                 'customer_id' => ['required'],
@@ -297,7 +321,6 @@ class InvoiceController extends Controller
             'equipment_type'=>$request->equipment_type,
             'company_id'=>Auth::user()->company_id,
             'user_id'=>Auth::user()->id,
-
             'invoice_no'=>'',
             'date'=>$request->date,
             'rate'=>$request->exchange_rate,
@@ -327,20 +350,13 @@ class InvoiceController extends Controller
             ]);
         }
         $setting = Setting::find(1);
-        if($invoice->invoice_status == "confirm" && Auth::user()->company_id == 2){
-            $invoice_no = 'DN'.' '.'/'.' '.$setting->debit_confirm.' / 24';
-            $setting->debit_confirm += 1;
-        }elseif($invoice->invoice_status == "confirm" && Auth::user()->company_id == 3){
-            $invoice_no = 'DNwin'.' '.'/'.' '.$setting->debit_win_confirm.' / 24';
-            $setting->debit_win_confirm += 1;
-        }else{
+    
             $invoice_no = 'DRAFTD';
             $invoice_no = $invoice_no . str_pad( $setting->debit_draft, 4, "0", STR_PAD_LEFT );
             $setting->debit_draft += 1;
-        }
-        $invoice->invoice_no = $invoice_no;
-        $invoice->save();
-        $setting->save();
+            $invoice->invoice_no = $invoice_no;
+            $invoice->save();
+            $setting->save();
 
         if($request->bldraft_id != 'customize'){
             $qty = $bldraft->blDetails->count();
@@ -386,14 +402,15 @@ class InvoiceController extends Controller
 
     public function storeInvoice(Request $request)
     {
+        //dd($request->input());
 
-        if($request->bldraft_id == 'customize'){
+        if($request->booking_ref == '0'){
             request()->validate([
                 'customer' => ['required'],
             ]);
         }else{
             request()->validate([
-                'bldraft_id' => ['required'],
+                'booking_ref' => ['required'],
                 'customer' => ['required'],
                 'customer_id' => ['required'],
                 'add_egp' => ['required'],
@@ -412,9 +429,9 @@ class InvoiceController extends Controller
                 return redirect()->back()->with('error','You Must Choose EGP or USD in Confirmed Invoice')->withInput($request->input());
             }
         }
-        if($request->bldraft_id == 'customize'){
+        if($request->booking_ref == '0'){
             $invoice = Invoice::create([
-                'bldraft_id'=>$request->bldraft_id,
+                // 'bldraft_id'=>$request->bldraft_id,
                 'tax_discount'=>$request->tax_discount,
                 'customer'=>$request->customer,
                 'qty'=>$request->qty,
@@ -442,11 +459,13 @@ class InvoiceController extends Controller
                 'customize_exchange_rate'=>$request->customize_exchange_rate,
             ]);
         }else{
-            $bldraft = BlDraft::where('id',$request->bldraft_id)->with('blDetails')->first();
+            $bldraft = Booking::where('id',$request->booking_ref)->with('bookingContainerDetails')->first();
             $blkind = str_split($request->bl_kind, 2);
             $blkind = $blkind[0];
             $invoice = Invoice::create([
-                'bldraft_id'=>$request->bldraft_id,
+                'booking_ref'=>$request->booking_ref,
+                // 'bldraft_id'=>$request->bldraft_id,
+                'qty'=>$request->qty,
                 'tax_discount'=>$request->tax_discount,
                 'customer'=>$request->customer,
                 'customer_id'=>$request->customer_id,
@@ -466,51 +485,13 @@ class InvoiceController extends Controller
         }
 
         $setting = Setting::find(1);
-        if($request->bldraft_id != 'customize'){
-            if($invoice->invoice_status == "confirm"){
-                if(optional($invoice->bldraft->booking->quotation)->shipment_type == "Export" && Auth::user()->company_id == 2){
-                    $invoice->invoice_no = 'ALYEXP'.' '.'/'.' '.$setting->invoice_confirm.' / 24';
-                    $setting->invoice_confirm += 1;
-                }elseif(optional($invoice->bldraft->booking->quotation)->shipment_type == "Import" && Auth::user()->company_id == 2){
-                    $invoice->invoice_no = 'ALYIMP'.' '.'/'.' '.$setting->invoice_confirm.' / 24';
-                    $setting->invoice_confirm += 1;
-                }elseif(optional($invoice->bldraft->booking->quotation)->shipment_type == "Export" && Auth::user()->company_id == 3){
-                    $invoice->invoice_no = 'ALYEXPwin'.' '.'/'.' '.$setting->invoice_win_confirm.' / 24';
-                    $setting->invoice_win_confirm += 1;
-                }elseif(optional($invoice->bldraft->booking->quotation)->shipment_type == "Import" && Auth::user()->company_id == 3){
-                    $invoice->invoice_no = 'ALYIMPwin'.' '.'/'.' '.$setting->invoice_win_confirm.' / 24';
-                    $setting->invoice_win_confirm += 1;
-                }
-            }else{
+    
                 $invoice_no = 'DRAFTV';
                 $invoice_no = $invoice_no . str_pad( $setting->invoice_draft, 4, "0", STR_PAD_LEFT );
                 $invoice->invoice_no = $invoice_no;
                 $setting->invoice_draft += 1;
-            }
-        }elseif($request->bldraft_id == 'customize'){
-            if($invoice->invoice_status == "confirm"){
-                if($invoice->booking_status == 0  && Auth::user()->company_id == 2){
-                    $invoice->invoice_no = 'ALYEXP'.' '.'/'.' '.$setting->invoice_confirm.' / 24';
-                    $setting->invoice_confirm += 1;
-                }elseif($invoice->booking_status == 1  && Auth::user()->company_id == 2){
-                    $invoice->invoice_no = 'ALYIMP'.' '.'/'.' '.$setting->invoice_confirm.' / 24';
-                    $setting->invoice_confirm += 1;
-                }elseif($invoice->booking_status == 0  && Auth::user()->company_id == 3){
-                    $invoice->invoice_no = 'ALYEXPwin'.' '.'/'.' '.$setting->invoice_win_confirm.' / 24';
-                    $setting->invoice_win_confirm += 1;
-                }elseif($invoice->booking_status == 1  && Auth::user()->company_id == 3){
-                    $invoice->invoice_no = 'ALYIMPwin'.' '.'/'.' '.$setting->invoice_win_confirm.' / 24';
-                    $setting->invoice_win_confirm += 1;
-                }
-            }else{
-                $invoice_no = 'DRAFTV';
-                $invoice_no = $invoice_no . str_pad( $setting->invoice_draft, 4, "0", STR_PAD_LEFT );
-                $invoice->invoice_no = $invoice_no;
-                $setting->invoice_draft += 1;
-            }
-        }
-        $setting->save();
-        $invoice->save();
+                $setting->save();
+                $invoice->save();
         // $egyrate = 0;
         // if($request->bldraft_id != 'customize'){
         //     if($request->exchange_rate == "eta"){
@@ -534,8 +515,8 @@ class InvoiceController extends Controller
             ]);
         }
 
-        if($request->bldraft_id != 'customize'){
-            $bldrafts = BlDraft::where('id',$request->input('bldraft_id'))->first();
+        if($request->booking_ref != '0'){
+            $bldrafts = Booking::where('id',$request->input('booking_ref'))->first();
             $bldrafts->has_bl = 1;
             $bldrafts->save();
         }
@@ -545,37 +526,25 @@ class InvoiceController extends Controller
     public function show($id)
     {
         $invoice = Invoice::with('chargeDesc')->find($id);
-        $firstVoyagePortdis =null;
-        if(optional(optional(optional($invoice->bldraft)->booking)->quotation)->shipment_type == "Import"){
-            $firstVoyagePortdis = VoyagePorts::where('voyage_id',optional($invoice->bldraft->booking)->voyage_id)
-            ->where('port_from_name',optional($invoice->bldraft->booking->dischargePort)->id)->first();
-        }
-        elseif(optional(optional($invoice->booking)->quotation)->shipment_type == "Import"){
-            $firstVoyagePortdis = VoyagePorts::where('voyage_id',optional($invoice->booking)->voyage_id)
-            ->where('port_from_name',optional($invoice->booking->dischargePort)->id)->first();
-        }
-        $secondVoyagePortdis =null;
-        if(optional(optional(optional($invoice->bldraft)->booking)->quotation)->shipment_type == "Import" && optional($invoice->bldraft->booking)->transhipment_port != null){
-            $secondVoyagePortdis = VoyagePorts::where('voyage_id',optional($invoice->bldraft->booking)->voyage_id_second)
-            ->where('port_from_name',optional($invoice->bldraft->booking->dischargePort)->id)->first();
-        }
-        elseif(optional(optional($invoice->booking)->quotation)->shipment_type == "Import" && optional($invoice->booking)->transhipment_port != null){
-            $secondVoyagePortdis = VoyagePorts::where('voyage_id',optional($invoice->booking)->voyage_id_second)
-            ->where('port_from_name',optional($invoice->booking->dischargePort)->id)->first();
-        }
-
-        if($invoice->bldraft_id == 0){
+        $firstVoyagePort =null;
+        $qty =null;
+        if($invoice->booking_ref == 0){
             $qty = $invoice->qty;
             if($invoice->booking != null){
                 $firstVoyagePort = VoyagePorts::where('voyage_id',optional($invoice->booking)->voyage_id)
                 ->where('port_from_name',optional($invoice->booking->loadPort)->id)->first();
+
             }else{
                 $firstVoyagePort = null;
-            }
+            }  
+          }elseif(optional(optional($invoice)->booking)->shipment_type == "Import"){
+                $firstVoyagePort = VoyagePorts::where('voyage_id',optional($invoice->booking)->voyage_id)
+                ->where('port_from_name',optional($invoice->booking->dischargePort)->id)->first();
         }else{
-            $qty = $invoice->bldraft->blDetails->count();
-            $firstVoyagePort = VoyagePorts::where('voyage_id',optional($invoice->bldraft->booking)->voyage_id)
-            ->where('port_from_name',optional($invoice->bldraft->booking->loadPort)->id)->first();
+            $qty = $invoice->booking->bookingContainerDetails->count();
+            $firstVoyagePort = VoyagePorts::where('voyage_id',optional($invoice->booking)->voyage_id)
+            ->where('port_from_name',optional($invoice->booking->loadPort)->id)->first();
+            dd('ioko');
         }
         $vat = $invoice->vat;
         $vat = $vat / 100;
@@ -641,8 +610,6 @@ class InvoiceController extends Controller
                 'total'=>$total,
                 'total_eg'=>$total_eg,
                 'firstVoyagePort'=>$firstVoyagePort,
-                'firstVoyagePortdis'=>$firstVoyagePortdis,
-                'secondVoyagePortdis'=>$secondVoyagePortdis,
                 'USD'=>$USD,
                 'EGP'=>$EGP,
 
@@ -650,17 +617,31 @@ class InvoiceController extends Controller
         }else{
             $gross_weight = 0;
             $amount = 0;
+            $equipmentTypeIds = $invoice->booking->bookingContainerDetails->pluck('container_type')->toArray();
 
-            if($invoice->bldraft_id != 0){
-                foreach($invoice->bldraft->blDetails as $bldetail){
+            $equipmentTypes = collect(); // Initialize an empty collection
+            
+            // Check if $equipmentTypeIds is not empty, then fetch equipment types
+            if (!empty($equipmentTypeIds)) {
+                $equipmentTypes = ContainersTypes::whereIn('id', $equipmentTypeIds)
+                    ->orderBy('id')
+                    ->get();
+            }        
+            $equipmentTypeIds = $equipmentTypes->pluck('id')->toArray(); 
+
+            if($invoice->booking_ref != 0){
+                foreach($invoice->booking->bookingContainerDetails as $bldetail){
                     $gross_weight += $bldetail->gross_weight;
                 }
-                $triffDetails = LocalPortTriff::where('port_id',optional($invoice->bldraft)->load_port_id)
-                    ->where('validity_to','>=',Carbon::now()->format("Y-m-d"))
-                    ->with(["triffPriceDetailes" => function($q) use($invoice){
-                        $q->where("equipment_type_id", optional($invoice->bldraft->equipmentsType)->id);
-                        $q->orwhere('equipment_type_id','100');
-                    }])->first();
+                $triffDetails = LocalPortTriff::where('port_id', optional($invoice->bldraft)->load_port_id)
+                ->where('validity_to', '>=', Carbon::now()->format("Y-m-d"))
+                ->with(["triffPriceDetailes" => function($q) use($equipmentTypes) {
+                    $q->where(function($query) use($equipmentTypes) {
+                        $query->whereIn("equipment_type_id", $equipmentTypes->pluck('id')->toArray())
+                              ->orWhere('equipment_type_id', '100');
+                    });
+                }])
+                ->first();              
             }else{
                 $triffDetails = LocalPortTriff::where('port_id',$invoice->load_port)
                     ->where('validity_to','>=',Carbon::now()->format("Y-m-d"))
@@ -669,12 +650,11 @@ class InvoiceController extends Controller
                         $q->orwhere('equipment_type_id','100');
                     }])->first();
             }
-
+      
 
             foreach($invoice->chargeDesc as $charge){
                 $amount = $amount + ( (float)$charge->size_small);
             }
-
 
             return view('invoice.invoice.show_invoice',[
                 'invoice'=>$invoice,
@@ -684,8 +664,6 @@ class InvoiceController extends Controller
                 'amount'=>$amount,
                 'gross_weight'=>$gross_weight,
                 'firstVoyagePort'=>$firstVoyagePort,
-                'firstVoyagePortdis'=>$firstVoyagePortdis,
-                'secondVoyagePortdis'=>$secondVoyagePortdis,
                 'USD'=>$USD,
                 'EGP'=>$EGP,
                 'total_after_vat'=>$total_after_vat,
@@ -704,8 +682,8 @@ class InvoiceController extends Controller
     {
         $charges = ChargesDesc::orderBy('id')->get();
 
-        if($invoice->bldraft_id != 0){
-            $bldraft = BlDraft::where('id',$invoice->bldraft_id)->with('blDetails')->first();
+        if($invoice->booking_ref != 0){
+            $bldraft = Booking::where('id',$invoice->booking_ref)->with('bookingContainerDetails')->first();
         }else{
             $bldraft = null;
             $ffws = Customers::where('company_id',Auth::user()->company_id)->whereHas('CustomerRoles', function ($query) {
@@ -724,7 +702,7 @@ class InvoiceController extends Controller
 
 
             $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
-            $ports = Ports::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
+            $ports = Ports::orderBy('id')->get();
             $equipmentTypes = ContainersTypes::orderBy('id')->get();
             $bookings  = Booking::orderBy('id','desc')->where('company_id',Auth::user()->company_id)->get();
             $invoice_details = InvoiceChargeDesc::where('invoice_id',$invoice->id)->with('invoice')->get();
@@ -754,7 +732,7 @@ class InvoiceController extends Controller
             ]);
         }
         $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
-        $qty = $bldraft->blDetails->count();
+        $qty = $bldraft->bookingContainerDetails->count();
         $invoice_details = InvoiceChargeDesc::where('invoice_id',$invoice->id)->with('invoice')->get();
         $total = 0;
         $total_eg = 0;
@@ -776,6 +754,8 @@ class InvoiceController extends Controller
     }
     public function update(Request $request, Invoice $invoice)
     {
+        $setting = Setting::find(1);
+
         $inputs = request()->all();
         $this->authorize(__FUNCTION__,Invoice::class);
         if($invoice->bldraft_id == 0){
@@ -792,57 +772,26 @@ class InvoiceController extends Controller
                 return redirect()->back()->with('error','You Must Choose EGP or USD in Confirmed Invoice')->withInput($request->input());
             }
         }
-        $setting = Setting::find(1);
         $inputs = request()->all();
         unset($inputs['invoiceChargeDesc'],$inputs['_token'],$inputs['removed']);
-        if($invoice->invoice_status == "draft" &&  $request->invoice_status == "confirm" && $invoice->type == "invoice" ){
-            // check if this invoice is customized
-            $setting = Setting::find(1);
-            if($invoice->bldraft_id != 0){
-                if(optional($invoice->bldraft->booking->quotation)->shipment_type == "Export" && Auth::user()->company_id == 2 ){
-                    $inputs['invoice_no'] = 'ALYEXP'.' '.'/'.' '.$setting->invoice_confirm.' / 24';
-                    $setting->invoice_confirm += 1;
-                }elseif(optional($invoice->bldraft->booking->quotation)->shipment_type == "Import" && Auth::user()->company_id == 2){
-                    $inputs['invoice_no'] = 'ALYIMP'.' '.'/'.' '.$setting->invoice_confirm.' / 24';
-                    $setting->invoice_confirm += 1;
-                }elseif(optional($invoice->bldraft->booking->quotation)->shipment_type == "Export" && Auth::user()->company_id == 3){
-                    $inputs['invoice_no'] = 'ALYEXPWin'.' '.'/'.' '.$setting->invoice_win_confirm.' / 24';
-                    $setting->invoice_win_confirm += 1;
-                }elseif(optional($invoice->bldraft->booking->quotation)->shipment_type == "Import" && Auth::user()->company_id == 3){
-                    $inputs['invoice_no'] = 'ALYIMPwin'.' '.'/'.' '.$setting->invoice_win_confirm.' / 24';
-                    $setting->invoice_win_confirm += 1;
-                }
-            }
-            if($invoice->bldraft_id == 0){
-                if($inputs['booking_status'] == 1 && Auth::user()->company_id == 2){
-                    $inputs['invoice_no'] = 'ALYIMP'.' '.'/'.' '.$setting->invoice_confirm.' / 24';
-                    $setting->invoice_confirm += 1;
-                }elseif($inputs['booking_status'] == 0 && Auth::user()->company_id == 2){
-                    $inputs['invoice_no'] = 'ALYEXP'.' '.'/'.' '.$setting->invoice_confirm.' / 24';
-                    $setting->invoice_confirm += 1;
-                }elseif($inputs['booking_status'] == 1 && Auth::user()->company_id == 3){
-                    $inputs['invoice_no'] = 'ALYIMPwin'.' '.'/'.' '.$setting->invoice_win_confirm.' / 24';
-                    $setting->invoice_win_confirm += 1;
-                }elseif($inputs['booking_status'] == 0 && Auth::user()->company_id == 2){
-                    $inputs['invoice_no'] = 'ALYEXPwin'.' '.'/'.' '.$setting->invoice_win_confirm.' / 24';
-                    $setting->invoice_win_confirm += 1;
-                }
-            }
 
-        } elseif ($invoice->invoice_status == "draft" && $request->invoice_status == "confirm" && $invoice->type == "debit" && Auth::user()->company_id == 2) {
+        if($invoice->invoice_status == "ready_confirm" &&  $request->invoice_status == "confirm" && $invoice->type == "invoice" && $invoice->add_egp == "onlyegp" ){
             $setting = Setting::find(1);
-            $inputs['invoice_no'] = 'DN' . ' ' . '/' . ' ' . $setting->debit_confirm . ' / 24';
+            $inputs['invoice_no'] = 'E'.' '.'/'.' '.$setting->invoice_confirm.' / 24';
+            $setting->invoice_confirm_egp += 1;
+        }elseif($invoice->invoice_status == "ready_confirm" &&  $request->invoice_status == "confirm" && $invoice->type == "invoice"){
+            $setting = Setting::find(1);
+            $inputs['invoice_no'] = 'U'.' '.'/'.' '.$setting->invoice_confirm.' / 24';
+            $setting->invoice_confirm_usd += 1;
+        }elseif ($invoice->invoice_status == "ready_confirm" && $request->invoice_status == "confirm" && $invoice->type == "debit" ) {
+            $setting = Setting::find(1);
+            $inputs['invoice_no'] = 'D' . ' ' . '/' . ' ' . $setting->debit_confirm . ' / 24';
             $setting->debit_confirm += 1;
-        }elseif ($invoice->invoice_status == "draft" && $request->invoice_status == "confirm" && $invoice->type == "debit" && Auth::user()->company_id == 3){
-            $setting = Setting::find(1);
-            $inputs['invoice_no'] = 'DNwin' . ' ' . '/' . ' ' . $setting->debit_win_confirm . ' / 24';
-            $setting->debit_win_confirm += 1;
         }
         $setting->save();
         $invoice->update($inputs);
         InvoiceChargeDesc::destroy(explode(',',$request->removed));
         $invoice->createOrUpdateInvoiceChargeDesc($request->invoiceChargeDesc);
-
         return redirect()->route('invoice.index')->with('success',trans('Invoice.Updated.Success'));
     }
 

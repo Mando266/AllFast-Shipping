@@ -90,15 +90,21 @@ class MovementsImport implements ToModel,WithHeadingRow
             return session()->flash('message',"This Booking NO: {$booking} Not found");
         }
 
+        // try {
+        //     // code that triggers a pdo exception
+        //     $date = Date::excelToDateTimeObject($row['movement_date']);
+        //     $dateConvertion = $date->format('Y-m-d');
+        //   } catch (Exception $e) {
+        //     $dateConvertion = $row['movement_date'];
+        //   }
+        //   $row['movement_date'] = $dateConvertion;
         try {
-            // code that triggers a pdo exception
             $date = Date::excelToDateTimeObject($row['movement_date']);
-            $dateConvertion = $date->format('Y-m-d');
-          } catch (Exception $e) {
+            $dateConvertion = $date->format('Y-m-d H:i:s');
+        } catch (Exception $e) {
             $dateConvertion = $row['movement_date'];
-          }
-          $row['movement_date'] = $dateConvertion;
-    
+        }
+        $row['movement_date'] = $dateConvertion;
         
         // Get All movements and sort it and get the last movement before this movement 
 

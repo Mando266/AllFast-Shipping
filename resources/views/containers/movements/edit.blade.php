@@ -40,7 +40,7 @@
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="movement_dateInput">Movement Date <span class="text-warning"> * (Required.) </span></label>
-                                <input type="date" class="form-control" id="movement_dateInput" name="movement_date" value="{{old('movement_date',$movement->movement_date)}}"
+                                <input type="datetime-local" class="form-control" id="movement_dateInput" name="movement_date" value="{{old('movement_date',$movement->movement_date)}}"
                                      autocomplete="off" >
                                 @error('movement_date')
                                 <div class="invalid-feedback">
@@ -209,16 +209,6 @@
                                     @endforeach
                                 </select>
                                 @error('container_status')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="RemarkesInput">Free Time</label>
-                                <input type="text" class="form-control" id="RemarkesInput" name="free_time" value="{{old('free_time',$movement->free_time)}}"
-                                    placeholder="Free Time" autocomplete="off">
-                                @error('free_time')
                                 <div class="invalid-feedback">
                                     {{$message}}
                                 </div>

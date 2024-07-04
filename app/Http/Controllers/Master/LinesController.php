@@ -76,7 +76,7 @@ class LinesController extends Controller
     public function edit(Lines $line)
     {
         $this->authorize(__FUNCTION__,Lines::class);
-        $line_types = LinesType::orderBy('name')->where('company_id',Auth::user()->company_id)->get();
+        $line_types = LinesType::orderBy('name')->get();
         $types = LinesWithType::where('line_id',$line->id)->get()->pluck('type_id')->toarray();
         return view('master.lines.edit',[
             'types'=>$types,

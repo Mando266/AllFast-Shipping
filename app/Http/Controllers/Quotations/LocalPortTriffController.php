@@ -44,9 +44,9 @@ class LocalPortTriffController extends Controller
     public function create()
     {
         $this->authorize(__FUNCTION__,LocalPortTriff::class);
-            $ports = Ports::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
+            $ports = Ports::orderBy('id')->get();
             $equipment_types = ContainersTypes::orderBy('id')->get();
-            $terminals = Terminals::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
+            $terminals = Terminals::orderBy('id')->get();
             $country = Country::orderBy('id')->get();
             $currency = Currency::all();
             $agents = Agents::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
@@ -131,9 +131,9 @@ class LocalPortTriffController extends Controller
     {
         $this->authorize(__FUNCTION__,LocalPortTriff::class);
         $localporttriff = LocalPortTriff::where('company_id',Auth::user()->company_id)->with('triffPriceDetailes')->find($id);
-        $ports = Ports::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
+        $ports = Ports::orderBy('id')->get();
         $equipment_types = ContainersTypes::orderBy('id')->get();
-        $terminals = Terminals::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
+        $terminals = Terminals::orderBy('id')->get();
         $country = Country::orderBy('id')->get();
         $currency = Currency::all();
         $charges = ChargesDesc::orderBy('id')->get();

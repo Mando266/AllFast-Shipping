@@ -100,7 +100,7 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group col-md-6  text-right">
-                        <h3> <span style="font-size:22px;"> {{ optional($receipt->invoice)->bldraft_id == 0 ? optional($receipt->invoice->booking)->ref_no : optional($receipt->invoice->bldraft)->ref_no }}</span>&nbsp;&nbsp;: بوليصة<h3>
+                        <h3> <span style="font-size:22px;">{{ optional($receipt->invoice->bldraft)->ref_no }}</span>&nbsp;&nbsp;: بوليصة<h3>
                     </div>
                     <div class="form-group col-md-6  text-right"> 
                     @if(optional(optional(optional($receipt->invoice->bldraft)->booking)->quotation)->shipment_type == "Import")    

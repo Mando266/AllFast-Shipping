@@ -83,51 +83,61 @@ class ReceiptController extends Controller
         ]);
     }
 
-    public function create(Request $request)
+
+    public function create()
     {
-        $this->authorize(__FUNCTION__, Receipt::class);
-    
-        $selectedInvoiceIds = $request->input('invoice_id', []);
-        $invoices = Invoice::whereIn('id', $selectedInvoiceIds)->with('chargeDesc')->get();
-        $total = 0;
-        $total_eg = 0;
+        $this->authorize(__FUNCTION__,Receipt::class);
+
+        $invoice = Invoice::where('id',request('invoice_id'))->with('chargeDesc')->first();
+        $bldraft = BlDraft::where('id',request('bldraft_id'))->first();
         $oldPayment = 0;
-        // Initialize $oldReceipts as an empty collection
-        $oldReceipts = collect();
-    
-        foreach ($invoices as $invoice) {
-            $invoiceOldReceipts = Receipt::where('invoice_id', $invoice->id)->get();
-            // Aggregate old receipts from all invoices
-            $oldReceipts = $oldReceipts->merge($invoiceOldReceipts);
-    
-            foreach ($invoiceOldReceipts as $oldReceipt) {
+        $oldReceipts = Receipt::where('invoice_id',request('invoice_id'))->get();
+        if($oldReceipts->count() != 0){
+            foreach($oldReceipts as $oldReceipt){
                 $oldPayment += $oldReceipt->paid;
             }
-    
-            $vat = $invoice->vat / 100;
-            foreach ($invoice->chargeDesc as $chargeDesc) {
-                $total += $chargeDesc->total_amount;
-                $total_eg += $chargeDesc->total_egy;
-                if ($chargeDesc->add_vat == 1) {
-                    $total += ($vat * $chargeDesc->total_amount);
-                    $total_eg += ($vat * $chargeDesc->total_egy);
-                }
+        }
+
+        $total = 0;
+        $total_eg = 0;
+        $now = Carbon::now();
+        $vat = $invoice->vat;
+        $vat = $vat / 100;
+        $total_after_vat = 0;
+        $total_eg_after_vat = 0;
+
+        foreach($invoice->chargeDesc as $chargeDesc){
+            $total += $chargeDesc->total_amount;
+            $total_eg += $chargeDesc->total_egy;
+            $total_after_vat += ($vat * $chargeDesc->total_amount);
+            $total_eg_after_vat += ($vat * $chargeDesc->total_egy);
+        }
+        $total = $total  + $total_after_vat - (($total_after_vat * $invoice->tax_discount)/100);
+        $total_eg = $total_eg + $total_eg_after_vat - (($total_eg * $invoice->tax_discount)/100);
+        if($invoice->add_egp == "false"){
+            if($total <= $oldPayment){
+                return redirect()->back()->with('error','Sorry You Cant Create Receipt for this invoice its already Paid')->withInput(request()->input());
+            }else{
+                $total -= $oldPayment;
+            }
+        }elseif($invoice->add_egp == "onlyegp"){
+            if($total_eg <= $oldPayment){
+                return redirect()->back()->with('error','Sorry You Cant Create Receipt for this invoice its already Paid')->withInput(request()->input());
+            }else{
+                $total_eg -= $oldPayment;
             }
         }
-    
-        $total -= $oldPayment;
-        $total_eg -= $oldPayment;
+
         $banks = Bank::get();
-    
-        return view('invoice.receipt.create', [
-            'invoices' => $invoices,
-            'banks' => $banks,
-            'oldReceipts' => $oldReceipts,
-            'total' => $total,
-            'total_eg' => $total_eg,
+        return view('invoice.receipt.create',[
+            'invoice'=>$invoice,
+            'banks'=>$banks,
+            'bldraft'=>$bldraft,
+            'oldReceipts'=>$oldReceipts,
+            'total'=>$total,
+            'total_eg'=>$total_eg,
         ]);
     }
-    
 
     public function store(Request $request)
     {
