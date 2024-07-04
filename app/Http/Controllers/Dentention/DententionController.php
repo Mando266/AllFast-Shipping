@@ -21,6 +21,7 @@ class DententionController extends Controller
      */
     public function index()
     {
+        
         $movementsCode = ContainersMovement::orderBy('id')->get();
         $bookings = Booking::select('id', 'ref_no')
             ->where('company_id', Auth::user()->company_id)
@@ -43,7 +44,7 @@ class DententionController extends Controller
         $movementDCHFId = $this->getDCHFMovementId();
         $movementRCVCId = $this->getRCVCMovementId();
         $demurrage = $this->getDemurrageTriff($request->booking_no);
-        $bookingFreeTime =optional($this->getBooking($request->booking_no))->free_time;
+        $bookingFreeTime = $this->getBookingFreeTime($request->booking_no);
         $containerCalc = collect();
         $status = 'completed';
         if (in_array('all', $request->container_ids)) {
@@ -77,10 +78,9 @@ class DententionController extends Controller
                     $endMovementDate = $request->to_date;
                 } else {
                     $endMovementDate = $endMovement->movement_date;
-                }
-                
+                }                
                 $diffBetweenDates = 0;
-                if ($endMovement) {
+                if ($endMovementDate) {
                     $daysCount = Carbon::parse($endMovementDate)->diffInDays($startMovementDate);
                 } else {
                     $status = 'in_completed';
@@ -204,10 +204,11 @@ class DententionController extends Controller
                     'from' =>  $startMovementDate,
                     'to' => $endMovementDate,
                     'from_code' => optional(optional($startMovement)->movementcode)->code,
-                    'to_code' => $endMovement != null ? (optional($endMovement)->movement_date != null ? $endMovement->movementcode->code : $endMovement) : now(),
+                    'to_code' => optional(optional($endMovement)->movementcode)->code,
                     'total' => $containerTotal,
                     'periods' => $periodCalc,
                 ]);
+              
                 $containerCalc->add($tempCollection);
             }
         } else {
@@ -237,7 +238,7 @@ class DententionController extends Controller
                     $endMovementDate = $endMovement->movement_date;
                 }
                 $diffBetweenDates = 0;
-                if ($endMovement) {
+                if ($endMovementDate) {
                     $daysCount = Carbon::parse($endMovementDate)->diffInDays($startMovementDate);
                 } else {
                     $status = 'in_completed';
@@ -478,5 +479,15 @@ class DententionController extends Controller
             return null;
         }
         return Demurrage::where('port_id', $booking->discharge_port_id)->with('slabs.periods')->first();
+    }
+    private function getBookingFreeTime($booking_no)
+    {
+        $booking = $this->getBooking($booking_no);
+        if (!$booking) {
+            return null;
+        }
+   
+        return ($booking->free_time > 0) ? $booking->free_time : optional($booking->quotation)->import_detention;
+
     }
 }
