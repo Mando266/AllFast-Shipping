@@ -48,7 +48,7 @@
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="containersTypesInput">Trminal <span class="text-warning"> *  </span></label>
-                                    <select class="form-control" id="terminal" data-live-search="true" name="terminal_id" data-size="10" required>
+                                    <select class="selectpicker form-control" id="terminal" data-live-search="true" name="terminal_id" data-size="10" required>
                                         <option value="">Select...</option>
                                         @foreach ($terminals as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('terminal_id') ? 'selected':''}}>{{$item->name}}</option>
@@ -143,7 +143,7 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="text" id="dayes" name="triffPriceDetailes[0][selling_price]" class="form-control" autocomplete="off">
+                                        <input type="text" id="dayes" name="triffPriceDetailes[0][selling_price]" class="form-control" autocomplete="off" required>
                                             @error('selling_price')
                                             <div style="color:red;">
                                                 {{$message}}
@@ -252,7 +252,7 @@
         '<td><select class="selectpicker form-control" data-live-search="true" id="selectpickers" name="triffPriceDetailes['+counter+'][equipment_type_id]" data-size="10"><option>Select</option><option value="100">All</option>@foreach ($equipment_types as $item)<option value="{{$item->id}}">{{$item->name}}</option>@endforeach</select></td>'+
         '<td><select class="selectpicker form-control" data-live-search="true" id="selectpickers" name="triffPriceDetailes['+counter+'][unit]"><option>Select</option><option value="Container">Container</option><option value="Document">Document</option></select></td>'+
         '<td><select class="selectpicker form-control" data-live-search="true" id="selectpickers" name="triffPriceDetailes['+counter+'][currency]" data-size="10"><option>Select</option>@foreach ($currency as $item)<option value="{{$item->name}}">{{$item->name}}</option>@endforeach</select></td>'+
-        '<td><input type="text" name="triffPriceDetailes['+counter+'][selling_price]" class="form-control"></td>'+
+        '<td><input type="text" name="triffPriceDetailes['+counter+'][selling_price]" class="form-control" required></td>'+
         // '<td><input type="text" name="triffPriceDetailes['+counter+'][cost]" class="form-control"></td>'+
         // '<td><input type="text" name="triffPriceDetailes['+counter+'][agency_revene]" class="form-control" autocomplete="off" ></td>'+
         // '<td><input type="text" name="triffPriceDetailes['+counter+'][liner]" class="form-control" autocomplete="off"></td>'+
@@ -282,6 +282,7 @@
                         }
                 let port = $('#port');
                 port.html(list2.join(''));
+                $(port).selectpicker('refresh');
                 });
             });
         });
@@ -299,6 +300,8 @@
                         }
                 let terminal = $('#terminal');
                 terminal.html(list2.join(''));
+                $(terminal).selectpicker('refresh');
+                
                 });
             });
         });

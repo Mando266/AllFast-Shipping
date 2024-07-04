@@ -18,7 +18,7 @@
                     <form id="createForm" action="{{route('invoice.store_invoice')}}" method="POST" enctype="multipart/form-data">
                             @csrf
                         <div class="form-row">
-                            <input type="hidden" name="bldraft_id" value="{{request()->input('bldraft_id')}}">
+                            <input type="hidden" name="booking_ref" value="{{request()->input('booking_ref')}}">
                                 <div class="form-group col-md-6">
                                 <label for="customer">Customer<span class="text-warning"> * (Required.) </span></label>
                                 <select class="selectpicker form-control" name="customer_id" id="customer" data-live-search="true" data-size="10"
@@ -48,49 +48,48 @@
                                     placeholder="Customer Name" autocomplete="off" required>
                             </div> 
                         </div>
-                        <div class="form-row">
-                                <div class="form-group col-md-3" >
-                                    <label>Place Of Acceptence</label>
-                                    <select class="selectpicker form-control" id="place_of_acceptence_id" data-live-search="true" name="place_of_acceptence" data-size="10"
-                                 title="{{trans('forms.select')}}" >
-                                        @foreach($ports as $port)
-                                            <option value="{{$port->id}}" {{$port->id == old('place_of_acceptence_id') ? 'selected':''}}>{{$port->name}}</option>
-                                        @endforeach
-                                        </select>
-                                    @error('place_of_acceptence')
-                                    <div style="color: red;">
-                                        {{$message}}
-                                    </div>
-                                    @enderror
-                                </div> 
-
-                                <div class="form-group col-md-3" >
-                                    <label>Load Port</label>
-                                    <select class="selectpicker form-control" id="load_port" data-live-search="true" name="load_port" data-size="10"
-                                 title="{{trans('forms.select')}}" >
-                                        @foreach($ports as $port)
-                                        <option value="{{$port->id}}" {{$port->id == old('load_port') ? 'selected':''}}>{{$port->name}}</option>
-                                        @endforeach
-                                        </select>
-                                    @error('load_port')
-                                    <div style="color: red;">
-                                        {{$message}}
-                                    </div>
-                                    @enderror
-                                </div> 
+                        <!-- <div class="form-row">
                             <div class="form-group col-md-3" >
-                                <label for="Date">Booking Ref</label>
-                                    <select class="selectpicker form-control" id="booking_ref" data-live-search="true" name="booking_ref" data-size="10"
-                                        title="{{trans('forms.select')}}">
-                                        @foreach($bookings as $booking)
-                                        <option value="{{$booking->id}}" {{$booking->id == old('booking_ref') ? 'selected':''}}>{{$booking->ref_no}}</option>
-                                        @endforeach
-                                        </select>
-                                    @error('booking_ref')
-                                    <div style="color: red;">
-                                        {{$message}}
-                                    </div>
-                                    @enderror
+                                <label>Place Of Acceptence</label>
+                                <select class="selectpicker form-control" id="place_of_acceptence_id" data-live-search="true" name="place_of_acceptence" data-size="10"
+                                title="{{trans('forms.select')}}" >
+                                    @foreach($ports as $port)
+                                        <option value="{{$port->id}}" {{$port->id == old('place_of_acceptence_id') ? 'selected':''}}>{{$port->name}}</option>
+                                    @endforeach
+                                    </select>
+                                @error('place_of_acceptence')
+                                <div style="color: red;">
+                                    {{$message}}
+                                </div>
+                                @enderror
+                            </div> 
+                            <div class="form-group col-md-3" >
+                                <label>Load Port</label>
+                                <select class="selectpicker form-control" id="load_port" data-live-search="true" name="load_port" data-size="10"
+                                title="{{trans('forms.select')}}" >
+                                    @foreach($ports as $port)
+                                    <option value="{{$port->id}}" {{$port->id == old('load_port') ? 'selected':''}}>{{$port->name}}</option>
+                                    @endforeach
+                                    </select>
+                                @error('load_port')
+                                <div style="color: red;">
+                                    {{$message}}
+                                </div>
+                                @enderror
+                            </div> 
+                            <div class="form-group col-md-3" >
+                                <label>Discharge Port</label>
+                                <select class="selectpicker form-control" id="discharge_port" data-live-search="true" name="discharge_port" data-size="10"
+                                    title="{{trans('forms.select')}}">
+                                    @foreach($ports as $port)
+                                        <option value="{{$port->id}}" {{$port->id == old('discharge_port') ? 'selected':''}}>{{$port->name}}</option>
+                                    @endforeach
+                                </select>
+                                @error('discharge_port')
+                                <div style="color: red;">
+                                    {{$message}}
+                                </div>
+                                @enderror
                             </div> 
                             <div class="form-group col-md-3">
                                 <label for="voyage_id">Vessel / Voyage </label>
@@ -106,61 +105,45 @@
                                     </div>
                                     @enderror
                             </div>
-
-                            </div> 
-                            <div class="form-row">
-                                <div class="form-group col-md-3" >
-                                    <label>Discharge Port</label>
-                                    <select class="selectpicker form-control" id="discharge_port" data-live-search="true" name="discharge_port" data-size="10"
-                                        title="{{trans('forms.select')}}">
-                                        @foreach($ports as $port)
-                                            <option value="{{$port->id}}" {{$port->id == old('discharge_port') ? 'selected':''}}>{{$port->name}}</option>
-                                        @endforeach
+                            <div class="form-group col-md-3" >
+                                <label>Port of Delivery</label>
+                                <select class="selectpicker form-control" id="port_of_delivery" data-live-search="true" name="port_of_delivery" data-size="10"
+                                title="{{trans('forms.select')}}">
+                                    @foreach($ports as $port)
+                                    <option value="{{$port->id}}" {{$port->id == old('port_of_delivery') ? 'selected':''}}>{{$port->name}}</option>
+                                    @endforeach
                                     </select>
-                                    @error('discharge_port')
-                                    <div style="color: red;">
-                                        {{$message}}
-                                    </div>
-                                    @enderror
-                                </div> 
-
-                                <div class="form-group col-md-3" >
-                                    <label>Port of Delivery</label>
-                                    <select class="selectpicker form-control" id="port_of_delivery" data-live-search="true" name="port_of_delivery" data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                        @foreach($ports as $port)
-                                        <option value="{{$port->id}}" {{$port->id == old('port_of_delivery') ? 'selected':''}}>{{$port->name}}</option>
-                                        @endforeach
-                                        </select>
-                                    @error('port_of_delivery')
-                                    <div style="color: red;">
-                                        {{$message}}
-                                    </div>
-                                    @enderror
-                                </div> 
-                                <div class="form-group col-md-3" >
-                                    <label>Equipment Type</label>
-                                        <select class="selectpicker form-control" id="equipment_type" data-live-search="true" name="equipment_type" data-size="10"
+                                @error('port_of_delivery')
+                                <div style="color: red;">
+                                    {{$message}}
+                                </div>
+                                @enderror
+                            </div> 
+                        </div>  -->
+                            <div class="form-row">
+                                <div class="form-group col-md-4" >
+                                    <label for="Date">Booking Ref</label>
+                                        <select class="selectpicker form-control" id="booking_ref" data-live-search="true" name="booking_ref" data-size="10"
                                             title="{{trans('forms.select')}}">
-                                            @foreach($equipmentTypes as $equipmentType)
-                                            <option value="{{$equipmentType->id}}" {{$equipmentType->id == old('equipment_type') ? 'selected':''}}>{{$equipmentType->name}}</option>
+                                            @foreach($bookings as $booking)
+                                            <option value="{{$booking->id}}" {{$booking->id == old('booking_ref') ? 'selected':''}}>{{$booking->ref_no}}</option>
                                             @endforeach
-                                        </select>
-                                    @error('equipment_type')
-                                    <div style="color: red;">
-                                        {{$message}}
-                                    </div>
-                                    @enderror
-                                </div> 
-
-                                <div class="form-group col-md-3">
+                                            </select>
+                                        @error('booking_ref')
+                                        <div style="color: red;">
+                                            {{$message}}
+                                        </div>
+                                        @enderror
+                                </div>
+                                <div class="form-group col-md-4">
                                     <label for="status">Invoice Status<span class="text-warning"> * </span></label>
                                     <select class="form-control" data-live-search="true" name="invoice_status" title="{{trans('forms.select')}}" required>
-                                        <option value="draft">Draft</option>
-                                        <option value="ready_confirm">Ready To Confirm</option>
-                                        @if(Auth::user()->id == 15)
-                                            <option value="confirm">Confirm</option>
-                                        @endif
+                                        @permission('Invoice-Draft')
+                                            <option value="draft">Draft</option>
+                                        @endpermission
+                                        @permission('Invoice-ReadyToConfirm')
+                                            <option value="ready_confirm">Ready To Confirm</option>
+                                        @endpermission
                                     </select>
                                     @error('invoice_status')
                                     <div style="color:red;">
@@ -168,25 +151,25 @@
                                     </div>
                                     @enderror
                                 </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group col-md-3" >
+                                <div class="form-group col-md-4" >
                                     <label for="Date">Date</label>
                                         <input type="date" class="form-control" name="date" placeholder="Date" autocomplete="off" value="{{old('date',date('Y-m-d'))}}">
                                 </div>
-                                <div class="form-group col-md-2" >
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-3" >
                                     <label>QTY</label>
-                                        <input type="text" class="form-control" placeholder="Qty" name="qty" autocomplete="off" style="background-color:#fff">
+                                        <input type="text" class="form-control" placeholder="Qty" name="qty" autocomplete="off" style="background-color:#fff" value="1">
                                 </div>
-                                <div class="form-group col-md-2" >
+                                <div class="form-group col-md-3" >
                                     <label>TAX Hold</label>
                                     <input type="text" class="form-control" placeholder="TAX %" name="tax_discount" autocomplete="off"  style="background-color:#fff" value="0">
                                 </div>
-                                <div class="form-group col-md-2" >
+                                <div class="form-group col-md-3" >
                                     <label>Exchange Rate</label>
-                                        <input type="text" class="form-control" placeholder="Exchange Rate" name="customize_exchange_rate"  value="47.15" autocomplete="off"  style="background-color:#fff" required>
+                                        <input type="text" class="form-control" placeholder="Exchange Rate" name="customize_exchange_rate"  value="48" autocomplete="off"  style="background-color:#fff" required>
                                 </div>
-                                <div class="form-group col-md-2">
+                                <div class="form-group col-md-3">
                                     <div style="padding: 30px;">
                                         <input class="form-check-input" type="radio" name="add_egp" id="add_egp" value="false" checked>
                                         <label class="form-check-label" for="add_egp">
@@ -206,21 +189,11 @@
                                         <label> VAT % </label>
                                         <input type="text" class="form-control" placeholder="VAT %" name="vat" value={{14}} autocomplete="off"  style="background-color:#fff">
                                     </div> 
-                                <div class="form-group col-md-3">
-                                    <label for="status">Booking Status<span class="text-warning"> * </span></label>
-                                    <select class="selectpicker form-control" data-live-search="true" name="booking_status" title="{{trans('forms.select')}}" required>
-                                        <option value="1">Import</option>
-                                        <option value="0">Export</option>
-                                    </select>
-                                </div>
+                                    <div class="col-md-9 form-group">
+                                        <label> Notes </label>
+                                        <textarea class="form-control" name="notes"></textarea>
+                                    </div> 
                             </div>  
-                                
-                            <div class="form-row">
-                                <div class="col-md-12 form-group">
-                                    <label> Notes </label>
-                                    <textarea class="form-control" name="notes"></textarea>
-                                </div> 
-                            </div> 
                         <h4>Charges<h4>
                         <table id="charges" class="table table-bordered">
                             <thead>
@@ -327,7 +300,7 @@
         var counter  = '<?= isset($key)? ++$key : 0 ?>';
         $("#add").click(function(){
            var tr = '<tr>'+ 
-               '<td><select class="form-control" data-live-search="true" name="invoiceChargeDesc['+counter+'][charge_description]" required     data-size="10"><option>Select</option>@foreach ($charges as $item)<option value="{{$item->name}}">{{$item->name}}</option>@endforeach</select></td>'+
+               '<td><select class="selectpicker form-control" data-live-search="true" name="invoiceChargeDesc['+counter+'][charge_description]" required     data-size="10"><option>Select</option>@foreach ($charges as $item)<option value="{{$item->name}}">{{$item->name}}</option>@endforeach</select></td>'+
                '<td><input type="text" name="invoiceChargeDesc['+counter+'][size_small]" class="form-control" autocomplete="off" placeholder="Amount" required></td>'+
                '<td><div class="form-check"><input class="form-check-input" type="radio" name="invoiceChargeDesc['+counter+'][add_vat]" id="item_'+counter+'_enabled_yes" value="1"><label class="form-check-label" for="item_'+counter+'_enabled_yes">Yes</label></div><div class="form-check"><input class="form-check-input" type="radio" name="invoiceChargeDesc['+counter+'][add_vat]" id="item_'+counter+'_enabled_no" value="0" checked><label class="form-check-label" for="item_'+counter+'_enabled_no">No</label></div></td>'+
                '<td><div class="form-check"><input class="form-check-input" type="radio" name="invoiceChargeDesc['+counter+'][enabled]" id="item_'+counter+'_enabled_yes" value="1" checked><label class="form-check-label" for="item_'+counter+'_enabled_yes">Yes</label></div><div class="form-check"><input class="form-check-input" type="radio" name="invoiceChargeDesc['+counter+'][enabled]" id="item_'+counter+'_enabled_no" value="0"><label class="form-check-label" for="item_'+counter+'_enabled_no">No</label></div></td>'+
@@ -339,6 +312,8 @@
            '</tr>';
            counter++;
           $('#charges').append(tr);
+          $('.selectpicker').selectpicker("render");
+          $('#selectpickers').selectpicker();
         });
     });
     </script>

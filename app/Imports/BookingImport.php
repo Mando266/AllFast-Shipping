@@ -65,4 +65,7 @@ class BookingImport implements ToModel,WithHeadingRow
 
         return $bookingDetail;
     }
+
+
+    
 }

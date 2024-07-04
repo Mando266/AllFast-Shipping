@@ -16,14 +16,7 @@
                 <div class="widget-content widget-content-area">
                     <div class="row">
                         <div class="col-md-6 text-left">
-                            <img src="{{asset('assets/img/msl.png')}}" style="width: 350px; height: 97.6px;" alt="logo">
-                        </div>
-                        <div class="col-md-6 text-right">
-                            @if(Auth::user()->company_id == 3)
-                                <img src="{{asset('assets/img/winwin_maritime.png')}}" alt="logo" style="height: 141px;width: 180px;">
-                                    @else
-                                <img src="{{asset('assets/img/cstar-logo.jpeg')}}" style="width: 290px; height: 100%;" alt="logo">
-                            @endif
+                            <img src="{{asset('assets/img/allfastLogo.png')}}" style="width: 350px;" alt="logo">
                         </div>
                     </div>
                 <br>
@@ -32,7 +25,7 @@
                     <thead>
                         <tr>
 
-                            @if(optional(optional(optional($invoice->bldraft)->booking)->quotation)->shipment_type == "Import" || $invoice->booking_status == 1)
+                            @if(optional(optional($invoice)->booking)->shipment_type == "Import" || $invoice->booking_status == 1)
                                 @if($invoice->invoice_status == "draft")
                                 <th class="text-center  underline" style="font-size: 24px !important;">IMPORT PROFORMA INVOICE</th>
                                 @else
@@ -77,51 +70,52 @@
                         <tr>
 
                             <td class="col-md-2 tableStyle text-center">Vessel</td>
-                            @if(optional(optional(optional($invoice->bldraft)->booking)->quotation)->shipment_type == "Import" && optional($invoice->bldraft->booking)->transhipment_port != null)
-                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->bldraft_id == 0 ? optional(optional($invoice->voyage)->vessel)->name : optional(optional(optional($invoice->bldraft->booking)->secondvoyage)->vessel)->name }}</span></td>
-                            @else
-                            <td class="col-md-2 tableStyle text-center"><span class="entry">{{ $invoice->bldraft_id == 0 ? optional(optional($invoice->voyage)->vessel)->name : optional($invoice->bldraft->voyage->vessel)->name }}</span></td>
-                            @endif
+                            <td class="col-md-2 tableStyle text-center"><span class="entry">{{ $invoice->booking_ref == 0 ? optional(optional($invoice->voyage)->vessel)->name : optional(optional($invoice->booking)->voyage->vessel)->name }}</span></td>
                             <td class="col-md-2 tableStyle text-center" >Origin Port</td>
-                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->bldraft_id == 0 ? optional($invoice->loadPort)->code : optional($invoice->bldraft->loadPort)->code }}</span></td>
+                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->booking_ref == 0 ? optional($invoice->loadPort)->code : optional(optional($invoice->booking)->loadPort)->code }}</span></td>
                             <td class="col-md-2 tableStyle text-center">Arrival Date</td>
-                            @if(optional(optional(optional($invoice->bldraft)->booking)->quotation)->shipment_type == "Import")
-                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{optional($invoice->bldraft->booking)->transhipment_port != null ? optional($secondVoyagePortdis)->eta : optional($firstVoyagePortdis)->eta}}</span></td>
-                            @else
                             <td class="col-md-2 tableStyle text-center" ><span class="entry">{{optional($firstVoyagePort)->eta}}</span></td>
-                            @endif
                         </tr>
                         <tr>
                             <td class="col-md-2 tableStyle text-center" >Voyage No</td>
-                            @if(optional(optional(optional($invoice->bldraft)->booking)->quotation)->shipment_type == "Import" && optional($invoice->bldraft->booking)->transhipment_port != null)
-                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->bldraft_id == 0 ? optional($invoice->voyage)->voyage_no : optional(optional(optional($invoice->bldraft)->booking)->secondvoyage)->voyage_no }}</span></td>
-                            @else
-                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->bldraft_id == 0 ? optional($invoice->voyage)->voyage_no : optional($invoice->bldraft->voyage)->voyage_no }}</span></td>
-                            @endif
+                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->booking_ref == 0 ? optional($invoice->voyage)->voyage_no : optional($invoice->booking->voyage)->voyage_no }}</span></td>
                             <td class="col-md-2 tableStyle text-center" >POL</td>
-                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->bldraft_id == 0 ? optional($invoice->loadPort)->code : optional($invoice->bldraft->loadPort)->code }}</span></td>
+                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->booking_ref == 0 ? optional($invoice->loadPort)->code : optional($invoice->booking->loadPort)->code }}</span></td>
                             <td class="col-md-2 tableStyle text-center">Departure Date</td>
-                            @if(optional(optional(optional($invoice->bldraft)->booking)->quotation)->shipment_type == "Import")
-                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{optional($invoice->bldraft->booking)->transhipment_port != null ? optional($secondVoyagePortdis)->etd : optional($firstVoyagePortdis)->etd}}</span></td>
-                            @else
                             <td class="col-md-2 tableStyle text-center" ><span class="entry">{{optional($firstVoyagePort)->etd}}</span></td>
-                            @endif
                         </tr>
 
                         <tr>
                             <td class="col-md-2 tableStyle text-center">IMO ClASS</td>
                             <td class="col-md-2 tableStyle text-center" ></td>
                             <td class="col-md-2 tableStyle text-center" >POD</td>
-                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->bldraft_id == 0 ? optional($invoice->dischargePort)->code : optional($invoice->bldraft->dischargePort)->code }}</span></td>
+                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->booking_ref == 0 ? optional($invoice->dischargePort)->code : optional($invoice->booking->dischargePort)->code }}</span></td>
                             <td class="col-md-2 tableStyle text-center">Cntr. Type(s)</td>
-                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{$invoice->bldraft_id == 0 ? $invoice->qty : $invoice->blDraft->blDetails->count()}} @if($invoice->bldraft_id == 0 && optional($invoice->equipmentsType)->name != null ) X  @elseif($invoice->bldraft_id != 0) X @endif  {{ $invoice->bldraft_id == 0 ? optional(optional($invoice->booking)->equipmentsType)->name : optional($invoice->blDraft->equipmentsType)->name }}</span></td>
+                            <td class="col-md-2 tableStyle text-center" ><span class="entry">
+                            @if($invoice->booking_ref != 0 )  
+                            @php
+                                $containerTypes =  optional(optional(optional($invoice)->booking)->bookingContainerDetails)->pluck('containerType.name')->unique();
+                            @endphp
+                            @if($containerTypes->count() > 1)
+                                @foreach($invoice->booking->bookingContainerDetails as $detail)
+                                    {{ $detail->qty }} X {{ optional(optional($detail)->containerType)->name }} <br>
+                                @endforeach
+                            @else
+                                @php
+                                    $totalQty = optional(optional($invoice)->booking)->bookingContainerDetails->sum('qty');
+                                    $singleType = optional(optional($invoice)->booking)->bookingContainerDetails->first();
+                                @endphp
+                                {{ $totalQty }} X {{ optional($singleType->containerType)->name }}
+                            @endif
+                            @endif
+
                         </tr>
                         <tr>
                             <td class="col-md-2 tableStyle text-center" >B/L No.</td>
-                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->bldraft_id == 0 ? optional($invoice->booking)->ref_no : optional($invoice->bldraft)->ref_no }}
+                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->booking_ref == 0 ? optional($invoice->booking)->ref_no : optional($invoice->booking)->ref_no }}
                             </span></td>
                             <td class="col-md-2 tableStyle text-center" >Final Dest</td>
-                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->bldraft_id == 0 ? optional($invoice->placeOfDelivery)->code : optional($invoice->bldraft->placeOfDelivery)->code }}</span></td>
+                            <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->bldraft_id == 0 ? optional($invoice->placeOfDelivery)->code : optional($invoice->booking->placeOfDelivery)->code }}</span></td>
                             <td class="col-md-2 tableStyle text-center" ></td>
                             <td class="col-md-2 tableStyle text-center" ></td>
                         </tr>
@@ -234,13 +228,10 @@
                 <br>
                 <br>
                 <br>
-                @if(Auth::user()->company_id == 2)
-                    <h4 style="font-size: 16px; color:#000;">Bank USD details: Ahli United Bank – AUB &nbsp; 0007169620002 &nbsp; IBAN:	EG020020000700000007169620002<h4>
-                    <h4 style="font-size: 16px; color:#000;">Bank EGP &nbsp;details: Ahli United Bank – AUB &nbsp; 0007169620001 &nbsp; IBAN:	EG290020000700000007169620001<h4>
-                    @else
-                    <h4 style="font-size: 16px; color:#000;">Bank USD details: Commercial International Bank – CIB &nbsp; 100061900866 &nbsp; IBAN: EG130010020400000100061900866<h4>
-                    <h4 style="font-size: 16px; color:#000;">Bank EGP &nbsp;details: Commercial International Bank – CIB &nbsp; 100040346157 &nbsp; IBAN: EG950010020400000100040346184<h4>
-                @endif
+                    <h4 style="font-size: 16px; color:#000;">Bank USD details: Arab African International Bank &nbsp; 1029021510010101 &nbsp; IBAN:	EG260057023801029021510010101<h4>
+                    <h4 style="font-size: 16px; color:#000;">Bank EGP &nbsp;details: Arab African International Bank &nbsp; 1029021510010201 &nbsp; IBAN:	EG420057023801029021510010201<h4>
+                    <h4 style="font-size: 16px; color:#000;">Bank USD details: Commercial International Bank – CIB &nbsp; 100058602967 &nbsp; IBAN: EG060010000300000100058602967<h4>
+                    <h4 style="font-size: 16px; color:#000;">Bank EGP &nbsp;details: Commercial International Bank – CIB &nbsp; 100058602951 &nbsp; IBAN: EG500010000300000100058602951<h4>
                 </div>
 
                 <h4 style="font-size: 16px; color:#000; text-align: right;">الساده العملاء نود أن  نلفت انتباهكم إلى أهمية إجراء الإيداعات البنكية لكل عميل بشكل منفصل بما يتطابق مع العميل المصدره باسمه الفواتير. يرجى العلم بأنه لن يكون بإمكاننا قبول إيداعات مجمعة لعملاء مختلفين لضمان دقه معالجه المدفوعات . نقدر تعاونكم وفهمكم لهذه الضرورة <h4>

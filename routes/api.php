@@ -50,7 +50,7 @@ Route::get('master/requesttype/{name}', [CompanyDataController::class, 'requestT
 Route::get('agent/loadPrice/{id}/{equipment_id?}/{company_id}', [PriceController::class, 'getLoadAgentPrice']);
 Route::get('agent/dischargePrice/{id}/{equipment_id?}/{company_id}', [PriceController::class, 'getDischargeAgentPrice']);
 Route::get('agent/agentCountry/{id}', [AgentCountry::class, 'getAgentCountry']);
-Route::get('booking/activityContainers/{id}/{company_id}/{equipment_id}', [CountriesController::class, 'getActivityContainers']);
+Route::get('booking/activityContainers/{company_id}/{equipment_id}', [CountriesController::class, 'getActivityContainers']);
 Route::get('master/invoices/{id}', [CompanyDataController::class, 'blinvoice']);
 Route::get('master/invoicesCustomers/{id}', [CompanyDataController::class, 'customerInvoice']);
 Route::get('/bldrafts/{bldraft}/containers', [BlDraftController::class ,'containers']);

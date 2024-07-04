@@ -34,6 +34,25 @@
                 </div>
             </br>
             <h5><span style='color:#1b55e2';>Container No / Type:</span> {{$containers->code}} / {{{optional($containers->containersTypes)->name}}}</h5>
+            </br>
+                <?php
+
+use App\Models\Containers\Movements;
+
+if(request()->input('container_id') != null){
+
+                    $container_id = request()->input('container_id');
+                    if(is_array($container_id)){
+                        $container_id = $container_id[0];
+                    }
+                }elseif(request()->input('bl_no') != null){
+                    $container_id = Movements::where('bl_no',request()->input('bl_no'))->pluck('container_id')->first();
+
+                }elseif($id != null){
+
+                    $container_id = $id;
+                    }?>
+
                 <div class="widget-content widget-content-area">
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover table-condensed mb-4">
@@ -55,7 +74,53 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-      
+                               
+
+                                    @if($movementId == true)
+
+                                        @if($movementsArray == false)
+                                        <tr>
+                                            <td>{{{optional($items->movementcode)->code}}}</td>
+                                            <td>{{$items->movement_date}}</td>
+                                            <td>{{optional($items->activitylocation)->code}}</td>
+                                            <td>{{optional($items->pol)->code}}</td>
+                                            <td>{{optional($items->pod)->code}}</td>
+                                            <td>{{{optional($items->vessels)->name}}} {{optional($items->voyage)->voyage_no}}</td>
+                                            <td>{{optional($items->booking)->ref_no}}</td>
+                                            <td>{{$items->bl_no}}</td>
+                                            <td>{{$items->free_time}}</td>
+                                            <td>{{{optional($items->importAgent)->name}}}</td>
+                                            <td>{{{optional($items->bookingAgent)->name}}}</td>
+                                            <td>{{$items->remarkes}}</td>
+                                            <td></td>
+
+                                            <td class="text-center">
+                                                <ul class="table-controls">
+                                                    @permission('Movements-Edit')
+                                                    <li>
+                                                            <a href="{{route('movements.edit',['movement'=>$items->id])}}" data-toggle="tooltip" data-placement="top" title="" data-original-title="edit">
+                                                                <i class="far fa-edit text-success"></i>
+                                                            </a>
+                                                    </li>
+                                                    @endpermission
+                                                    @permission('Movements-Delete')
+                                                    <li>
+                                                        <form action="{{route('movements.destroy',['movement'=>$items->id])}}" method="post">
+                                                            @method('DELETE')
+                                                            @csrf
+                                                        <button style="border: none; background: none;" type="submit" class="fa fa-trash text-danger"></button>
+                                                        </form>
+                                                    </li>
+                                                    @endpermission
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                        @else
+                                        <tr class="text-center">
+                                            <td colspan="20">{{ trans('home.no_data_found')}}</td>
+                                        </tr>
+                                        @endif
+                                    @else
                                         @forelse ($items as $item)
                                         <tr>
                                             <td>{{{optional($item->movementcode)->code}}}</td>
@@ -70,7 +135,7 @@
                                             <td>{{{optional($item->importAgent)->name}}}</td>
                                             <td>{{{optional($item->bookingAgent)->name}}}</td>
                                             <td>{{$item->remarkes}}</td>
-                                
+
                                             <td class="text-center">
                                                 <ul class="table-controls">
                                                     @permission('Movements-Edit')
@@ -98,6 +163,7 @@
                                         </tr>
                                     @endforelse
 
+                                    @endif
                                 </tbody>
                             </table>
                         </div>

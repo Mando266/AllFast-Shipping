@@ -192,22 +192,7 @@
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group col-md-3">
-                            <label for="equipment_type_id">Equipment Type <span class="text-warning"> * (Required.) </span></label>
-                                <select class="selectpicker form-control" id="equipment_type_id" data-live-search="true" name="equipment_type_id" data-size="10"
-                                title="{{trans('forms.select')}}" disabled>
-                                @foreach ($equipmentTypes as $item)
-                                    @if($booking->equipment_type_id != null)
-                                    <option value="{{$item->id}}" {{$item->id == old('equipment_type_id',$booking->equipment_type_id) ? 'selected':''}}>{{$item->name}}</option>
-                                    @endif
-                                @endforeach
-                            </select>
-                            @error('equipment_type_id')
-                            <div style="color: red;">
-                                {{$message}}
-                            </div>
-                            @enderror
-                        </div>
+               
                         <div class="form-group col-md-3">
                             <label for="voyage_id">Vessel / Voyage <span class="text-warning"> * (Required.) </span></label>
                             <select class="selectpicker form-control" id="voyage_id" data-live-search="true" name="voyage_id" data-size="10"
@@ -294,7 +279,7 @@
                             @else
                         <div class="form-group col-md-3">
                                 <label for="status">Bl Payment</label>
-                                    <input type="text" name="payment_kind" class="form-control" placeholder="Bl Payment" autocomplete="off" value="{{optional($booking->quotation)->payment_kind}}" disabled>
+                                    <input type="text" name="payment_kind" class="form-control" placeholder="Bl Payment" autocomplete="off" value="{{optional($booking)->payment_kind}}" disabled>
                                 @error('bl_kind')
                                 <div style="color:red;">
                                     {{$message}}
