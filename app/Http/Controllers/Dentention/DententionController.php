@@ -93,7 +93,7 @@ class DententionController extends Controller
                 } else {
                     $daysCount = Carbon::parse(now())->diffInDays($startMovementDate);
                 }
-                $daysCount = $daysCount + $apply_first_day - $apply_last_day;
+                $daysCount = $daysCount + $apply_first_day - $apply_last_day + 1 ;
                 $tempDaysCount = $daysCount;
                 $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
                 foreach (optional($slab)->periods as $period) {
@@ -261,7 +261,7 @@ class DententionController extends Controller
                     $daysCount = Carbon::parse(now())->diffInDays($startMovementDate);
                 }
 
-                $daysCount = $daysCount + $apply_first_day - $apply_last_day;
+                $daysCount = $daysCount + $apply_first_day - $apply_last_day+1;
                 $tempDaysCount = $daysCount;
                 $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
 
