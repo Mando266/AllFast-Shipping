@@ -320,6 +320,7 @@
             $('#charges tbody tr').each(function() {
                 $(this).find('input[name$="[add_vat]"][value="' + (isChecked ? '1' : '0') + '"]').prop('checked', true);
             });
+            calculateTotals();
         });
 
         function calculateTotals() {
