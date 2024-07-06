@@ -41,15 +41,17 @@ class DententionController extends Controller
     {
         $apply_first_day = isset($request['apply_first_day']) ? 1 : 0;
         $apply_last_day = isset($request['apply_last_day']) ? 1 : 0;
+        $bookingNo=$request->booking_no;
         $movementDCHFId = $this->getDCHFMovementId();
         $movementRCVCId = $this->getRCVCMovementId();
-        $demurrage = $this->getDemurrageTriff($request->booking_no);
-        $bookingFreeTime = $this->getBookingFreeTime($request->booking_no);
+        $demurrage = $this->getDemurrageTriff($bookingNo);
+        $bookingFreeTime = $this->getBookingFreeTime($bookingNo);
         $containerCalc = collect();
         $status = 'in_completed';
+        $movementId=request()->from ?? $movementDCHFId;
 
         if (in_array('all', $request->container_ids)) {
-            $mov = Movements::where('booking_no', $request->booking_no)->where('company_id', Auth::user()->company_id)
+            $mov = Movements::where('booking_no', $bookingNo)->where('company_id', Auth::user()->company_id)
                 ->distinct()->get()->pluck('container_id')->toarray();
             $containers = Containers::whereIn('id', $mov)->get();
             $grandTotal = 0;
@@ -58,8 +60,12 @@ class DententionController extends Controller
                 $containerTotal = 0;
                 $freeTime = $bookingFreeTime;
                 $startMovement = Movements::where('container_id', $container->id)
-                    ->where('movement_id', request()->from ?? $movementDCHFId)
-                    ->where('booking_no', $request->booking_no)->first();
+                    ->where('movement_id',$movementId )
+                    ->where('booking_no', $bookingNo)->first();
+                 if (!$startMovement) {
+                    $bookingCode=Booking::find($bookingNo)->ref_no;
+                       return back()->with('error' ,"No DCHF Movement for This Booking No $bookingCode ");
+                    }
                 $startMovementDate = $startMovement->movement_date;
                 if ($request->to_date == null && $request->to == null) {
                     $endMovement = Movements::where('container_id', $container->id)
@@ -225,7 +231,7 @@ class DententionController extends Controller
                 $periodCalc = collect();
                 $freeTime = $bookingFreeTime;
                 $containerTotal = 0;
-                $startMovement = Movements::where('container_id', $container->id)->where('movement_id', request()->from ?? $movementDCHFId)
+                $startMovement = Movements::where('container_id', $container->id)->where('movement_id', $movementId)
                     ->first();
                 $startMovementDate = $startMovement->movement_date;
 
