@@ -55,6 +55,7 @@ class DententionController extends Controller
             foreach ($containers as $container) {
                 $periodCalc = collect();
                 $containerTotal = 0;
+                $freeTime = $bookingFreeTime;
                 $startMovement = Movements::where('container_id', $container->id)
                                             ->where('movement_id', request()->from ?? $movementDCHFId)
                                             ->where('booking_no', $request->booking_no)->first();
@@ -86,15 +87,15 @@ class DententionController extends Controller
                     $status = 'in_completed';
                     $daysCount = Carbon::parse(now())->diffInDays($startMovementDate);
                 }
-                $daysCount = $daysCount + $apply_first_day + $apply_last_day;
+                $daysCount = $daysCount + $apply_first_day - $apply_last_day;
                 $tempDaysCount = $daysCount;
                 $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
                 foreach (optional($slab)->periods as $period) {
-                        if ($bookingFreeTime > $period->number_off_dayes) {
+                        if ($freeTime > $period->number_off_dayes) {
                             if ($tempDaysCount != 0) {
                                 if ($period->number_off_dayes < $tempDaysCount) {
                                     $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
-                                    $bookingFreeTime = $bookingFreeTime - $period->number_off_dayes;
+                                    $freeTime = $freeTime - $period->number_off_dayes;
                                     $days = $period->number_off_dayes;
                                 
                                     if ($diffBetweenDates != 0) {
@@ -133,8 +134,8 @@ class DententionController extends Controller
                                 if ($period->number_off_dayes < $tempDaysCount) {
                                     // remaining days more than period days
                                     $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
-                                    $days = $period->number_off_dayes - $bookingFreeTime;
-                                    $periodtotal = (0 * $bookingFreeTime) + ($period->rate * $days);
+                                    $days = $period->number_off_dayes - $freeTime;
+                                    $periodtotal = (0 * $freeTime) + ($period->rate * $days);
                                     $shownDays = $period->number_off_dayes;
                                     if ($diffBetweenDates != 0) {
                                         if ($diffBetweenDates >= $period->number_off_dayes) {
@@ -146,7 +147,7 @@ class DententionController extends Controller
                                             $days = $days - $diffBetweenDates;
                                             $shownDays = $shownDays - $diffBetweenDates;
                                             $diffBetweenDates = 0;
-                                            $periodtotal = (0 * $bookingFreeTime) + ($period->rate * $days);
+                                            $periodtotal = (0 * $freeTime) + ($period->rate * $days);
                                         }
                                         $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
                                     }
@@ -159,11 +160,11 @@ class DententionController extends Controller
                                     ]);
                                     // Adding period
                                     $periodCalc->add($tempCollection);
-                                    $bookingFreeTime = 0;
+                                    $freeTime = 0;
                                 } else {
                                     // remaining days less than period days
-                                    $days = $tempDaysCount - $bookingFreeTime;
-                                    $periodtotal = (0 * $bookingFreeTime) + ($period->rate * $days);
+                                    $days = $tempDaysCount - $freeTime;
+                                    $periodtotal = (0 * $freeTime) + ($period->rate * $days);
                                     $shownDays = $tempDaysCount;
                                     if ($diffBetweenDates != 0) {
                                         if ($diffBetweenDates >= $tempDaysCount) {
@@ -175,7 +176,7 @@ class DententionController extends Controller
                                             $days = $days - $diffBetweenDates;
                                             $shownDays = $shownDays - $diffBetweenDates;
                                             $diffBetweenDates = 0;
-                                            $periodtotal = (0 * $bookingFreeTime) + ($period->rate * $days);
+                                            $periodtotal = (0 * $freeTime) + ($period->rate * $days);
                                         }
                                         $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
                                     }
@@ -189,7 +190,7 @@ class DententionController extends Controller
                                     // Adding period
                                     $periodCalc->add($tempCollection);
                                     $tempDaysCount = 0;
-                                    $bookingFreeTime = 0;
+                                    $freeTime = 0;
                                 }
                             }
                         }
@@ -216,6 +217,7 @@ class DententionController extends Controller
             $grandTotal = 0;
             foreach ($containers as $container) {
                 $periodCalc = collect();
+                $freeTime = $bookingFreeTime;
                 $containerTotal = 0;
                 $startMovement = Movements::where('container_id', $container->id)->where('movement_id', request()->from ?? $movementDCHFId)
                     ->first();
@@ -225,9 +227,13 @@ class DententionController extends Controller
                     $endMovement = Movements::where('container_id', $container->id)
                         ->where('movement_date', '>=', $startMovementDate)->oldest()->first();
 
-                } elseif ($request->to_date == null) {
-                    $endMovement = Movements::where('container_id', $container->id)->where('movement_id', $movementRCVCId)
-                        ->where('movement_date', '>', $startMovementDate)->oldest()->first();
+                               } elseif ($request->to_date != null && $request->to == null) {
+                    $endMovement = Movements::where('container_id', $container->id)
+                        ->where('movement_date', '>', $request->to_date)->oldest()->first();
+                } elseif ($request->to_date == null && $request->to != null) {
+                    $endMovement = Movements::where('container_id', $container->id)
+                                            ->where('movement_id', $request->to)
+                                            ->oldest()->first();
                 } else {
                     $endMovement = Movements::where('container_id', $container->id)->where('movement_id', $request->to)
                         ->where('movement_date', '<=', $request->to_date)->oldest()->first();
@@ -237,6 +243,7 @@ class DententionController extends Controller
                 } else {
                     $endMovementDate = $endMovement->movement_date;
                 }
+                
                 $diffBetweenDates = 0;
                 if ($endMovementDate) {
                     $daysCount = Carbon::parse($endMovementDate)->diffInDays($startMovementDate);
@@ -245,19 +252,16 @@ class DententionController extends Controller
                     $daysCount = Carbon::parse(now())->diffInDays($startMovementDate);
                 }
 
-                $daysCount = $daysCount + $apply_first_day + $apply_last_day;
+                $daysCount = $daysCount + $apply_first_day - $apply_last_day;
                 $tempDaysCount = $daysCount;
                 $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
 
-                foreach ($slab->periods as $period) {
-                    if (request()->service == 3 || request()->service == 1) {
-                        //we are in the free time period
-                        if ($bookingFreeTime > $period->number_off_dayes) {
+                foreach (optional($slab)->periods as $period) {
+                        if ($freeTime > $period->number_off_dayes) {
                             if ($tempDaysCount != 0) {
                                 if ($period->number_off_dayes < $tempDaysCount) {
-                                    // remaining days more than period days
                                     $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
-                                    $bookingFreeTime = $bookingFreeTime - $period->number_off_dayes;
+                                    $freeTime = $freeTime - $period->number_off_dayes;
                                     $shownDays = $period->number_off_dayes;
                                     if ($diffBetweenDates != 0) {
                                         $shownDays = $shownDays - $diffBetweenDates;
@@ -295,8 +299,8 @@ class DententionController extends Controller
                                 if ($period->number_off_dayes < $tempDaysCount) {
                                     // remaining days more than period days
                                     $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
-                                    $days = $period->number_off_dayes - $bookingFreeTime;
-                                    $periodtotal = (0 * $bookingFreeTime) + ($period->rate * $days);
+                                    $days = $period->number_off_dayes - $freeTime;
+                                    $periodtotal = (0 * $freeTime) + ($period->rate * $days);
                                     $shownDays = $period->number_off_dayes;
                                     if ($diffBetweenDates != 0) {
                                         if ($diffBetweenDates >= $period->number_off_dayes) {
@@ -308,7 +312,7 @@ class DententionController extends Controller
                                             $shownDays = $shownDays - $diffBetweenDates;
                                             $days = $days - $diffBetweenDates;
                                             $diffBetweenDates = 0;
-                                            $periodtotal = (0 * $bookingFreeTime) + ($period->rate * $days);
+                                            $periodtotal = (0 * $freeTime) + ($period->rate * $days);
                                         }
                                         $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
                                     }
@@ -321,11 +325,11 @@ class DententionController extends Controller
                                     ]);
                                     // Adding period
                                     $periodCalc->add($tempCollection);
-                                    $bookingFreeTime = 0;
+                                    $freeTime = 0;
                                 } else {
                                     // remaining days less than period days
-                                    $days = $tempDaysCount - $bookingFreeTime;
-                                    $periodtotal = (0 * $bookingFreeTime) + ($period->rate * $days);
+                                    $days = $tempDaysCount - $freeTime;
+                                    $periodtotal = (0 * $freeTime) + ($period->rate * $days);
                                     if ($diffBetweenDates != 0) {
                                         if ($diffBetweenDates >= $tempDaysCount) {
                                             $diffBetweenDates = $diffBetweenDates - $tempDaysCount;
@@ -334,7 +338,7 @@ class DententionController extends Controller
                                         } else {
                                             $diffBetweenDates = 0;
                                             $days = $days - $diffBetweenDates;
-                                            $periodtotal = (0 * $bookingFreeTime) + ($period->rate * $days);
+                                            $periodtotal = (0 * $freeTime) + ($period->rate * $days);
                                         }
                                         $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
                                     }
@@ -348,61 +352,11 @@ class DententionController extends Controller
                                     // Adding period
                                     $periodCalc->add($tempCollection);
                                     $tempDaysCount = 0;
-                                    $bookingFreeTime = 0;
+                                    $freeTime = 0;
                                 }
                             }
                         }
-                    } else {
-                        if ($tempDaysCount != 0) {
-                            if ($period->number_off_dayes < $tempDaysCount) {
-                                // remaining days more than period days
-                                $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
-                                $periodtotal = $period->rate * $period->number_off_dayes;
-                                if ($diffBetweenDates != 0) {
-                                    if ($diffBetweenDates >= $period->number_off_dayes) {
-                                        $diffBetweenDates = $diffBetweenDates - $period->number_off_dayes;
-                                        $periodtotal = 0;
-                                    } else {
-                                        $periodtotal = $period->rate * ($period->number_off_dayes - $diffBetweenDates);
-                                        $diffBetweenDates = 0;
-                                    }
-                                    $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
-                                }
-                                $containerTotal = $containerTotal + $periodtotal;
-                                $tempCollection = collect([
-                                    'name' => $period->period,
-                                    'days' => $period->number_off_dayes,
-                                    'rate' => $period->rate,
-                                    'total' => $periodtotal,
-                                ]);
-                                // Adding period
-                                $periodCalc->add($tempCollection);
-                            } else {
-                                // remaining days less than period days
-                                $periodtotal = $period->rate * $tempDaysCount;
-                                if ($diffBetweenDates != 0) {
-                                    if ($diffBetweenDates >= $tempDaysCount) {
-                                        $diffBetweenDates = $diffBetweenDates - $tempDaysCount;
-                                        $periodtotal = 0;
-                                    } else {
-                                        $periodtotal = $period->rate * ($tempDaysCount - $diffBetweenDates);
-                                        $diffBetweenDates = 0;
-                                    }
-                                    $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
-                                }
-                                $containerTotal = $containerTotal + $periodtotal;
-                                $tempCollection = collect([
-                                    'name' => $period->period,
-                                    'days' => $tempDaysCount,
-                                    'rate' => $period->rate,
-                                    'total' => $periodtotal,
-                                ]);
-                                // Adding period
-                                $periodCalc->add($tempCollection);
-                                $tempDaysCount = 0;
-                            }
-                        }
-                    }
+
                 }
 
                 // Adding Container with periods
@@ -425,13 +379,14 @@ class DententionController extends Controller
 
         $calculation = collect([
             'grandTotal' => $grandTotal,
-            'currency' => $demurrage->currency,
+            'currency' => optional($demurrage)->currency,
             'containers' => $containerCalc,
         ]);
         $data = [
             'calculation' => $calculation,
             'input' => $request->input(),
         ];
+        
 
         return redirect()->route('dententions.index')->with($data);
     }
