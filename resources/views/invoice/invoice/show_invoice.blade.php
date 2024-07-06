@@ -87,7 +87,11 @@
 
                         <tr>
                             <td class="col-md-2 tableStyle text-center">IMO ClASS</td>
-                            <td class="col-md-2 tableStyle text-center" ></td>
+                            @if(optional($invoice->booking)->imo == 1)
+                            <td class="col-md-2 tableStyle text-center">Yes</td>
+                            @else
+                            <td class="col-md-2 tableStyle text-center"></td>
+                            @endif
                             <td class="col-md-2 tableStyle text-center" >POD</td>
                             <td class="col-md-2 tableStyle text-center" ><span class="entry">{{ $invoice->booking_ref == 0 ? optional($invoice->dischargePort)->code : optional($invoice->booking->dischargePort)->code }}</span></td>
                             <td class="col-md-2 tableStyle text-center">Cntr. Type(s)</td>
@@ -167,30 +171,30 @@
                             @endif
 
                             @if( $invoice->add_egp != 'onlyegp')
-                            <td class="col-md-2 tableStyle text-center"><span class="entry">{{ number_format($chargeDesc->total_amount, 2) }}</span></td>
+                            <td class="col-md-2 tableStyle text-center"><span class="entry">{{ number_format($chargeDesc->usd_vat, 2) }}</span></td>
                             @endif
 
                             @if($invoice->add_egp == 'true' || $invoice->add_egp == 'onlyegp')
-                            <td class="col-md-2 tableStyle text-center"><span class="entry">{{ number_format($chargeDesc->total_egy, 2)}}</span></td>
+                            <td class="col-md-2 tableStyle text-center"><span class="entry">{{ number_format($chargeDesc->egp_vat, 2)}}</span></td>
                             @endif
                         </tr>
                         @endforeach
-                        <tr>
-                        @if($invoice->add_egp == 'onlyegp')
-                            <td class="col-md-6 tableStyle" colspan="5"><span class="entry">TOTAL</span></td>
-                            @elseif( $invoice->add_egp != 'onlyegp')
-                            <td class="col-md-6 tableStyle" colspan="4"><span class="entry">TOTAL</span></td>
-                            @else
-                            <td class="col-md-6 tableStyle" colspan="5"><span class="entry">TOTAL</span></td>
-                        @endif
-                            @if( $invoice->add_egp != 'onlyegp')
-                            <td class="col-md-2 tableStyle text-center"><span class="entry">{{ number_format($total_after_vat, 2) }}</span></td>
-                            <td class="col-md-2 tableStyle text-center"><span class="entry">{{ number_format($total_before_vat, 2) }}</span></td>
-                            @endif
-                            @if($invoice->add_egp == 'true' || $invoice->add_egp == 'onlyegp')
-                            <td class="col-md-2 tableStyle text-center"><span class="entry">{{ number_format($total_eg_before_vat, 2)}}</span></td>
-                            @endif
-                        </tr>
+                        <!--<tr>-->
+                        <!--@if($invoice->add_egp == 'onlyegp')-->
+                        <!--    <td class="col-md-6 tableStyle" colspan="5"><span class="entry">TOTAL</span></td>-->
+                        <!--    @elseif( $invoice->add_egp != 'onlyegp')-->
+                        <!--    <td class="col-md-6 tableStyle" colspan="4"><span class="entry">TOTAL</span></td>-->
+                        <!--    @else-->
+                        <!--    <td class="col-md-6 tableStyle" colspan="5"><span class="entry">TOTAL</span></td>-->
+                        <!--@endif-->
+                        <!--    @if( $invoice->add_egp != 'onlyegp')-->
+                        <!--    <td class="col-md-2 tableStyle text-center"><span class="entry">{{ number_format($total_after_vat, 2) }}</span></td>-->
+                        <!--    <td class="col-md-2 tableStyle text-center"><span class="entry">{{ number_format($total_before_vat, 2) }}</span></td>-->
+                        <!--    @endif-->
+                        <!--    @if($invoice->add_egp == 'true' || $invoice->add_egp == 'onlyegp')-->
+                        <!--    <td class="col-md-2 tableStyle text-center"><span class="entry">{{ number_format($total_eg_before_vat, 2)}}</span></td>-->
+                        <!--    @endif-->
+                        <!--</tr>-->
                         <tr>
                             <td class="col-md-6 tableStyle" colspan="5"><span class="entry">GRAND TOTAL</span></td>
                             @if( $invoice->add_egp != 'onlyegp')

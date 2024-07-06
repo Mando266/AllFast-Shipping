@@ -777,11 +777,11 @@ class InvoiceController extends Controller
 
         if($invoice->invoice_status == "ready_confirm" &&  $request->invoice_status == "confirm" && $invoice->type == "invoice" && $invoice->add_egp == "onlyegp" ){
             $setting = Setting::find(1);
-            $inputs['invoice_no'] = 'E'.' '.'/'.' '.$setting->invoice_confirm.' / 24';
+            $inputs['invoice_no'] = 'E'.' '.'/'.' '.$setting->invoice_confirm_egp.' / 24';
             $setting->invoice_confirm_egp += 1;
         }elseif($invoice->invoice_status == "ready_confirm" &&  $request->invoice_status == "confirm" && $invoice->type == "invoice"){
             $setting = Setting::find(1);
-            $inputs['invoice_no'] = 'U'.' '.'/'.' '.$setting->invoice_confirm.' / 24';
+            $inputs['invoice_no'] = 'U'.' '.'/'.' '.$setting->invoice_confirm_usd.' / 24';
             $setting->invoice_confirm_usd += 1;
         }elseif ($invoice->invoice_status == "ready_confirm" && $request->invoice_status == "confirm" && $invoice->type == "debit" ) {
             $setting = Setting::find(1);

@@ -129,7 +129,7 @@
                             <div class="form-row">
                                 <div class="col-md-3 form-group">
                                     <label> VAT % </label>
-                                    @if(optional($bldraft)->shipment_type == Import)
+                                    @if(optional($bldraft)->shipment_type == "Import")
                                         <input type="text" class="form-control" placeholder="VAT %" name="vat"
                                            autocomplete="off" value="14" style="background-color:#fff" required>
                                     @else
@@ -184,7 +184,11 @@
                                 <tr>
                                     <th class="text-center">Charge Description</th>
                                     <th class="text-center">Amount</th>
-                                    <th class="text-center">Add VAT</th>
+                                    <th class="text-center d-flex flex-column align-items-center">Add VAT
+                                        <span class="form-check pb-3">
+                                            <input class="form-check-input" type="checkbox" id="selectAllVat">
+                                        </span>
+                                    </th>                                    
                                     <th class="text-center">Multiply QTY</th>
                                     <th class="text-center">TOTAL USD</th>
                                     <th class="text-center">USD After VAT</th>
@@ -288,12 +292,21 @@
                                                         @endforeach
                                                     </select>
                                                 </td>
+                                                @if(optional($bldraft)->imo == 1)
+                                                <td><input type="text" class="form-control" id="size_small"
+                                                           name="invoiceChargeDesc[{{ $key }}][size_small]"
+                                                           value="{{ $detail->imo_selling_price }}"
+                                                           placeholder="Amount" autocomplete="off" disabled
+                                                           style="background-color: white;">
+                                                </td>
+                                                @else
                                                 <td><input type="text" class="form-control" id="size_small"
                                                            name="invoiceChargeDesc[{{ $key }}][size_small]"
                                                            value="{{ $detail->selling_price }}"
                                                            placeholder="Amount" autocomplete="off" disabled
                                                            style="background-color: white;">
                                                 </td>
+                                                @endif
                                                 <td>
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="radio"
@@ -494,6 +507,15 @@
 </script>
 
 <script>
+    // Function to handle the select all checkbox for VAT
+    $('#selectAllVat').change(function() {
+        var isChecked = $(this).is(':checked');
+        $('#charges tbody tr').each(function() {
+            $(this).find('input[name$="[add_vat]"][value="' + (isChecked ? '1' : '0') + '"]').prop('checked', true);
+        });
+        calculateTotals();
+    });
+
     function calculateAmounts() {
         let vat = parseFloat($('input[name="vat"]').val()) / 100;
         let qty = parseFloat($('input[name="qty"]').val());

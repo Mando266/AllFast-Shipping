@@ -122,7 +122,7 @@
                                 <li>
                                     <a href="#Triffs" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle"> Triffs <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg> </a>
                                         <ul class="collapse list-unstyled sub-submenu" id="Triffs" data-parent="#Triffs">
-                                        @permission('Invoice-List')
+                                        @permission('LocalPortTriff-List')
                                             <li>
                                                 <a href="{{route('chargesDesc.index')}}">Charges Description</a>
                                             </li>
@@ -452,11 +452,11 @@
                             </div>
                         </a>
                         <ul class="collapse submenu list-unstyled" id="component10" data-parent="#accordionExample">
-                                @permission('Invoice-List')
+                                <!-- @permission('Invoice-List')
                                 <li>
                                     <a href="{{route('chargesDesc.index')}}">Portal Charges</a>
                                 </li>
-                                @endpermission
+                                @endpermission -->
                                 @permission('Invoice-List')
                                 <li>
                                     <a href="{{route('invoice.index')}}">Invoice Gates</a>
@@ -477,11 +477,11 @@
                                     <a href="{{route('refund.index')}}">Refund Gates</a>
                                 </li>
                                 @endpermission
-                                @permission('Invoice-List')
+                                <!-- @permission('Invoice-List')
                                 <li>
                                     <a href="{{route('statements.index')}}">Customer Statements</a>
                                 </li>
-                                @endpermission
+                                @endpermission -->
 
                         </ul>
             </li>

@@ -21,7 +21,7 @@ class DententionController extends Controller
      */
     public function index()
     {
-        
+
         $movementsCode = ContainersMovement::orderBy('id')->get();
         $bookings = Booking::select('id', 'ref_no')
             ->where('company_id', Auth::user()->company_id)
@@ -46,7 +46,8 @@ class DententionController extends Controller
         $demurrage = $this->getDemurrageTriff($request->booking_no);
         $bookingFreeTime = $this->getBookingFreeTime($request->booking_no);
         $containerCalc = collect();
-        $status = 'completed';
+        $status = 'in_completed';
+
         if (in_array('all', $request->container_ids)) {
             $mov = Movements::where('booking_no', $request->booking_no)->where('company_id', Auth::user()->company_id)
                 ->distinct()->get()->pluck('container_id')->toarray();
@@ -57,8 +58,8 @@ class DententionController extends Controller
                 $containerTotal = 0;
                 $freeTime = $bookingFreeTime;
                 $startMovement = Movements::where('container_id', $container->id)
-                                            ->where('movement_id', request()->from ?? $movementDCHFId)
-                                            ->where('booking_no', $request->booking_no)->first();
+                    ->where('movement_id', request()->from ?? $movementDCHFId)
+                    ->where('booking_no', $request->booking_no)->first();
                 $startMovementDate = $startMovement->movement_date;
                 if ($request->to_date == null && $request->to == null) {
                     $endMovement = Movements::where('container_id', $container->id)
@@ -69,131 +70,136 @@ class DententionController extends Controller
                         ->where('movement_date', '>', $request->to_date)->oldest()->first();
                 } elseif ($request->to_date == null && $request->to != null) {
                     $endMovement = Movements::where('container_id', $container->id)
-                                            ->where('movement_id', $request->to)
-                                            ->oldest()->first();
+                        ->where('movement_id', $request->to)
+                        ->oldest()->first();
                 } else {
                     $endMovement = Movements::where('container_id', $container->id)->where('movement_id', $request->to)
                         ->where('movement_date', '<=', $request->to_date)->oldest()->first();
                 }
+
+                if (optional($endMovement)->movement_id == $movementRCVCId) {
+                    $status = 'completed';
+                }
+
                 if ($endMovement == null || ($request->to_date < $endMovement->movement_date && !is_null($request->to_date))) {
                     $endMovementDate = $request->to_date;
                 } else {
                     $endMovementDate = $endMovement->movement_date;
-                }                
+                }
                 $diffBetweenDates = 0;
+
                 if ($endMovementDate) {
                     $daysCount = Carbon::parse($endMovementDate)->diffInDays($startMovementDate);
                 } else {
-                    $status = 'in_completed';
                     $daysCount = Carbon::parse(now())->diffInDays($startMovementDate);
                 }
-                $daysCount = $daysCount + $apply_first_day - $apply_last_day;
+                $daysCount = $daysCount + $apply_first_day - $apply_last_day + 1 ;
                 $tempDaysCount = $daysCount;
                 $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
                 foreach (optional($slab)->periods as $period) {
-                        if ($freeTime > $period->number_off_dayes) {
-                            if ($tempDaysCount != 0) {
-                                if ($period->number_off_dayes < $tempDaysCount) {
-                                    $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
-                                    $freeTime = $freeTime - $period->number_off_dayes;
-                                    $days = $period->number_off_dayes;
-                                
-                                    if ($diffBetweenDates != 0) {
-                                        $days = $days - $diffBetweenDates;
-                                        $days = $days < 0 ? 0 : $days;
-                                        $diffBetweenDates = $diffBetweenDates - $period->number_off_dayes;
-                                        $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
-                                    }
-                                    $periodtotal = 0 * $period->number_off_dayes;
-                                    $containerTotal = $containerTotal + $periodtotal;
-                                    $tempCollection = collect([
-                                        'name' => $period->period,
-                                        'days' => $days,
-                                        'rate' => $period->rate,
-                                        'total' => $periodtotal,
-                                    ]);
-                                    // Adding period
-                                    $periodCalc->add($tempCollection);
-                                } else {
-                                    // remaining days less than period days
-                                    $periodtotal = 0 * $tempDaysCount;
-                                    $containerTotal = $containerTotal + $periodtotal;
-                                    $tempCollection = collect([
-                                        'name' => $period->period,
-                                        'days' => $tempDaysCount,
-                                        'rate' => $period->rate,
-                                        'total' => $periodtotal,
-                                    ]);
-                                    // Adding period
-                                    $periodCalc->add($tempCollection);
-                                    $tempDaysCount = 0;
+                    if ($freeTime > $period->number_off_dayes) {
+                        if ($tempDaysCount != 0) {
+                            if ($period->number_off_dayes < $tempDaysCount) {
+                                $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
+                                $freeTime = $freeTime - $period->number_off_dayes;
+                                $days = $period->number_off_dayes;
+
+                                if ($diffBetweenDates != 0) {
+                                    $days = $days - $diffBetweenDates;
+                                    $days = $days < 0 ? 0 : $days;
+                                    $diffBetweenDates = $diffBetweenDates - $period->number_off_dayes;
+                                    $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
                                 }
-                            }
-                        } else {
-                            if ($tempDaysCount != 0) {
-                                if ($period->number_off_dayes < $tempDaysCount) {
-                                    // remaining days more than period days
-                                    $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
-                                    $days = $period->number_off_dayes - $freeTime;
-                                    $periodtotal = (0 * $freeTime) + ($period->rate * $days);
-                                    $shownDays = $period->number_off_dayes;
-                                    if ($diffBetweenDates != 0) {
-                                        if ($diffBetweenDates >= $period->number_off_dayes) {
-                                            $diffBetweenDates = $diffBetweenDates - $period->number_off_dayes;
-                                            $days = 0;
-                                            $shownDays = 0;
-                                            $periodtotal = 0;
-                                        } else {
-                                            $days = $days - $diffBetweenDates;
-                                            $shownDays = $shownDays - $diffBetweenDates;
-                                            $diffBetweenDates = 0;
-                                            $periodtotal = (0 * $freeTime) + ($period->rate * $days);
-                                        }
-                                        $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
-                                    }
-                                    $containerTotal = $containerTotal + $periodtotal;
-                                    $tempCollection = collect([
-                                        'name' => $period->period,
-                                        'days' => $shownDays,
-                                        'rate' => $period->rate,
-                                        'total' => $periodtotal,
-                                    ]);
-                                    // Adding period
-                                    $periodCalc->add($tempCollection);
-                                    $freeTime = 0;
-                                } else {
-                                    // remaining days less than period days
-                                    $days = $tempDaysCount - $freeTime;
-                                    $periodtotal = (0 * $freeTime) + ($period->rate * $days);
-                                    $shownDays = $tempDaysCount;
-                                    if ($diffBetweenDates != 0) {
-                                        if ($diffBetweenDates >= $tempDaysCount) {
-                                            $diffBetweenDates = $diffBetweenDates - $tempDaysCount;
-                                            $days = 0;
-                                            $shownDays = 0;
-                                            $periodtotal = 0;
-                                        } else {
-                                            $days = $days - $diffBetweenDates;
-                                            $shownDays = $shownDays - $diffBetweenDates;
-                                            $diffBetweenDates = 0;
-                                            $periodtotal = (0 * $freeTime) + ($period->rate * $days);
-                                        }
-                                        $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
-                                    }
-                                    $containerTotal = $containerTotal + $periodtotal;
-                                    $tempCollection = collect([
-                                        'name' => $period->period,
-                                        'days' => $shownDays,
-                                        'rate' => $period->rate,
-                                        'total' => $periodtotal,
-                                    ]);
-                                    // Adding period
-                                    $periodCalc->add($tempCollection);
-                                    $tempDaysCount = 0;
-                                    $freeTime = 0;
-                                }
+                                $periodtotal = 0 * $period->number_off_dayes;
+                                $containerTotal = $containerTotal + $periodtotal;
+                                $tempCollection = collect([
+                                    'name' => $period->period,
+                                    'days' => $days,
+                                    'rate' => $period->rate,
+                                    'total' => $periodtotal,
+                                ]);
+                                // Adding period
+                                $periodCalc->add($tempCollection);
+                            } else {
+                                // remaining days less than period days
+                                $periodtotal = 0 * $tempDaysCount;
+                                $containerTotal = $containerTotal + $periodtotal;
+                                $tempCollection = collect([
+                                    'name' => $period->period,
+                                    'days' => $tempDaysCount,
+                                    'rate' => $period->rate,
+                                    'total' => $periodtotal,
+                                ]);
+                                // Adding period
+                                $periodCalc->add($tempCollection);
+                                $tempDaysCount = 0;
                             }
                         }
+                    } else {
+                        if ($tempDaysCount != 0) {
+                            if ($period->number_off_dayes < $tempDaysCount) {
+                                // remaining days more than period days
+                                $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
+                                $days = $period->number_off_dayes - $freeTime;
+                                $periodtotal = (0 * $freeTime) + ($period->rate * $days);
+                                $shownDays = $period->number_off_dayes;
+                                if ($diffBetweenDates != 0) {
+                                    if ($diffBetweenDates >= $period->number_off_dayes) {
+                                        $diffBetweenDates = $diffBetweenDates - $period->number_off_dayes;
+                                        $days = 0;
+                                        $shownDays = 0;
+                                        $periodtotal = 0;
+                                    } else {
+                                        $days = $days - $diffBetweenDates;
+                                        $shownDays = $shownDays - $diffBetweenDates;
+                                        $diffBetweenDates = 0;
+                                        $periodtotal = (0 * $freeTime) + ($period->rate * $days);
+                                    }
+                                    $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
+                                }
+                                $containerTotal = $containerTotal + $periodtotal;
+                                $tempCollection = collect([
+                                    'name' => $period->period,
+                                    'days' => $shownDays,
+                                    'rate' => $period->rate,
+                                    'total' => $periodtotal,
+                                ]);
+                                // Adding period
+                                $periodCalc->add($tempCollection);
+                                $freeTime = 0;
+                            } else {
+                                // remaining days less than period days
+                                $days = $tempDaysCount - $freeTime;
+                                $periodtotal = (0 * $freeTime) + ($period->rate * $days);
+                                $shownDays = $tempDaysCount;
+                                if ($diffBetweenDates != 0) {
+                                    if ($diffBetweenDates >= $tempDaysCount) {
+                                        $diffBetweenDates = $diffBetweenDates - $tempDaysCount;
+                                        $days = 0;
+                                        $shownDays = 0;
+                                        $periodtotal = 0;
+                                    } else {
+                                        $days = $days - $diffBetweenDates;
+                                        $shownDays = $shownDays - $diffBetweenDates;
+                                        $diffBetweenDates = 0;
+                                        $periodtotal = (0 * $freeTime) + ($period->rate * $days);
+                                    }
+                                    $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
+                                }
+                                $containerTotal = $containerTotal + $periodtotal;
+                                $tempCollection = collect([
+                                    'name' => $period->period,
+                                    'days' => $shownDays,
+                                    'rate' => $period->rate,
+                                    'total' => $periodtotal,
+                                ]);
+                                // Adding period
+                                $periodCalc->add($tempCollection);
+                                $tempDaysCount = 0;
+                                $freeTime = 0;
+                            }
+                        }
+                    }
                 }
                 // Adding Container with periods
                 $grandTotal = $grandTotal + $containerTotal;
@@ -202,14 +208,14 @@ class DententionController extends Controller
                     'container_no' => $container->code,
                     'status' => trans("home.$status"),
                     'container_type' => $container->containersTypes->name,
-                    'from' =>  $startMovementDate,
+                    'from' => $startMovementDate,
                     'to' => $endMovementDate,
                     'from_code' => optional(optional($startMovement)->movementcode)->code,
                     'to_code' => optional(optional($endMovement)->movementcode)->code,
                     'total' => $containerTotal,
                     'periods' => $periodCalc,
                 ]);
-              
+
                 $containerCalc->add($tempCollection);
             }
         } else {
@@ -227,135 +233,138 @@ class DententionController extends Controller
                     $endMovement = Movements::where('container_id', $container->id)
                         ->where('movement_date', '>=', $startMovementDate)->oldest()->first();
 
-                               } elseif ($request->to_date != null && $request->to == null) {
+                } elseif ($request->to_date != null && $request->to == null) {
                     $endMovement = Movements::where('container_id', $container->id)
                         ->where('movement_date', '>', $request->to_date)->oldest()->first();
                 } elseif ($request->to_date == null && $request->to != null) {
                     $endMovement = Movements::where('container_id', $container->id)
-                                            ->where('movement_id', $request->to)
-                                            ->oldest()->first();
+                        ->where('movement_id', $request->to)
+                        ->oldest()->first();
                 } else {
                     $endMovement = Movements::where('container_id', $container->id)->where('movement_id', $request->to)
                         ->where('movement_date', '<=', $request->to_date)->oldest()->first();
                 }
+                if (optional($endMovement)->movement_id == $movementRCVCId) {
+                    $status = 'completed';
+                }
+
                 if ($endMovement == null || ($request->to_date < $endMovement->movement_date && !is_null($request->to_date))) {
                     $endMovementDate = $request->to_date;
                 } else {
                     $endMovementDate = $endMovement->movement_date;
                 }
-                
+
                 $diffBetweenDates = 0;
                 if ($endMovementDate) {
                     $daysCount = Carbon::parse($endMovementDate)->diffInDays($startMovementDate);
                 } else {
-                    $status = 'in_completed';
                     $daysCount = Carbon::parse(now())->diffInDays($startMovementDate);
                 }
 
-                $daysCount = $daysCount + $apply_first_day - $apply_last_day;
+                $daysCount = $daysCount + $apply_first_day - $apply_last_day+1;
                 $tempDaysCount = $daysCount;
                 $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
 
                 foreach (optional($slab)->periods as $period) {
-                        if ($freeTime > $period->number_off_dayes) {
-                            if ($tempDaysCount != 0) {
-                                if ($period->number_off_dayes < $tempDaysCount) {
-                                    $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
-                                    $freeTime = $freeTime - $period->number_off_dayes;
-                                    $shownDays = $period->number_off_dayes;
-                                    if ($diffBetweenDates != 0) {
-                                        $shownDays = $shownDays - $diffBetweenDates;
-                                        $shownDays = $shownDays < 0 ? 0 : $shownDays;
-                                        $diffBetweenDates = $diffBetweenDates - $period->number_off_dayes;
-                                        $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
-                                    }
-                                    $periodtotal = 0 * $period->number_off_dayes;
-                                    $containerTotal = $containerTotal + $periodtotal;
-                                    $tempCollection = collect([
-                                        'name' => $period->period,
-                                        'days' => $shownDays,
-                                        'rate' => $period->rate,
-                                        'total' => $periodtotal,
-                                    ]);
-                                    // Adding period
-                                    $periodCalc->add($tempCollection);
-                                } else {
-                                    // remaining days less than period days
-                                    $periodtotal = 0 * $tempDaysCount;
-                                    $containerTotal = $containerTotal + $periodtotal;
-                                    $tempCollection = collect([
-                                        'name' => $period->period,
-                                        'days' => $tempDaysCount,
-                                        'rate' => $period->rate,
-                                        'total' => $periodtotal,
-                                    ]);
-                                    // Adding period
-                                    $periodCalc->add($tempCollection);
-                                    $tempDaysCount = 0;
+                    if ($freeTime > $period->number_off_dayes) {
+                        if ($tempDaysCount != 0) {
+                            if ($period->number_off_dayes < $tempDaysCount) {
+                                $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
+                                $freeTime = $freeTime - $period->number_off_dayes;
+                                $shownDays = $period->number_off_dayes;
+                                if ($diffBetweenDates != 0) {
+                                    $shownDays = $shownDays - $diffBetweenDates;
+                                    $shownDays = $shownDays < 0 ? 0 : $shownDays;
+                                    $diffBetweenDates = $diffBetweenDates - $period->number_off_dayes;
+                                    $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
                                 }
-                            }
-                        } else {
-                            if ($tempDaysCount != 0) {
-                                if ($period->number_off_dayes < $tempDaysCount) {
-                                    // remaining days more than period days
-                                    $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
-                                    $days = $period->number_off_dayes - $freeTime;
-                                    $periodtotal = (0 * $freeTime) + ($period->rate * $days);
-                                    $shownDays = $period->number_off_dayes;
-                                    if ($diffBetweenDates != 0) {
-                                        if ($diffBetweenDates >= $period->number_off_dayes) {
-                                            $diffBetweenDates = $diffBetweenDates - $period->number_off_dayes;
-                                            $days = 0;
-                                            $shownDays = 0;
-                                            $periodtotal = 0;
-                                        } else {
-                                            $shownDays = $shownDays - $diffBetweenDates;
-                                            $days = $days - $diffBetweenDates;
-                                            $diffBetweenDates = 0;
-                                            $periodtotal = (0 * $freeTime) + ($period->rate * $days);
-                                        }
-                                        $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
-                                    }
-                                    $containerTotal = $containerTotal + $periodtotal;
-                                    $tempCollection = collect([
-                                        'name' => $period->period,
-                                        'days' => $shownDays,
-                                        'rate' => $period->rate,
-                                        'total' => $periodtotal,
-                                    ]);
-                                    // Adding period
-                                    $periodCalc->add($tempCollection);
-                                    $freeTime = 0;
-                                } else {
-                                    // remaining days less than period days
-                                    $days = $tempDaysCount - $freeTime;
-                                    $periodtotal = (0 * $freeTime) + ($period->rate * $days);
-                                    if ($diffBetweenDates != 0) {
-                                        if ($diffBetweenDates >= $tempDaysCount) {
-                                            $diffBetweenDates = $diffBetweenDates - $tempDaysCount;
-                                            $days = 0;
-                                            $periodtotal = 0;
-                                        } else {
-                                            $diffBetweenDates = 0;
-                                            $days = $days - $diffBetweenDates;
-                                            $periodtotal = (0 * $freeTime) + ($period->rate * $days);
-                                        }
-                                        $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
-                                    }
-                                    $containerTotal = $containerTotal + $periodtotal;
-                                    $tempCollection = collect([
-                                        'name' => $period->period,
-                                        'days' => $tempDaysCount,
-                                        'rate' => $period->rate,
-                                        'total' => $periodtotal,
-                                    ]);
-                                    // Adding period
-                                    $periodCalc->add($tempCollection);
-                                    $tempDaysCount = 0;
-                                    $freeTime = 0;
-                                }
+                                $periodtotal = 0 * $period->number_off_dayes;
+                                $containerTotal = $containerTotal + $periodtotal;
+                                $tempCollection = collect([
+                                    'name' => $period->period,
+                                    'days' => $shownDays,
+                                    'rate' => $period->rate,
+                                    'total' => $periodtotal,
+                                ]);
+                                // Adding period
+                                $periodCalc->add($tempCollection);
+                            } else {
+                                // remaining days less than period days
+                                $periodtotal = 0 * $tempDaysCount;
+                                $containerTotal = $containerTotal + $periodtotal;
+                                $tempCollection = collect([
+                                    'name' => $period->period,
+                                    'days' => $tempDaysCount,
+                                    'rate' => $period->rate,
+                                    'total' => $periodtotal,
+                                ]);
+                                // Adding period
+                                $periodCalc->add($tempCollection);
+                                $tempDaysCount = 0;
                             }
                         }
+                    } else {
+                        if ($tempDaysCount != 0) {
+                            if ($period->number_off_dayes < $tempDaysCount) {
+                                // remaining days more than period days
+                                $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
+                                $days = $period->number_off_dayes - $freeTime;
+                                $periodtotal = (0 * $freeTime) + ($period->rate * $days);
+                                $shownDays = $period->number_off_dayes;
+                                if ($diffBetweenDates != 0) {
+                                    if ($diffBetweenDates >= $period->number_off_dayes) {
+                                        $diffBetweenDates = $diffBetweenDates - $period->number_off_dayes;
+                                        $days = 0;
+                                        $shownDays = 0;
+                                        $periodtotal = 0;
+                                    } else {
+                                        $shownDays = $shownDays - $diffBetweenDates;
+                                        $days = $days - $diffBetweenDates;
+                                        $diffBetweenDates = 0;
+                                        $periodtotal = (0 * $freeTime) + ($period->rate * $days);
+                                    }
+                                    $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
+                                }
+                                $containerTotal = $containerTotal + $periodtotal;
+                                $tempCollection = collect([
+                                    'name' => $period->period,
+                                    'days' => $shownDays,
+                                    'rate' => $period->rate,
+                                    'total' => $periodtotal,
+                                ]);
+                                // Adding period
+                                $periodCalc->add($tempCollection);
+                                $freeTime = 0;
+                            } else {
+                                // remaining days less than period days
+                                $days = $tempDaysCount - $freeTime;
+                                $periodtotal = (0 * $freeTime) + ($period->rate * $days);
+                                if ($diffBetweenDates != 0) {
+                                    if ($diffBetweenDates >= $tempDaysCount) {
+                                        $diffBetweenDates = $diffBetweenDates - $tempDaysCount;
+                                        $days = 0;
+                                        $periodtotal = 0;
+                                    } else {
+                                        $diffBetweenDates = 0;
+                                        $days = $days - $diffBetweenDates;
+                                        $periodtotal = (0 * $freeTime) + ($period->rate * $days);
+                                    }
+                                    $diffBetweenDates = $diffBetweenDates < 0 ? 0 : $diffBetweenDates;
+                                }
+                                $containerTotal = $containerTotal + $periodtotal;
+                                $tempCollection = collect([
+                                    'name' => $period->period,
+                                    'days' => $tempDaysCount,
+                                    'rate' => $period->rate,
+                                    'total' => $periodtotal,
+                                ]);
+                                // Adding period
+                                $periodCalc->add($tempCollection);
+                                $tempDaysCount = 0;
+                                $freeTime = 0;
+                            }
+                        }
+                    }
 
                 }
 
@@ -366,7 +375,7 @@ class DententionController extends Controller
                     'container_no' => $container->code,
                     'status' => trans("home.$status"),
                     'container_type' => $container->containersTypes->name,
-                    'from' =>  $startMovementDate,
+                    'from' => $startMovementDate,
                     'to' => $endMovementDate,
                     'from_code' => optional(optional($startMovement)->movementcode)->code,
                     'to_code' => optional(optional($endMovement)->movementcode)->code,
@@ -386,7 +395,6 @@ class DententionController extends Controller
             'calculation' => $calculation,
             'input' => $request->input(),
         ];
-        
 
         return redirect()->route('dententions.index')->with($data);
     }
@@ -441,7 +449,7 @@ class DententionController extends Controller
         if (!$booking) {
             return null;
         }
-   
+
         return ($booking->free_time > 0) ? $booking->free_time : optional($booking->quotation)->import_detention;
 
     }

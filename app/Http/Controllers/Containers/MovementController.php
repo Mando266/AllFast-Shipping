@@ -27,485 +27,240 @@ class MovementController extends Controller
     public function index()
     {
         $this->authorize(__FUNCTION__, Movements::class);
-
+    
+        // Fetch common data used in different conditions
+        $company_id = Auth::user()->company_id;
         $movementErrors = MovementImportErrors::all();
         $container_id = request()->input('container_id');
-        $filteredData = Movements::filter(new ContainersIndexFilter(request()))->orderBy('id')->groupBy(
-            'container_id'
-        )->with('container')->get();
-        $myMoves = Movements::orderBy('movement_date', 'desc')->with('movementcode.containerstock')->get()->groupBy(
-            'container_id'
-        );
-
-        // dd($filteredData);
-        // $movements = Movements::where('movement_id', request('movement_id'))->paginate(30);
         $plNo = request()->input('bl_no');
-        $movementsBlNo = Movements::where('company_id', Auth::user()->company_id)->select('bl_no')->distinct()->get(
-        )->pluck('bl_no');
-        $bookings = Booking::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
-
-        // remove element if last movement doesn't include movement_id or port_location_id
-        if (request('movement_id') != null || request('port_location_id') != null) {
-            // Get All movements and sort it and get the last movement before this movement
-            $movements = Movements::filter(new ContainersIndexFilter(request()))->orderBy(
-                'movement_date',
-                'desc'
-            )->with('movementcode.containerstock', 'container')->get();
-
-            $new = $movements;
-            $new = $new->groupBy('movement_date');
-
-            foreach ($new as $key => $move) {
-                $move = $move->sortByDesc('movementcode.sequence');
-                $new[$key] = $move;
-            }
-            $new = $new->collapse();
-
-            $movements = $new;
-            $filteredData = $movements->unique('container_id');
-
-
-            // End Get All movements and sort it and get the last movement before this movement
-            if (request('movement_id') != null) {
-                foreach ($filteredData as $key => $move) {
-                    // Get All movements and sort it and get the last movement before this movement
-                    $tempMovements = $myMoves[$move->container_id] ?? Movements::where(
-                            'container_id',
-                            $move->container_id
-                        )->orderBy('movement_date', 'desc')->with('movementcode.containerstock')->get();
-
-                    $new = $tempMovements;
-                    $new = $new->groupBy('movement_date');
-
-                    foreach ($new as $k => $move) {
-                        $move = $move->sortByDesc('movementcode.sequence');
-                        $new[$k] = $move;
-                    }
-                    $new = $new->collapse();
-
-                    $tempMovements = $new;
-                    $lastMove = $tempMovements->first();
-                    // End Get All movements and sort it and get the last movement before this movement
-
-                    // dump($lastMove->movement_id != request('movement_id'));
-                    if (!in_array($lastMove->movement_id, (array)request('movement_id'))) {
-
-                        unset($filteredData[$key]);
-                    }
-                }
-            }
-            if (request('port_location_id') != null) {
-                foreach ($filteredData as $key => $move) {
-                    // Get All movements and sort it and get the last movement before this movement
-                    $tempMovements = $myMoves[$move->container_id] ?? Movements::where(
-                            'container_id',
-                            $move->container_id
-                        )->orderBy('movement_date', 'desc')->with('movementcode.containerstock')->get();
-
-                    $new = $tempMovements;
-                    $new = $new->groupBy('movement_date');
-
-                    foreach ($new as $k => $move) {
-                        $move = $move->sortByDesc('movementcode.sequence');
-                        $new[$k] = $move;
-                    }
-                    $new = $new->collapse();
-
-                    $tempMovements = $new;
-                    $lastMove = $tempMovements->first();
-                    // End Get All movements and sort it and get the last movement before this movement
-                    if (!in_array($lastMove->port_location_id, (array)request('port_location_id'))) {
-                        unset($filteredData[$key]);
-                    } else {
-                        $move = $lastMove;
-                    }
-                }
-            }
+        $movementIdFilter = request('movement_id');
+        $portLocationIdFilter = request('port_location_id');
+        $tillDate = request('TillDate');
+    
+        // Fetch bookings and unique BL numbers
+        $bookings = Booking::where('company_id', $company_id)->orderBy('id')->get();
+        $movementsBlNo = Movements::where('company_id', $company_id)->select('bl_no')->distinct()->pluck('bl_no');
+    
+        // Fetch and group movements by container_id
+        $filteredData = Movements::filter(new ContainersIndexFilter(request()))
+            ->orderBy('id')
+            ->groupBy('container_id')
+            ->with('container')
+            ->get();
+    
+        $myMoves = Movements::orderBy('movement_date', 'desc')
+            ->with('movementcode.containerstock')
+            ->get()
+            ->groupBy('container_id');
+    
+        // Remove elements if last movement doesn't include movement_id or port_location_id
+        if ($movementIdFilter || $portLocationIdFilter) {
+            $filteredData = $this->applyMovementAndLocationFilters($filteredData, $myMoves, $movementIdFilter, $portLocationIdFilter);
         }
-        if (request('TillDate')) {
-            $tillDate = request('TillDate');
+    
+        // Handle TillDate and Triff_id if provided
+        $lastDCHF = null;
+        $periods = null;
+        if ($tillDate) {
             $periods = Period::where('demurrage_id', request('Triff_id'))->get();
-            // Get All movements and sort it and get the last movement before this movement
-            $movements = Movements::where('container_id', $move->container_id)->orderBy('movement_date', 'desc')->with(
-                'movementcode.containerstock'
-            )->get();
-
-            $new = $movements;
-            $new = $new->groupBy('movement_date');
-
-            foreach ($new as $key => $move) {
-                $move = $move->sortByDesc('movementcode.sequence');
-                $new[$key] = $move;
-            }
-            $new = $new->collapse();
-
-            $movements = $new;
-            // End Get All movements and sort it and get the last movement before this movement
-            $lastDCHF = $lastMove = $movements->where(
-                'movement_id',
-                ContainersMovement::where('code', 'DCHF')->pluck('id')->first()
-            )->first();
-        } else {
-            $tillDate = null;
-            $periods = null;
-            $lastDCHF = null;
+            $movements = Movements::where('container_id', $container_id)
+                ->orderBy('movement_date', 'desc')
+                ->with('movementcode.containerstock')
+                ->get();
+    
+            $movements = $this->sortAndCollapseMovements($movements);
+            $lastDCHF = $movements->where('movement_id', ContainersMovement::where('code', 'DCHF')->pluck('id')->first())->first();
         }
-        $temp = [];
-        foreach ($filteredData as $element) {
-            $id = $element->id;
-            $temp[] = $id;
-        }
-
+    
+        // Prepare data for final query
+        $temp = $filteredData->pluck('id')->toArray();
+    
         if ($filteredData->count() == 1) {
             $filteredData = $filteredData->first();
         }
-
-
-        $movements = Movements::wherein('id', $temp)->where('company_id', Auth::user()->company_id)->orderBy(
-            'movement_date',
-            'desc'
-        )->orderBy('id', 'desc')->groupBy('container_id')->with('container.containersOwner')->paginate(30);
-
+    
+        $movements = Movements::whereIn('id', $temp)
+            ->where('company_id', $company_id)
+            ->orderBy('movement_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->groupBy('container_id')
+            ->with('container.containersOwner')
+            ->paginate(30);
+    
         foreach ($movements as $move) {
-            // Get All movements and sort it and get the last movement before this movement
-            $tempMovements = $myMoves[$move->container_id] ?? Movements::where(
-                    'container_id',
-                    $move->container_id
-                )->orderBy('movement_date', 'desc')->with('movementcode.containerstock')->get();
-
-            $new = $tempMovements;
-            $new = $new->groupBy('movement_date');
-
-            foreach ($new as $key => $tempMove) {
-                $tempMove = $tempMove->sortByDesc('movementcode.sequence');
-                $new[$key] = $tempMove;
+            $tempMovements = $myMoves[$move->container_id] ?? Movements::where('container_id', $move->container_id)
+                ->orderBy('movement_date', 'desc')
+                ->with('movementcode.containerstock')
+                ->get();
+    
+            $tempMovements = $this->sortAndCollapseMovements($tempMovements);
+    
+            // Apply additional filters
+            if ($plNo) {
+                $tempMovements = $tempMovements->where('bl_no', $plNo);
             }
-            $new = $new->collapse();
-
-            $tempMovements = $new;
-            // End Get All movements and sort it and get the last movement before this movement
-
-            if (request('bl_no') != null) {
-                $tempMovements = $tempMovements->where('bl_no', request('bl_no'));
+            if ($voyageFilter = request('voyage_id')) {
+                $tempMovements = $tempMovements->where('voyage_id', $voyageFilter);
             }
-            if (request('voyage_id') != null) {
-                $tempMovements = $tempMovements->where('voyage_id', request('voyage_id'));
-            }
-            if (request('booking_no') != null) {
-                $bookingNo = request('booking_no');
-                $tempMovements = $tempMovements->filter(function ($item) use ($bookingNo) {
-                    return preg_match("/$bookingNo/", $item['booking_no']);
+            if ($bookingNoFilter = request('booking_no')) {
+                $tempMovements = $tempMovements->filter(function ($item) use ($bookingNoFilter) {
+                    return preg_match("/$bookingNoFilter/", $item['booking_no']);
                 });
             }
-
+    
             $lastMove = $tempMovements->first();
-
-            if($lastMove != null)
-            {
-                $move->bl_no = $lastMove->bl_no;
-                $move->port_location_id = $lastMove->port_location_id;
-                $move->movement_date = $lastMove->movement_date;
-                $move->movement_id = $lastMove->movement_id;
-                $move->container_type_id = $lastMove->container_type_id;
-                $move->pol_id = $lastMove->pol_id;
-                $move->pod_id = $lastMove->pod_id;
-                $move->vessel_id = $lastMove->vessel_id;
-                $move->voyage_id = $lastMove->voyage_id;
-                $move->terminal_id = $lastMove->terminal_id;
-                $move->booking_no = $lastMove->booking_no;
-                $move->remarkes = $lastMove->remarkes;
-                $move->created_at = $lastMove->created_at;
-                $move->updated_at = $lastMove->updated_at;
-                $move->transshipment_port_id = $lastMove->transshipment_port_id;
-                $move->booking_agent_id = $lastMove->booking_agent_id;
-                $move->free_time = $lastMove->free_time;
-                $move->container_status = $lastMove->container_status;
-                $move->import_agent = $lastMove->import_agent;
-                $move->free_time_origin = $lastMove->free_time_origin;
+    
+            if ($lastMove) {
+                $this->copyMovementDetails($move, $lastMove);
             }
         }
-
-        // prepare export movements
-
-        $exportMovements = Movements::where('company_id', Auth::user()->company_id)->wherein('id', $temp)->orderBy(
-            'movement_date',
-            'desc'
-        )->orderBy('id', 'desc')->groupBy('container_id')->with(
-            'container.containersOwner',
-            'movementcode.containerstock'
-        )->get();
-
-//        dd($exportMovements->count());
-        $exportTempMoves = Movements::where('company_id', Auth::user()->company_id)->orderBy(
-            'movement_date',
-            'desc'
-        )->with('movementcode.containerstock')->get()->groupBy('container_id');
-        foreach ($exportMovements as $move) {
-            // Get All movements and sort it and get the last movement before this movement
-            $tempMovements = $exportTempMoves[$move->container_id] ?? Movements::where(
-                    'company_id',
-                    Auth::user()->company_id
-                )->where('container_id', $move->container_id)->orderBy('movement_date', 'desc')->with(
-                    'movementcode.containerstock'
-                )->get();
-
-            $new = $tempMovements;
-            $new = $new->groupBy('movement_date');
-
-            foreach ($new as $key => $tempMove) {
-                $tempMove = $tempMove->sortByDesc('movementcode.sequence');
-                $new[$key] = $tempMove;
-            }
-            $new = $new->collapse();
-
-            $tempMovements = $new;
-            // End Get All movements and sort it and get the last movement before this movement
-
-            if (request('bl_no') != null) {
-                $tempMovements = $tempMovements->where('bl_no', request('bl_no'));
-            }
-            if (request('voyage_id') != null) {
-                $tempMovements = $tempMovements->where('voyage_id', request('voyage_id'));
-            }
-            if (request('booking_no') != null) {
-                $bookingNo = request('booking_no');
-                $tempMovements = $tempMovements->filter(function ($item) use ($bookingNo) {
-                    return preg_match("/$bookingNo/", $item['booking_no']);
-                });
-            }
-
-            $lastMove = $tempMovements->first();
-
-            if($lastMove != null){
-                $move->bl_no = $lastMove->bl_no;
-                $move->port_location_id = $lastMove->port_location_id;
-                $move->movement_date = $lastMove->movement_date;
-                $move->movement_id = $lastMove->movement_id;
-                $move->container_type_id = $lastMove->container_type_id;
-                $move->pol_id = $lastMove->pol_id;
-                $move->pod_id = $lastMove->pod_id;
-                $move->vessel_id = $lastMove->vessel_id;
-                $move->voyage_id = $lastMove->voyage_id;
-                $move->terminal_id = $lastMove->terminal_id;
-                $move->booking_no = $lastMove->booking_no;
-                $move->remarkes = $lastMove->remarkes;
-                $move->created_at = $lastMove->created_at;
-                $move->updated_at = $lastMove->updated_at;
-                $move->transshipment_port_id = $lastMove->transshipment_port_id;
-                $move->booking_agent_id = $lastMove->booking_agent_id;
-                $move->free_time = $lastMove->free_time;
-                $move->container_status = $lastMove->container_status;
-                $move->import_agent = $lastMove->import_agent;
-                $move->free_time_origin = $lastMove->free_time_origin;
-            }
-        }
-
-        // End of Export Movements
-
-        $containers = Containers::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
-        $lessor = Containers::where('company_id', Auth::user()->company_id)->where('description', '!=', null)
-            ->orderBy('id')->select('description')->distinct()->get();
-        $ports = Ports::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
-        $voyages = Voyages::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
+    
+        // Prepare export movements
+        $exportMovements = Movements::where('company_id', $company_id)
+            ->whereIn('id', $temp)
+            ->orderBy('movement_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->groupBy('container_id')
+            ->with('container.containersOwner', 'movementcode.containerstock')
+            ->get();
+    
+        // Fetch additional data for the view
+        $containers = Containers::where('company_id', $company_id)->orderBy('id')->get();
+        $lessor = Containers::where('company_id', $company_id)
+            ->where('description', '!=', null)
+            ->orderBy('id')
+            ->select('description')
+            ->distinct()
+            ->get();
+        $ports = Ports::where('company_id', $company_id)->orderBy('id')->get();
+        $voyages = Voyages::where('company_id', $company_id)->orderBy('id')->get();
         $container_ownership = ContinerOwnership::orderBy('id')->get();
         $containersMovements = ContainersMovement::orderBy('id')->get();
         $containerstatus = ContainerStatus::orderBy('id')->get();
-        $vessels = Vessels::where('company_id', Auth::user()->company_id)->orderBy('name')->get();
-        // $items = Movements::where('company_id',Auth::user()->company_id)->wherein('id',$temp)->orderBy('movement_date','desc')->orderBy('id','desc')->groupBy('container_id')->with('container.containersOwner','movementcode.containerstock')->get();
+        $vessels = Vessels::where('company_id', $company_id)->orderBy('name')->get();
+    
         session()->flash('items', $exportMovements);
-        if (count($temp) != 1) {
-            return view('containers.movements.index', [
-                'items' => $movements,
-                'containerstatus' => $containerstatus,
-                'movementsBlNo' => $movementsBlNo,
-                'bookings' => $bookings,
-                'containers' => $containers,
-                'movementerrors' => $movementErrors,
-                'plNo' => $plNo,
-                'lessor' => $lessor,
-                'ports' => $ports,
-                'container_ownership' => $container_ownership,
-                'voyages' => $voyages,
-                'containersMovements' => $containersMovements,
-                'vessels' => $vessels,
-
-            ]);
-        } else {
-            if ($container_id == null) {
-                if ($movements->count() == 0) {
-                    return view('containers.movements.index', [
-                        'items' => $movements,
-                        'movementsBlNo' => $movementsBlNo,
-                        'bookings' => $bookings,
-                        'containers' => $containers,
-                        'movementerrors' => $movementErrors,
-                        'plNo' => $plNo,
-                        'lessor' => $lessor,
-                        'ports' => $ports,
-                        'container_ownership' => $container_ownership,
-                        'voyages' => $voyages,
-                        'containersMovements' => $containersMovements,
-                        'vessels' => $vessels,
-                    ]);
-                }
-                // dd($movements);
-                $container_id = Containers::where('id', $movements->first()->container_id)->pluck('id')->first();
-            }
-            $movement = Movements::find($container_id);
-            $container = Containers::find($container_id);
-            $movements = Movements::filter(new ContainersIndexFilter(request()))->where('container_id', $container_id);
-
-            $movementId = false;
-            $movementsArray = false;
-
-            // Check if we have movement code or port_location_id to get latest movement or not
-            if (request('movement_id') == null && request('port_location_id') == null) {
-                // prepare Data for export
-                $exportmovements = $movements->orderBy('movement_date', 'desc')->orderBy('id', 'desc')->with(
-                    'movementcode.containerstock',
-                    'container'
-                )->get();
-                $exportmovements = $exportmovements->groupBy('movement_date');
-
-                foreach ($exportmovements as $key => $move) {
-                    $move = $move->sortByDesc('movementcode.sequence');
-                    $exportmovements[$key] = $move;
-                }
-                $exportmovements = $exportmovements->collapse();
-                // prepare Data for show
-                $movements = $movements->orderBy('movement_date', 'desc')->orderBy('id', 'desc')->with(
-                    'movementcode.containerstock'
-                )->paginate(30);
-                $new = $movements->getCollection();
-                $new = $new->groupBy('movement_date');
-
-                foreach ($new as $key => $move) {
-                    $move = $move->sortByDesc('movementcode.sequence');
-                    $new[$key] = $move;
-                }
-                $new = $new->collapse();
-                $movements = $movements->setCollection($new);
-            } else {
-                if (request('container_id') != null) {
-                    // prepare Data for export
-                    $exportmovements = Movements::where('container_id', request('container_id'))->orderBy(
-                        'movement_date',
-                        'desc'
-                    )
-                        ->orderBy('id', 'desc')->with('movementcode.containerstock')->get();
-
-                    $exportmovements = $exportmovements->groupBy('movement_date');
-
-                    foreach ($exportmovements as $key => $move) {
-                        $move = $move->sortByDesc('movementcode.sequence');
-                        $exportmovements[$key] = $move;
-                    }
-                    $exportmovements = $exportmovements->collapse();
-                    // prepare Data for show
-                    $movements = Movements::where('container_id', request('container_id'))->orderBy(
-                        'movement_date',
-                        'desc'
-                    )
-                        ->orderBy('id', 'desc')->with('movementcode.containerstock')->paginate(30);
-                    $new = $movements->getCollection();
-                    $new = $new->groupBy('movement_date');
-
-                    foreach ($new as $key => $move) {
-                        $move = $move->sortByDesc('movementcode.sequence');
-                        $new[$key] = $move;
-                    }
-                    $new = $new->collapse();
-
-                    $movements = $movements->setCollection($new);
-                } else {
-                    // prepare Data for export
-                    $exportmovements = Movements::where('container_id', $container_id)->orderBy(
-                        'movement_date',
-                        'desc'
-                    )->with('movementcode.containerstock')->get();
-                    $exportmovements = $exportmovements->groupBy('movement_date');
-
-                    foreach ($exportmovements as $key => $move) {
-                        $move = $move->sortByDesc('movementcode.sequence');
-                        $exportmovements[$key] = $move;
-                    }
-                    $exportmovements = $exportmovements->collapse();
-                    // prepare Data for show
-                    $movements = Movements::where('container_id', $container_id)->orderBy(
-                        'movement_date',
-                        'desc'
-                    )->with('movementcode.containerstock')->paginate(30);
-                    $new = $movements->getCollection();
-                    $new = $new->groupBy('movement_date');
-
-                    foreach ($new as $key => $move) {
-                        $move = $move->sortByDesc('movementcode.sequence');
-                        $new[$key] = $move;
-                    }
-                    $new = $new->collapse();
-
-                    $movements = $movements->setCollection($new);
-                }
-                $movements = $movements->first();
-                if (request('movement_id') != null) {
-                    // dd($movements);
-                    if (!in_array($movements->movement_id, (array)request('movement_id'))) {
-
-                        $movementsArray = true;
-                    }
-                }
-                if (request('port_location_id') != null) {
-                    if (!in_array($movements->port_location_id, (array)request('port_location_id'))) {
-                        $movementsArray = true;
-                    }
-                }
-                $movementId = true;
-            }
-            $containers = Containers::where('id', $container_id)->first();
-
-
-            if ($movementsArray == true) {
-                $movements = [];
-                $DCHF = 0;
-                $RCVC = 0;
-            } else {
-                $DCHF = $movements->where(
-                    'movement_id',
-                    ContainersMovement::where('code', 'DCHF')->pluck('id')->first()
-                )->count();
-                $RCVC = $movements->where(
-                    'movement_id',
-                    ContainersMovement::where('code', 'RCVC')->pluck('id')->first()
-                )->count();
-            }
-            $demurrages = Demurrage::get();
-            $mytime = Carbon::now()->format('d-m-Y');
-            is_array($container_id) ?? $container_id = $container_id[0];
-            // dd($exportMovements);
-            session()->flash('items', $movements);
-            session(['returnUrl' => url()->previous()]);
-
-
-            return view('containers.movements.show', [
-
-                'movementsArray' => $movementsArray,
-                'movementId' => $movementId,
-                'periods' => $periods,
-                'container_id' => $container_id,
-                'tillDate' => $tillDate,
-                'lastDCHF' => $lastDCHF,
-                'id' => $id,
-                'DCHF' => $DCHF,
-                'RCVC' => $RCVC,
-                'movement' => $movement,
-                'container' => $container,
-                'items' => $movements,
-                'containers' => $containers,
-                'mytime' => $mytime,
-                'demurrages' => $demurrages,
-            ]);
-        }
+    
+        return view('containers.movements.index', [
+            'items' => $movements,
+            'containerstatus' => $containerstatus,
+            'movementsBlNo' => $movementsBlNo,
+            'bookings' => $bookings,
+            'containers' => $containers,
+            'movementerrors' => $movementErrors,
+            'plNo' => $plNo,
+            'lessor' => $lessor,
+            'ports' => $ports,
+            'container_ownership' => $container_ownership,
+            'voyages' => $voyages,
+            'containersMovements' => $containersMovements,
+            'vessels' => $vessels,
+        ]);
     }
+    
+    /**
+     * Apply filters for movement_id and port_location_id to the filtered data.
+     *
+     * @param \Illuminate\Support\Collection $filteredData
+     * @param \Illuminate\Support\Collection $myMoves
+     * @param mixed $movementIdFilter
+     * @param mixed $portLocationIdFilter
+     * @return \Illuminate\Support\Collection
+     */
+    private function applyMovementAndLocationFilters($filteredData, $myMoves, $movementIdFilter, $portLocationIdFilter)
+    {
+        $filteredData = $this->getLastMoveForEachContainer($filteredData);
+    
+        if ($movementIdFilter) {
+            $filteredData = $filteredData->filter(function ($move) use ($myMoves, $movementIdFilter) {
+                $tempMovements = $myMoves[$move->container_id] ?? Movements::where('container_id', $move->container_id)
+                    ->orderBy('movement_date', 'desc')
+                    ->with('movementcode.containerstock')
+                    ->get();
+    
+                $tempMovements = $this->sortAndCollapseMovements($tempMovements);
+                $lastMove = $tempMovements->first();
+    
+                return $lastMove && in_array($lastMove->movement_id, (array)$movementIdFilter);
+            });
+        }
+    
+        if ($portLocationIdFilter) {
+            $filteredData = $filteredData->filter(function ($move) use ($myMoves, $portLocationIdFilter) {
+                $tempMovements = $myMoves[$move->container_id] ?? Movements::where('container_id', $move->container_id)
+                    ->orderBy('movement_date', 'desc')
+                    ->with('movementcode.containerstock')
+                    ->get();
+    
+                $tempMovements = $this->sortAndCollapseMovements($tempMovements);
+                $lastMove = $tempMovements->first();
+    
+                return $lastMove && in_array($lastMove->port_location_id, (array)$portLocationIdFilter);
+            });
+        }
+    
+        return $filteredData;
+    }
+    
+    /**
+     * Get the last movement for each container from the given collection.
+     *
+     * @param \Illuminate\Support\Collection $movements
+     * @return \Illuminate\Support\Collection
+     */
+    private function getLastMoveForEachContainer($movements)
+    {
+        return $movements->groupBy('container_id')->map(function ($group) {
+            return $group->sortByDesc('movement_date')->first();
+        });
+    }
+    
+    /**
+     * Sort and collapse movements by movement_date and sequence.
+     *
+     * @param \Illuminate\Support\Collection $movements
+     * @return \Illuminate\Support\Collection
+     */
+    private function sortAndCollapseMovements($movements)
+    {
+        return $movements->groupBy('movement_date')
+            ->map(function ($group) {
+                return $group->sortByDesc('movementcode.sequence');
+            })
+            ->collapse();
+    }
+    
+    /**
+     * Copy details from one movement to another.
+     *
+     * @param \App\Models\Movements $move
+     * @param \App\Models\Movements $lastMove
+     */
+    private function copyMovementDetails(&$move, $lastMove)
+    {
+        $move->bl_no = $lastMove->bl_no;
+        $move->port_location_id = $lastMove->port_location_id;
+        $move->movement_date = $lastMove->movement_date;
+        $move->movement_id = $lastMove->movement_id;
+        $move->container_type_id = $lastMove->container_type_id;
+        $move->pol_id = $lastMove->pol_id;
+        $move->pod_id = $lastMove->pod_id;
+        $move->vessel_id = $lastMove->vessel_id;
+        $move->voyage_id = $lastMove->voyage_id;
+        $move->terminal_id = $lastMove->terminal_id;
+        $move->booking_no = $lastMove->booking_no;
+        $move->remarkes = $lastMove->remarkes;
+        $move->created_at = $lastMove->created_at;
+        $move->updated_at = $lastMove->updated_at;
+        $move->transshipment_port_id = $lastMove->transshipment_port_id;
+        $move->booking_agent_id = $lastMove->booking_agent_id;
+        $move->free_time = $lastMove->free_time;
+        $move->container_status = $lastMove->container_status;
+        $move->import_agent = $lastMove->import_agent;
+        $move->free_time_origin = $lastMove->free_time_origin;
+    }
+    
+    
 
     public function create()
     {
@@ -699,6 +454,10 @@ class MovementController extends Controller
             $movementId = true;
         }
         if (request('booking_no') != null) {
+            // $refNo = request()->booking_no;
+            // $movements = $movements->whereHas('booking', function ($q) use ($refNo) {
+            //     $q->where('ref_no', 'like', "%{$refNo}%");
+            // });
             $movements = Movements::filter(new ContainersIndexFilter(request()))->where('container_id', $id)->with(
                 'movementcode'
             )->where('booking_no', request('booking_no'))->orderBy('movement_date', 'desc')->orderBy('id', 'desc');
@@ -782,20 +541,51 @@ class MovementController extends Controller
             $container_id = request('container_id');
         }
 
-    
+        if (request('TillDate') && request('Triff_id') != null) {
+            $tillDate = request('TillDate');
+            $periods = Period::where('demurrage_id', request('Triff_id'))->get();
+
+            $lastDCHF = $lastMove = Movements::where('container_id', $container_id)->where(
+                'movement_id',
+                ContainersMovement::where('code', 'DCHF')->pluck('id')->first()
+            )->orderBy('movement_date', 'desc')->orderBy('id', 'desc')->first();
+        } else {
+            $tillDate = null;
+            $periods = null;
+            $lastDCHF = null;
+        }
 
         $containers = Containers::where('id', $id)->first();
-      
+        $mytime = Carbon::now()->format('d-m-Y');
+        if ($movementsArray == true) {
+            $DCHF = 0;
+            $RCVC = 0;
+        } else {
+            $DCHF = $movements->where(
+                'movement_id',
+                ContainersMovement::where('code', 'DCHF')->pluck('id')->first()
+            )->count();
+            $RCVC = $movements->where(
+                'movement_id',
+                ContainersMovement::where('code', 'RCVC')->pluck('id')->first()
+            )->count();
+        }
         session()->flash('items', $exportmovements);
         return view('containers.movements.show', [
             'movementsArray' => $movementsArray,
             'movementId' => $movementId,
+            'periods' => $periods,
             'container_id' => $container_id,
+            'tillDate' => $tillDate,
+            'lastDCHF' => $lastDCHF,
             'id' => $id,
+            'DCHF' => $DCHF,
+            'RCVC' => $RCVC,
             'movement' => $movement,
             'container' => $container,
             'items' => $movements,
             'containers' => $containers,
+            'mytime' => $mytime,
             'demurrages' => $demurrages,
 
         ]);
@@ -833,54 +623,53 @@ class MovementController extends Controller
             'movement_id' => 'required',
             'movement_date' => 'required',
             'port_location_id' => 'required',
-            // You can re-enable this rule if needed
-            // 'voyage_id' => [
+            //     'voyage_id' =>[
             //     'required',
-            //     Rule::unique('movements')->where('vessel_id', $request->vessel_id)
+            //                     Rule::unique('movements')
+            //                         ->where('vessel_id', $request->vessel_id)
             // ],
+            'port_location_id' => 'required',
         ]);
-        
         $this->authorize(__FUNCTION__, Movements::class);
         $movement->fill($request->except('_token'));
-        // Get the code for the current movement
         $movementCode = ContainersMovement::where('id', $movement->movement_id)->pluck('code')->first();
-        // Get all movements for the container and sort by date, then by sequence
-        $movements = Movements::where('container_id', $movement->container_id)
-            ->orderBy('movement_date', 'desc')
-            ->with('movementcode')
-            ->get()
-            ->groupBy('movement_date')
-            ->map(function ($move) {
-                return $move->sortByDesc('movementcode.sequence');
-            })
-            ->collapse();
-    
-        // Find the last movement before the current movement
-        $lastMove = $movements->where('movement_date', '<=', $movement->movement_date)
-            ->where('id', '!=', $movement->id)
-            ->pluck('movement_id')
-            ->first();
-    
-        // Determine allowed movements based on the last movement
-        $allowedMovements = $lastMove 
-            ? ContainersMovement::where('id', $lastMove)->pluck('next_move')->first()
-            : null;
-    
-        if ($allowedMovements) {
-            $msg = "The allowed movement is {$allowedMovements}";
-            $allowedMovements = explode(", ", $allowedMovements);
+        // $lastMove = Movements::where('container_id',$movement->container_id)
+        //     ->where('movement_date','<',$movement->movement_date)->where('id','!=',$movement->id)
+        //     ->orderBy('movement_date','desc')->orderBy('id','desc')->first();
+        // Get All movements and sort it and get the last movement before this movement
+
+        $movements = Movements::where('container_id', $movement->container_id)->orderBy('movement_date', 'desc')->with(
+            'movementcode'
+        )->get();
+
+        $new = $movements;
+        $new = $new->groupBy('movement_date');
+
+        foreach ($new as $key => $move) {
+            $move = $move->sortByDesc('movementcode.sequence');
+            $new[$key] = $move;
         }
-    
-        // Validate the movement sequence if previous movements exist
-        if (!$lastMove || in_array($movementCode, $allowedMovements)) {
+        $new = $new->collapse();
+
+        $movements = $new;
+        $lastMove = $movements->where('movement_date', '<=', $movement->movement_date)->where(
+            'id',
+            '!=',
+            $movement->id
+        )->pluck('movement_id')->first();
+        // End Get All movements and sort it and get the last movement before this movement
+
+        $allowedMovements = ContainersMovement::where('id', $lastMove)->pluck('next_move')->first();
+        $msg = "The allowed movement is {$allowedMovements}";
+        $allowedMovements = explode(", ", $allowedMovements);
+        $url = $request->session()->get('returnUrl');
+        if (in_array($movementCode, $allowedMovements)) {
             $movement->save();
-            $url = $request->session()->get('returnUrl');
             return redirect($url)->with('success', trans('Movement.updated.success'));
         }
-        
         return back()->with('error', $msg);
     }
-    
+
     public function destroy($id)
     {
         $movement = Movements::find($id);
