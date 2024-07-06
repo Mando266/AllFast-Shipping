@@ -98,6 +98,7 @@ class LocalPortTriffController extends Controller
                 'charge_type'=>$triffPriceDetailes['charge_type'],
                 'unit'=>$triffPriceDetailes['unit'],
                 'selling_price'=>$triffPriceDetailes['selling_price'],
+                'imo_selling_price'=>$triffPriceDetailes['imo_selling_price'],
                 'payer'=>$triffPriceDetailes['payer'],
                 'currency'=> $triffPriceDetailes['currency'],
                 'equipment_type_id'=> $triffPriceDetailes['equipment_type_id'],

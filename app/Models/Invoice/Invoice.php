@@ -20,6 +20,8 @@ use App\ViewModel\Payment;
 use App\ViewModel\Reciver;
 use App\ViewModel\ReceiverAddress;
 use Carbon\Carbon;
+use App\User;
+
 class Invoice extends Model implements PermissionSeederContract
 {
     use HasFilter;
@@ -63,7 +65,9 @@ class Invoice extends Model implements PermissionSeederContract
     public function booking(){
         return $this->belongsTo(Booking::class,'booking_ref','id');
     }
-
+    public function user(){
+        return $this->belongsTo(User::class,'user_id','id');
+    }
     public function receipts()
     {
         return $this->hasMany(Receipt::class ,'invoice_id','id');

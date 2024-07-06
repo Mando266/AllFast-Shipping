@@ -94,6 +94,7 @@
                                         <th>Equipment Type</th>
                                         <th>unit</th>
                                         <th>Customer Rate</th>
+                                        <th>IMO Rate</th>
                                         <th>currancy</th>
                                         <th>payer</th>
                                         <th>Shipment Type</th>
@@ -140,6 +141,14 @@
                                     <td>
                                         <input type="text" id="dayes" name="triffPriceDetailes[{{$key}}][selling_price]" class="form-control" autocomplete="off" value="{{old('selling_price',$item->selling_price)}}" required>
                                             @error('selling_price')
+                                            <div style="color:red;">
+                                                {{$message}}
+                                            </div>
+                                            @enderror
+                                    </td>
+                                    <td>
+                                        <input type="text" id="dayes" name="triffPriceDetailes[{{$key}}][imo_selling_price]" class="form-control" autocomplete="off" value="{{old('imo_selling_price',$item->imo_selling_price)}}" required>
+                                            @error('imo_selling_price')
                                             <div style="color:red;">
                                                 {{$message}}
                                             </div>
@@ -267,6 +276,7 @@ $(document).ready(function(){
         '<td><select class="selectpicker form-control" data-live-search="true" id="selectpickers"  name="triffPriceDetailes['+counter+'][equipment_type_id]" data-size="10"><option>Select</option><option value="All">All</option>@foreach ($equipment_types as $item)<option value="{{$item->id}}">{{$item->name}}</option>@endforeach</select></td>'+
         '<td><select class="selectpicker form-control" data-live-search="true" id="selectpickers" name="triffPriceDetailes['+counter+'][unit]"><option>Select</option><option value="Container">Container</option><option value="Document" >Document</option></select></td>'+
         '<td><input type="text" name="triffPriceDetailes['+counter+'][selling_price]" id="selectpickers" class="form-control" autocomplete="off" required></td>'+
+        '<td><input type="text" name="triffPriceDetailes['+counter+'][imo_selling_price]" id="selectpickers" class="form-control" autocomplete="off" required></td>'+
         // '<td><input type="text" name="triffPriceDetailes['+counter+'][cost]" class="form-control" autocomplete="off"></td>'+
         '<td><select class="selectpicker form-control" data-live-search="true" name="triffPriceDetailes['+counter+'][currency]" data-size="10"><option>Select</option>@foreach ($currency as $item)<option value="{{$item->name}}">{{$item->name}}</option>@endforeach</select></td>'+
         // '<td><input type="text" name="triffPriceDetailes['+counter+'][agency_revene]" class="form-control"></td>'+

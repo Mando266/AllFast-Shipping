@@ -129,7 +129,7 @@
                             <div class="form-row">
                                 <div class="col-md-3 form-group">
                                     <label> VAT % </label>
-                                    @if(optional($bldraft)->shipment_type == Import)
+                                    @if(optional($bldraft)->shipment_type == "Import")
                                         <input type="text" class="form-control" placeholder="VAT %" name="vat"
                                            autocomplete="off" value="14" style="background-color:#fff" required>
                                     @else
@@ -292,12 +292,21 @@
                                                         @endforeach
                                                     </select>
                                                 </td>
+                                                @if(optional($bldraft)->imo == 1)
+                                                <td><input type="text" class="form-control" id="size_small"
+                                                           name="invoiceChargeDesc[{{ $key }}][size_small]"
+                                                           value="{{ $detail->imo_selling_price }}"
+                                                           placeholder="Amount" autocomplete="off" disabled
+                                                           style="background-color: white;">
+                                                </td>
+                                                @else
                                                 <td><input type="text" class="form-control" id="size_small"
                                                            name="invoiceChargeDesc[{{ $key }}][size_small]"
                                                            value="{{ $detail->selling_price }}"
                                                            placeholder="Amount" autocomplete="off" disabled
                                                            style="background-color: white;">
                                                 </td>
+                                                @endif
                                                 <td>
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="radio"

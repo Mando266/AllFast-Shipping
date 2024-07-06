@@ -15,11 +15,9 @@
                 <div class="widget-content widget-content-area">
                     <div class="row">
                         <div class="col-md-6 text-left">
-                            <img src="{{asset('assets/img/msl.png')}}" style="width: 350px; height: 97.6px;" alt="logo">
+                            <img src="{{asset('assets/img/allfastLogo.png')}}" style="width: 350px; " alt="logo">
                         </div>
-                        <div class="col-md-6 text-right">
-                            {{-- <img src="{{asset('assets/img/mas logo.png')}}" style="width: 300px; height: 143.6px;" alt="logo"> --}}
-                        </div>
+                    
                     </div>
                 <br>
                 <br>

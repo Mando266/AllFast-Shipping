@@ -91,7 +91,7 @@
                                         <div class="form-check-inline">
                                             <input type="checkbox" class="form-check-input" id="{{ $field }}" name="{{ $field }}" value="1"
                                                 {{ old($field, $booking->$field) == 1 ? 'checked' : '' }}
-                                                {{ $isDraft ? '' : 'disabled' }}>
+                                                {{ $isDraft ? 'disabled' : ''  }}>
                                             <label class="form-check-label" for="{{ $field }}" style="font-size: 15px; color: #3b3f5c; letter-spacing: 1px; margin-right: 10px;">
                                                 {{ $label }}
                                             </label>
