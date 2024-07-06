@@ -80,9 +80,9 @@ class InvoiceController extends Controller
     public function selectBLinvoice()
     {
         $bldrafts = BlDraft::select('*')
-        ->where('company_id', Auth::user()->company_id)
+        ->where('company_id', Auth::user()->company_id)->where('shipment_type' , 'Export')
         ->get();
-        $booking = Booking::select('*')
+        $booking = Booking::select('*')->where('shipment_type','Import')
             ->where('company_id', Auth::user()->company_id)
             ->get();
         $results = $bldrafts->merge($booking);
