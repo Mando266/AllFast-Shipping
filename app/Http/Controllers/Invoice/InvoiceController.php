@@ -80,7 +80,7 @@ class InvoiceController extends Controller
     public function selectBLinvoice()
     {
         $bldrafts = BlDraft::select('*')
-        ->where('company_id', Auth::user()->company_id)->where('shipment_type' , 'Export')
+        ->where('company_id', Auth::user()->company_id)
         ->get();
         $booking = Booking::select('*')->where('shipment_type','Import')
             ->where('company_id', Auth::user()->company_id)
