@@ -40,7 +40,6 @@ class DententionController extends Controller
      */
     public function store(DententionRequest $request)
     {
-        dd($request->all(),$request->validated());
         $bookingNo = $request->booking_no;
         if (in_array('all', $request->container_ids)) {
             $mov = Movements::where('booking_no', $bookingNo)->where('company_id', Auth::user()->company_id)

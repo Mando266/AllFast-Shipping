@@ -23,10 +23,11 @@ class DententionRequest extends FormRequest
      */
     public function rules()
     {
-        $containervalidated=in_array('all', $this->container_ids) ? 'in:all':'exists:containers,id';
+        // $containervalidated=in_array('all', $this->container_ids) ? 'in:all':'exists:containers,id';
         return [
             'booking_no' => 'required|exists:booking,id',
-            'container_ids' => 'required|array|min:1|'.$containervalidated,
+            'container_ids' => 'required|array|min:1',
+            // 'container_ids' => 'required|array|min:1|'.$containervalidated,
             'from' => 'required|exists:containers_movement,id',
             'to' => 'nullable|exists:containers_movement,id',
             'to_date' => 'nullable|date',
