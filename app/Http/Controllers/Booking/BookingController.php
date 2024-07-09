@@ -996,6 +996,35 @@ class BookingController extends Controller
         ]);
     }
 
+    public function getBookingDetails(Request $request, $bookingId)
+    {
+        try {
+            $perPage = 10;
+            $page = $request->input('page', 1);
+            $offset = ($page - 1) * $perPage;
+
+            $bookingDetails = BookingContainerDetails::where('booking_id', $bookingId)
+                ->offset($offset)
+                ->limit($perPage)
+                ->get();
+
+            $totalRows = BookingContainerDetails::where('booking_id', $bookingId)->count();
+            $totalPages = ceil($totalRows / $perPage);
+
+            $equipmentTypes = ContainersTypes::orderBy('id')->get();
+            $oldContainers = Containers::where('company_id', Auth::user()->company_id)->get();
+            $activityLocations = Ports::get();
+
+            return response()->json([
+                'bookingDetails' => view('booking.partials.booking-details', compact('bookingDetails', 'equipmentTypes', 'oldContainers', 'activityLocations'))->render(),
+                'totalPages' => $totalPages
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
     public function update(Request $request, Booking $booking)
     {
         $request->validate([
