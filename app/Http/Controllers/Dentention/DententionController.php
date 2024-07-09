@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Dentention;
 
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use App\Models\Booking\Booking;
-use App\Models\Master\Containers;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\DententionRequest;
+use App\Models\Booking\Booking;
 use App\Models\Containers\Demurrage;
 use App\Models\Containers\Movements;
-use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\DententionRequest;
+use App\Models\Master\Containers;
 use App\Models\Master\ContainersMovement;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DententionController extends Controller
 {
@@ -50,6 +50,9 @@ class DententionController extends Controller
             $containers = Containers::whereIn('id', $request->container_ids)->get();
             $calculation = $this->containersCalculation($request, $containers);
         }
+        if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
+            return $calculation;
+        }
 
         return redirect()->route('dententions.index')->with([
             'calculation' => $calculation,
@@ -68,7 +71,6 @@ class DententionController extends Controller
         $applyDays = 1;
         $applyDays += isset($request['apply_first_day']) ? 1 : 0;
         $applyDays -= isset($request['apply_last_day']) ? 1 : 0;
-
         $grandTotal = 0;
         $status = 'in_completed';
         $containerCalc = collect();
@@ -77,34 +79,16 @@ class DententionController extends Controller
             $periodCalc = collect();
             $containerTotal = 0;
             $freeTime = $bookingFreeTime;
-            $startMovement = Movements::where('container_id', $container->id)
-                ->where('movement_id', $movementId)
-                ->where('booking_no', $bookingNo)->first();
-            if (!$startMovement) {
-                $bookingCode = Booking::find($bookingNo)->ref_no;
-                return back()->with('error', "No DCHF Movement for This Booking No $bookingCode ");
+            $startMovement = $this->getStartMovement($container->id, $movementId, $bookingNo);
+            if ($startMovement instanceof \Illuminate\Http\RedirectResponse) {
+                return $startMovement;
             }
             $startMovementDate = $startMovement->movement_date;
-            if ($request->to_date == null && $request->to == null) {
-                $endMovement = Movements::where('container_id', $container->id)
-                // ->where('movement_id', $movementRCVCId)
-                    ->where('movement_date', '>', $startMovementDate)->oldest()->first();
-            } elseif ($request->to_date != null && $request->to == null) {
-                $endMovement = Movements::where('container_id', $container->id)
-                    ->where('movement_date', '>', $request->to_date)->oldest()->first();
-            } elseif ($request->to_date == null && $request->to != null) {
-                $endMovement = Movements::where('container_id', $container->id)
-                    ->where('movement_id', $request->to)
-                    ->oldest()->first();
-            } else {
-                $endMovement = Movements::where('container_id', $container->id)->where('movement_id', $request->to)
-                    ->where('movement_date', '<=', $request->to_date)->oldest()->first();
-            }
-
+            $endMovement = $this->getEndMovement($request, $container->id, $startMovementDate);
+            
             if (optional($endMovement)->movement_id == $movementRCVCId) {
                 $status = 'completed';
             }
-
             if ($endMovement == null || ($request->to_date < $endMovement->movement_date && !is_null($request->to_date))) {
                 $endMovementDate = $request->to_date;
             } else {
@@ -142,10 +126,8 @@ class DententionController extends Controller
                                 'rate' => $period->rate,
                                 'total' => $periodtotal,
                             ]);
-                            // Adding period
                             $periodCalc->add($tempCollection);
                         } else {
-                            // remaining days less than period days
                             $periodtotal = 0 * $tempDaysCount;
                             $containerTotal = $containerTotal + $periodtotal;
                             $tempCollection = collect([
@@ -154,7 +136,6 @@ class DententionController extends Controller
                                 'rate' => $period->rate,
                                 'total' => $periodtotal,
                             ]);
-                            // Adding period
                             $periodCalc->add($tempCollection);
                             $tempDaysCount = 0;
                         }
@@ -162,7 +143,6 @@ class DententionController extends Controller
                 } else {
                     if ($tempDaysCount != 0) {
                         if ($period->number_off_dayes < $tempDaysCount) {
-                            // remaining days more than period days
                             $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
                             $days = $period->number_off_dayes - $freeTime;
                             $periodtotal = (0 * $freeTime) + ($period->rate * $days);
@@ -188,11 +168,9 @@ class DententionController extends Controller
                                 'rate' => $period->rate,
                                 'total' => $periodtotal,
                             ]);
-                            // Adding period
                             $periodCalc->add($tempCollection);
                             $freeTime = 0;
                         } else {
-                            // remaining days less than period days
                             $days = $tempDaysCount - $freeTime;
                             $periodtotal = (0 * $freeTime) + ($period->rate * $days);
                             $shownDays = $tempDaysCount;
@@ -217,7 +195,6 @@ class DententionController extends Controller
                                 'rate' => $period->rate,
                                 'total' => $periodtotal,
                             ]);
-                            // Adding period
                             $periodCalc->add($tempCollection);
                             $tempDaysCount = 0;
                             $freeTime = 0;
@@ -225,10 +202,8 @@ class DententionController extends Controller
                     }
                 }
             }
-            // Adding Container with periods
             $grandTotal = $grandTotal + $containerTotal;
             $tempCollection = collect([
-                // 'bl_no' => $endMovement->bl_no ?? '',
                 'container_no' => $container->code,
                 'status' => trans("home.$status"),
                 'container_type' => $container->containersTypes->name,
@@ -239,10 +214,8 @@ class DententionController extends Controller
                 'total' => $containerTotal,
                 'periods' => $periodCalc,
             ]);
-
             $containerCalc->add($tempCollection);
         }
-
         return collect([
             'grandTotal' => $grandTotal,
             'currency' => optional($demurrage)->currency,
@@ -250,6 +223,45 @@ class DententionController extends Controller
         ]);
 
     }
+    
+    private function xxxx(Request $request, $containerId, $startMovementDate)
+    {
+        
+    }
+    private function getEndMovement(Request $request, $containerId, $startMovementDate)
+    {
+        if ($request->to_date == null && $request->to == null) {
+            $endMovement = Movements::where('container_id', $containerId)
+            // ->where('movement_id', $movementRCVCId)
+                ->where('movement_date', '>', $startMovementDate)->oldest()->first();
+        } elseif ($request->to_date != null && $request->to == null) {
+            $endMovement = Movements::where('container_id', $containerId)
+                ->where('movement_date', '>', $request->to_date)->oldest()->first();
+        } elseif ($request->to_date == null && $request->to != null) {
+            $endMovement = Movements::where('container_id', $containerId)
+                ->where('movement_id', $request->to)
+                ->oldest()->first();
+        } else {
+            $endMovement = Movements::where('container_id', $containerId)->where('movement_id', $request->to)
+                ->where('movement_date', '<=', $request->to_date)->oldest()->first();
+        }
+
+        return $endMovement;
+    }
+    
+    private function getStartMovement($containerId, $movementId, $bookingNo)
+    {
+        $startMovement = Movements::where('container_id', $containerId)
+            ->where('movement_id', $movementId)
+            ->where('booking_no', $bookingNo)->first();
+        if (!$startMovement) {
+            $bookingCode = Booking::find($bookingNo)->ref_no;
+            return back()->with('error', "No DCHF Movement for This Booking No $bookingCode ");
+        }
+        return $startMovement;
+
+    }
+    
     /**
      * Get the discharge port ID for a booking.
      *
