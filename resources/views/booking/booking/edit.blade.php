@@ -1,6 +1,38 @@
 @extends('layouts.app')
 @section('content')
 <div class="layout-px-spacing">
+    <style>
+        .pagination {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination .page-item .page-link {
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .pagination .page-item .page-link:hover {
+            background-color: #f1f1f1;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #007bff;
+            color: white;
+            border: 1px solid #007bff;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #777;
+        }
+    </style>
+
     <div class="row layout-top-spacing">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
             <div class="widget widget-one">
@@ -78,7 +110,7 @@
                                 </div>
                                 @enderror
                             </div>
-                            
+
                             @php
                                 $fields = ['coc' => 'COC', 'soc' => 'SOC', 'imo' => 'IMO', 'oog' => 'OOG', 'rf' => 'RF'];
                                 $isDraft = $quotation->id == '0';
@@ -497,6 +529,7 @@
                                     {{$message}}
                                 </div>
                             @enderror
+                        <div id="tableContainer" style="height: 400px; overflow-y: auto;">
                             <table id="containerDetails" class="table table-bordered">
                                 <thead>
                                     <tr>
@@ -519,87 +552,15 @@
                                         </th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                @foreach($booking_details as $key => $item)
-                                <tr>
-                                        <input type="hidden" value ="{{ $item->id }}" name="containerDetails[{{ $key }}][id]">
-                                    <td class="container_type">
-                                        <select class="selectpicker form-control" id="container_type" data-live-search="true" name="containerDetails[{{ $key }}][container_type]" data-size="10"
-                                                title="{{trans('forms.select')}}">
-                                            @foreach ($equipmentTypes as $equipmentType)
-                                                <option value="{{$equipmentType->id}}" {{$equipmentType->id == old('container_type',$item->container_type) ? 'selected':''}}>{{$equipmentType->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    @if(optional($booking)->shipment_type == "Import")
-                                    <td class="containerDetailsID">
-                                        <select class="selectpicker form-control" id="containerDetailsID" name="containerDetails[{{ $key }}][container_id]" data-live-search="true"  data-size="10"
-                                                title="{{trans('forms.select')}}">
-                                                @foreach ($oldContainers as $container)
-                                                    <option value="{{$container->id}}" {{$container->id == old('container_id',$item->container_id) ? 'selected':''}}>{{$container->code}}</option>
-                                                @endforeach
-                                        </select>
-                                    </td>
-                                    @else
-                                    <td class="containerDetailsID">
-                                        <select class="selectpicker form-control" id="containerDetailsID" name="containerDetails[{{ $key }}][container_id]" data-live-search="true"  data-size="10"
-                                                title="{{trans('forms.select')}}">
-                                                <option value="000" selected>Select</option>                                            
-                                                @foreach ($oldContainers as $container)
-                                                    <option value="{{$container->id}}" {{$container->id == old('container_id',$item->container_id) ? 'selected':''}}>{{$container->code}}</option>
-                                                @endforeach
-                                        </select>
-                                    </td>
-                                    @endif
-                                    @if(optional($booking)->shipment_type == "Import")
-                                    <td>
-                                        <input type="text" name="containerDetails[{{ $key }}][qty]" class="form-control input"  autocomplete="off" placeholder="QTY" value="1" disabled>
-                                    </td>   
-                                    @else
-                                    <td>
-                                        <input type="text" id="qyt" onchange="return check();" name="containerDetails[{{ $key }}][qty]" class="form-control input"  autocomplete="off" placeholder="QTY" value="{{old('qty',$item->qty)}}" required>
-                                    </td>
-                                    @endif
-                                    @if($quotation->shipment_type == 'Import')
-                                        <td>
-                                    @else
-                                        <td class="ports">
-                                    @endif
-                                        <select class="selectpicker form-control" id="activity_location_id" name="containerDetails[{{ $key }}][activity_location_id]" data-live-search="true"  data-size="10"
-                                        title="{{trans('forms.select')}}">
-                                            @foreach ($activityLocations as $activityLocation)
-                                                <option value="{{$activityLocation->id}}" {{$activityLocation->id == old('activity_location_id',$item->activity_location_id) ? 'selected':''}}>{{$activityLocation->code}}</option>
-                                            @endforeach
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input type="text" id="seal_no" name="containerDetails[{{ $key }}][seal_no]" class="form-control" autocomplete="off" placeholder="Seal No" value="{{old('seal_no',$item->seal_no)}}">
-                                    </td>
-                                    <td>
-                                        <input type="text" id="packs" name="containerDetails[{{ $key }}][packs]" class="form-control" autocomplete="off" placeholder="Packs" value="{{old('packs',$item->packs)}}">
-                                    </td> 
-                                   <td>
-                                        <input type="text" name="containerDetails[{{ $key }}][pack_type]" class="form-control" autocomplete="off" placeholder="Pack Type" value="{{old('pack_type',$item->pack_type)}}">
-                                    </td>
-                                    <td>
-                                        <input type="text" id="haz" name="containerDetails[{{ $key }}][haz]" class="form-control" autocomplete="off" placeholder="HAZ / REEFER/ OOG DETAILS / HAZ APPROVAL REF" value="{{old('haz',$item->haz)}}">
-                                    </td>
-                                    </td>
-                                    <td>
-                                        <input type="text" name="containerDetails[{{ $key }}][net_weight]" class="form-control" autocomplete="off" placeholder="Net Weight" value="{{old('net_weight',$item->net_weight)}}">
-                                    </td>
-                                    <td>
-                                        <input type="text" class="form-control" id="weight" name="containerDetails[{{ $key }}][weight]" value="{{old('weight',$item->weight)}}"
-                                        placeholder="Weight" autocomplete="off">
-                                    </td>
-                                    
-                                    <td style="width:85px;">
-                                        <button type="button" class="btn btn-danger remove" onclick="removeItem({{$item->id}})"><i class="fa fa-trash"></i></button>
-                                    </td>
-                                </tr>
-                                    @endforeach
+                                <tbody id="tableBody">
+                                <!-- Initial rows will be loaded here via AJAX -->
                                 </tbody>
                             </table>
+                        </div>
+                        <ul id="pagination" class="pagination justify-content-center">
+                            <!-- Pagination controls will be populated here via JavaScript -->
+                        </ul>
+
                             <input name="removed" id="removed" type="hidden"  value="">
 
                             <div class="row">
@@ -700,7 +661,127 @@ $(function(){
                 });
             });
         });
+
+      let currentPage = 1;
+      const bookingId = '{{ $booking->id }}';
+      const maxVisiblePages = 5; // Number of pagination links to show
+
+      function loadRows(page) {
+          $.ajax({
+              url: `/booking/booking-details/${bookingId}`,
+              method: 'GET',
+              data: { page: page },
+              success: function(response) {
+                  // Replace the existing rows with the new rows
+                  $('#tableBody').html(response.bookingDetails);
+                  setupPagination(response.totalPages, page);
+                  // Refresh the selectpicker to show the newly appended rows correctly
+                  $('.selectpicker').selectpicker('refresh');
+              },
+              error: function(xhr, status, error) {
+                  console.error('Error:', error);
+                  console.error('Response:', xhr.responseText);
+              }
+          });
+      }
+
+      function setupPagination(totalPages, currentPage) {
+          let paginationHtml = '';
+          let startPage = Math.max(currentPage - Math.floor(maxVisiblePages / 2), 1);
+          let endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
+
+          if (startPage > 1) {
+              paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+              if (startPage > 2) {
+                  paginationHtml += `<li class="page-item disabled"><a class="page-link" href="#">...</a></li>`;
+              }
+          }
+
+          for (let i = startPage; i <= endPage; i++) {
+              paginationHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                                <a class="page-link" href="#" data-page="${i}">${i}</a>
+                               </li>`;
+          }
+
+          if (endPage < totalPages) {
+              if (endPage < totalPages - 1) {
+                  paginationHtml += `<li class="page-item disabled"><a class="page-link" href="#">...</a></li>`;
+              }
+              paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
+          }
+
+          $('#pagination').html(paginationHtml);
+      }
+
+      $('#pagination').on('click', 'a', function(e) {
+          e.preventDefault();
+          let page = parseInt($(this).data('page'));
+          if (page !== currentPage) {
+              currentPage = page;
+              loadRows(page);
+          }
+      });
+
+      // Initial load
+      loadRows(currentPage);
+
+
+      // Add new container row at the top
+      $('#add').on('click', function() {
+          let newRow = `<tr>
+                        <td class="container_type">
+                            <select class="selectpicker form-control" id="container_type" data-live-search="true" name="containerDetails[0][container_type]" data-size="10" title="{{ trans('forms.select') }}">
+                                @foreach ($equipmentTypes as $equipmentType)
+                                  <option value="{{ $equipmentType->id }}">{{ $equipmentType->name }}</option>
+                                @endforeach
+                                  </select>
+                              </td>
+                              <td class="containerDetailsID">
+                                  <select class="selectpicker form-control" id="containerDetailsID" name="containerDetails[0][container_id]" data-live-search="true" data-size="10" title="{{ trans('forms.select') }}">
+                                                        @foreach ($oldContainers as $container)
+                                  <option value="{{ $container->id }}">{{ $container->code }}</option>
+                                                        @endforeach
+                                  </select>
+                              </td>
+                              <td>
+                                  <input type="text" id="qyt" name="containerDetails[0][qty]" class="form-control input" autocomplete="off" placeholder="QTY" value="1" required>
+                              </td>
+                              <td>
+                                  <select class="selectpicker form-control" id="activity_location_id" name="containerDetails[0][activity_location_id]" data-live-search="true" data-size="10" title="{{ trans('forms.select') }}">
+                                                        @foreach ($activityLocations as $activityLocation)
+                                  <option value="{{ $activityLocation->id }}">{{ $activityLocation->code }}</option>
+                                                        @endforeach
+                                  </select>
+                              </td>
+                              <td>
+                                  <input type="text" id="seal_no" name="containerDetails[0][seal_no]" class="form-control" autocomplete="off" placeholder="Seal No" value="">
+                              </td>
+                              <td>
+                                  <input type="text" id="packs" name="containerDetails[0][packs]" class="form-control" autocomplete="off" placeholder="Packs" value="">
+                              </td>
+                              <td>
+                                  <input type="text" name="containerDetails[0][pack_type]" class="form-control" autocomplete="off" placeholder="Pack Type" value="">
+                              </td>
+                              <td>
+                                  <input type="text" id="haz" name="containerDetails[0][haz]" class="form-control" autocomplete="off" placeholder="HAZ / REEFER/ OOG DETAILS / HAZ APPROVAL REF" value="">
+                              </td>
+                              <td>
+                                  <input type="text" name="containerDetails[0][net_weight]" class="form-control" autocomplete="off" placeholder="Net Weight" value="">
+                              </td>
+                              <td>
+                                  <input type="text" class="form-control" id="weight" name="containerDetails[0][weight]" value="" placeholder="Weight" autocomplete="off">
+                              </td>
+                              <td style="width:85px;">
+                                  <button type="button" class="btn btn-danger remove" onclick="removeItem(0)"><i class="fa fa-trash"></i></button>
+                              </td>
+                          </tr>`;
+          $('#tableBody').prepend(newRow);
+          $('.selectpicker').selectpicker('refresh');
+      });
+
+
   });
+
 </script>
 @endpush
 
