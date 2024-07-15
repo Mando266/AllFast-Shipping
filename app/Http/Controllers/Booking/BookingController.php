@@ -397,7 +397,6 @@ class BookingController extends Controller
 
     public function store(Request $request)
     {
-  //dd($request->input());
         $request->validate([
             'discharge_port_id' => ['required', 'different:load_port_id'],
         ], [
@@ -999,7 +998,7 @@ class BookingController extends Controller
     public function getBookingDetails(Request $request, $bookingId)
     {
         try {
-            $perPage = 10;
+            $perPage = 20;
             $page = $request->input('page', 1);
             $offset = ($page - 1) * $perPage;
 
