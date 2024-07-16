@@ -687,6 +687,7 @@ $(function(){
 
       function setupPagination(totalPages, currentPage) {
           let paginationHtml = '';
+    if (totalPages > 1) {
           let startPage = Math.max(currentPage - Math.floor(maxVisiblePages / 2), 1);
           let endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
 
@@ -708,6 +709,7 @@ $(function(){
                   paginationHtml += `<li class="page-item disabled"><a class="page-link" href="#">...</a></li>`;
               }
               paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
+           }
           }
 
           $('#pagination').html(paginationHtml);
