@@ -2,6 +2,6 @@
 
 return array (
   'dentention' => 'Dentention',
-  'storage' => 'Dentention',
+  'storage' => 'Storage',
   'storage_cal' => 'Dentention Calculation',
 );
