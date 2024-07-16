@@ -1,76 +1,52 @@
 <?php
 
-namespace App\Http\Controllers\Dentention;
+namespace App\Services;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\DententionRequest;
 use App\Models\Booking\Booking;
 use App\Models\Containers\Demurrage;
 use App\Models\Containers\Movements;
 use App\Models\Master\Containers;
 use App\Models\Master\ContainersMovement;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class DententionController extends Controller
+class BookingCalculationService
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-
-        $movementsCode = ContainersMovement::orderBy('id')->get();
-        $bookings = Booking::select('id', 'ref_no')
-            ->where('company_id', Auth::user()->company_id)
-            ->orderBy('id')
-            ->get();
-
-        return view('dentention.index', compact('bookings', 'movementsCode'));
-    }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  array  $payload
      * @return \Illuminate\Http\Response
      */
-    public function store(DententionRequest $request)
+    public function create(array $payload)
     {
-        $bookingNo = $request->booking_no;
-        if (in_array('all', $request->container_ids)) {
-            $mov = Movements::where('booking_no', $bookingNo)->where('company_id', Auth::user()->company_id)
+        if (in_array('all', $payload['container_ids'])) {
+            $mov = Movements::where('booking_no', $payload['booking_no'])->where('company_id', Auth::user()->company_id)
                 ->distinct()->get()->pluck('container_id')->toarray();
             $containers = Containers::whereIn('id', $mov)->get();
-            $calculation = $this->containersCalculation($request, $containers);
+            $calculation = $this->containersCalculation($payload, $containers);
         } else {
-            $containers = Containers::whereIn('id', $request->container_ids)->get();
-            $calculation = $this->containersCalculation($request, $containers);
+            $containers = Containers::whereIn('id', $payload['container_ids'])->get();
+            $calculation = $this->containersCalculation($payload, $containers);
         }
         if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
             return $calculation;
         }
 
-        return redirect()->route('dententions.index')->with([
-            'calculation' => $calculation,
-            'input' => $request->input(),
-        ]);
+        return $calculation;
     }
 
-    private function containersCalculation(Request $request, $containers)
+    private function containersCalculation(array $payload, $containers)
     {
-        $bookingNo = $request->booking_no;
-        $demurrage = $this->getDemurrageTriff($bookingNo);
-        $bookingFreeTime = $this->getBookingFreeTime($bookingNo);
+        $demurrage = $this->getDemurrageTriff($payload['booking_no']);
+        $bookingFreeTime = $this->getBookingFreeTime($payload['booking_no']);
         $movementRCVCId = $this->getRCVCMovementId();
         $movementDCHFId = $this->getDCHFMovementId();
-        $movementId = request()->from ?? $movementDCHFId;
-        $applyDays = 1;
-        $applyDays += isset($request['apply_first_day']) ? 1 : 0;
-        $applyDays -= isset($request['apply_last_day']) ? 1 : 0;
+        $movementId = $payload['from'] ?? $movementDCHFId;
+        $applyDays = 0;
+        $applyDays += isset($payload['apply_first_day']) ? 1 : 0;
+        $applyDays -= isset($payload['apply_last_day']) ? 1 : 0;
         $grandTotal = 0;
         $status = 'in_completed';
         $containerCalc = collect();
@@ -79,18 +55,18 @@ class DententionController extends Controller
             $periodCalc = collect();
             $containerTotal = 0;
             $freeTime = $bookingFreeTime;
-            $startMovement = $this->getStartMovement($container->id, $movementId, $bookingNo);
+            $startMovement = $this->getStartMovement($container->id, $movementId, $payload['booking_no']);
             if ($startMovement instanceof \Illuminate\Http\RedirectResponse) {
                 return $startMovement;
             }
             $startMovementDate = $startMovement->movement_date;
-            $endMovement = $this->getEndMovement($request, $container->id, $startMovementDate);
-            
+            $endMovement = $this->getEndMovement($payload, $container->id, $startMovementDate);
+
             if (optional($endMovement)->movement_id == $movementRCVCId) {
                 $status = 'completed';
             }
-            if ($endMovement == null || ($request->to_date < $endMovement->movement_date && !is_null($request->to_date))) {
-                $endMovementDate = $request->to_date;
+            if ($endMovement == null || ($payload['to_date'] < $endMovement->movement_date && !is_null($payload['to_date']))) {
+                $endMovementDate = $payload['to_date'];
             } else {
                 $endMovementDate = $endMovement->movement_date;
             }
@@ -101,6 +77,7 @@ class DententionController extends Controller
             } else {
                 $daysCount = Carbon::parse(now())->diffInDays($startMovementDate);
             }
+            
             $daysCount = $daysCount + $applyDays;
             $tempDaysCount = $daysCount;
             $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
@@ -223,32 +200,27 @@ class DententionController extends Controller
         ]);
 
     }
-    
-    private function xxxx(Request $request, $containerId, $startMovementDate)
+
+    private function getEndMovement(array $payload, $containerId, $startMovementDate)
     {
-        
-    }
-    private function getEndMovement(Request $request, $containerId, $startMovementDate)
-    {
-        if ($request->to_date == null && $request->to == null) {
+        if ($payload['to_date'] == null && $payload['to'] == null) {
             $endMovement = Movements::where('container_id', $containerId)
-            // ->where('movement_id', $movementRCVCId)
                 ->where('movement_date', '>', $startMovementDate)->oldest()->first();
-        } elseif ($request->to_date != null && $request->to == null) {
+        } elseif ($payload['to_date'] != null && $payload['to'] == null) {
             $endMovement = Movements::where('container_id', $containerId)
-                ->where('movement_date', '>', $request->to_date)->oldest()->first();
-        } elseif ($request->to_date == null && $request->to != null) {
+                ->where('movement_date', '>', $payload['to_date'])->oldest()->first();
+        } elseif ($payload['to_date'] == null && $payload['to'] != null) {
             $endMovement = Movements::where('container_id', $containerId)
-                ->where('movement_id', $request->to)
+                ->where('movement_id', $payload['to'])
                 ->oldest()->first();
         } else {
-            $endMovement = Movements::where('container_id', $containerId)->where('movement_id', $request->to)
-                ->where('movement_date', '<=', $request->to_date)->oldest()->first();
+            $endMovement = Movements::where('container_id', $containerId)->where('movement_id', $payload['to'])
+                ->where('movement_date', '<=', $payload['to_date'])->oldest()->first();
         }
 
         return $endMovement;
     }
-    
+
     private function getStartMovement($containerId, $movementId, $bookingNo)
     {
         $startMovement = Movements::where('container_id', $containerId)
@@ -256,12 +228,13 @@ class DententionController extends Controller
             ->where('booking_no', $bookingNo)->first();
         if (!$startMovement) {
             $bookingCode = Booking::find($bookingNo)->ref_no;
-            return back()->with('error', "No DCHF Movement for This Booking No $bookingCode ");
+            $movementCode = ContainersMovement::find($movementId)->code;
+            return back()->with('error', "No $movementCode Movement for This Booking No $bookingCode ");
         }
         return $startMovement;
 
     }
-    
+
     /**
      * Get the discharge port ID for a booking.
      *
