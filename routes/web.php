@@ -259,9 +259,9 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('storage', 'StorageController');
         // Route::get('storage',[StorageController::class,'index'])->name('storage.index');
     });
-    Route::prefix('dentention')->namespace('Dentention')->group(function () {
+    Route::prefix('dentention-storage-calculation')->namespace('DententionStorageCalculation')->group(function () {
         Route::resource('dententions', 'DententionController');
-        // Route::get('storage',[StorageController::class,'index'])->name('storage.index');
+        Route::resource('storage', 'StorageController');
     });
     Route::prefix('lessor')->namespace('Master')->group(function () {
         Route::resource('seller', 'LessorSellerController');
