@@ -390,11 +390,9 @@
                                 </li>
                                 @endpermission
                                 @permission('BlDraft-List')
-                                @if(Auth::user()->company_id == 2)
                                 <li>
                                     <a href="{{route('bldraft.index')}}"> Bl Gates </a>
                                 </li>
-                                @endif
                                 @endpermission
 
                                 <!-- @permission('XML-List')

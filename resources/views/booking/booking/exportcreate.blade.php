@@ -191,7 +191,7 @@
                         </div>
                         <div class="form-row">
                         <div class="form-group col-md-4">
-                                <label for="place_of_acceptence_id">Place Of Acceptence <span class="text-warning"> * (Required.) </span></label>
+                                <label for="place_of_acceptence_id">Place Of Acceptence <span class="text-warning"> * </span></label>
                                  <select class="selectpicker form-control" id="place_of_acceptence_id" data-live-search="true" name="place_of_acceptence_id" data-size="10"
                                  title="{{trans('forms.select')}}" required>
                                     @foreach ($ports as $item)

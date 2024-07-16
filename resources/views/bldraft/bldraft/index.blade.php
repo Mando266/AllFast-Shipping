@@ -18,7 +18,6 @@
                             <div class="col-md-12 text-right mb-5">
                             @permission('BlDraft-Create')
                                 <a href="{{route('bldraft.selectbooking')}}" class="btn btn-primary">New Bl Draft</a>
-                                <a href="{{route('bookingContainersRefresh')}}" class="btn btn-warning">Refresh Booking Containers</a>
                             @endpermission
                             @permission('BlDraft-List')
                                 <a class="btn btn-info" href="{{ route('export.BLExport') }}">BL Export</a> 

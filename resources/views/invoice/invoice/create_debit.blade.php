@@ -22,15 +22,9 @@
                             <div class="form-group col-md-6">
                                 <label for="customer">Customer<span class="text-warning"> * (Required.) </span></label>
                                 <select class="selectpicker form-control" name="customer_id" id="customer" data-live-search="true" data-size="10" title="{{trans('forms.select')}}">
-                                    @if($bldraft != null)
-                                        @if(optional($bldraft->booking->forwarder)->name != null)
-                                            <option value="{{optional($bldraft->booking)->ffw_id}}">{{ optional($bldraft->booking->forwarder)->name }} Forwarder</option>
-                                        @endif
-                                        @if(optional($bldraft->customerNotify)->name != null)
-                                            <option value="{{optional($bldraft)->customer_notifiy_id}}">{{ optional($bldraft->customerNotify)->name }} Notify</option>
-                                        @endif
-                                        <option value="{{optional($bldraft)->customer_id}}">{{ optional($bldraft->customer)->name }} Shipper</option>
-                                    @endif
+                                                <option value="{{optional($bldraft)->customer_consignee_id}}">{{ optional($bldraft->consignee)->name }}
+                                                    Consignee
+                                                </option>
                                 </select>
                                 @error('customer')
                                 <div style="color: red;">
@@ -50,10 +44,8 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-3">
-                                <label>Place Of Acceptence</label>
-                                @if(optional($bldraft)->place_of_acceptence_id != null)
-                                    <input type="text" class="form-control" placeholder="Place Of Acceptence" autocomplete="off" value="{{(optional($bldraft->placeOfAcceptence)->code)}}" style="background-color:#fff" disabled>
-                                @endif
+                                <label for="Date">Booking Ref</label>
+                                    <input type="text" class="form-control" placeholder="Booking Ref" autocomplete="off" value="{{(optional($bldraft)->ref_no)}}" style="background-color:#fff" disabled>
                             </div>
                             <div class="form-group col-md-3">
                                 <label>Load Port</label>
@@ -62,44 +54,23 @@
                                 @endif
                             </div>
                             <div class="form-group col-md-3">
-                                <label for="Date">Booking Ref</label>
-                                @if(optional($bldraft)->booking_id != null)
-                                    <input type="text" class="form-control" placeholder="Booking Ref" autocomplete="off" value="{{(optional($bldraft->booking)->ref_no)}}" style="background-color:#fff" disabled>
-                                @endif
-                            </div>
-                            <div class="form-group col-md-3">
-                                <label for="voyage_id">Vessel / Voyage </label>
-                                <select class="selectpicker form-control" id="voyage_id" name="voyage_id" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" disabled>
-                                    @foreach ($voyages as $item)
-                                        @if(optional($bldraft)->voyage_id != null && optional($bldraft->booking)->transhipment_port == null)
-                                            <option value="{{$item->id}}" {{$item->id == old('voyage_id',$bldraft->voyage_id) ? 'selected':''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
-                                        @elseif(optional($bldraft->booking)->voyage_id_second != null && optional($bldraft->booking)->transhipment_port != null)
-                                            <option value="{{$item->id}}" {{$item->id == old('voyage_id',$bldraft->booking->voyage_id_second) ? 'selected':''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group col-md-3">
                                 <label>Discharge Port</label>
                                 @if(optional($bldraft)->discharge_port_id != null)
                                     <input type="text" class="form-control" placeholder="Discharge Port" autocomplete="off" value="{{(optional($bldraft->dischargePort)->code)}}" style="background-color:#fff" disabled>
                                 @endif
                             </div>
                             <div class="form-group col-md-3">
-                                <label>Port of Delivery</label>
-                                @if(optional($bldraft)->place_of_delivery_id != null)
-                                    <input type="text" class="form-control" placeholder="Port of Delivery" autocomplete="off" value="{{(optional($bldraft->placeOfDelivery)->code)}}" style="background-color:#fff" disabled>
-                                @endif
+                                <label for="voyage_id">Vessel / Voyage </label>
+                                <select class="selectpicker form-control" id="voyage_id" name="voyage_id" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" disabled>
+                                    @foreach ($voyages as $item)
+                                            <option value="{{$item->id}}" {{$item->id == old('voyage_id',$bldraft->voyage_id) ? 'selected':''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
-                            <div class="form-group col-md-3">
-                                <label>Equipment Type</label>
-                                @if(optional($bldraft)->equipment_type_id != null)
-                                    <input type="text" class="form-control" placeholder="Equipment Type" name="bl_kind" autocomplete="off" value="{{(optional($bldraft->equipmentsType)->name)}}" style="background-color:#fff" disabled>
-                                @endif
-                            </div>
-                            <div class="form-group col-md-3">
+                        </div>
+                        <div class="form-row">
+
+                            <div class="form-group col-md-4">
                                 <label for="status">Invoice Status<span class="text-warning"> * </span></label>
                                 <select class="form-control" data-live-search="true" name="invoice_status" title="{{trans('forms.select')}}" required>
                                     @permission('Invoice-Draft')
@@ -115,18 +86,18 @@
                                 </div>
                                 @enderror
                             </div>
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-4">
                                 <label>QTY</label>
                                 <input type="text" class="form-control" placeholder="Qty" name="qty" autocomplete="off" value="{{$qty}}" style="background-color:#fff" disabled>
                             </div>
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-4">
                                 <label for="Date">Date</label>
                                 <input type="date" class="form-control" name="date" placeholder="Date" autocomplete="off" required value="{{old('date',date('Y-m-d'))}}">
                             </div>
-                            <div class="form-group col-md-3">
-                                <label>Exchange Rate</label>
-                                <input class="form-control" type="text" name="customize_exchange_rate" id="custom_rate_input" placeholder="Exchange Rate" value='47.15'>
-                            </div>
+                            <!-- <div class="form-group col-md-3"> -->
+                                <!-- <label>Exchange Rate</label> -->
+                                <input class="form-control" type="hidden" name="customize_exchange_rate" id="custom_rate_input" placeholder="Exchange Rate" value='48'>
+                            <!-- </div> -->
                         </div>
                         <div class="form-row">
                             <div class="col-md-12 form-group">
@@ -154,8 +125,8 @@
                                             </select>
                                             <!-- <input type="text" id="Charge Description" name="invoiceChargeDesc[0][charge_description]" class="form-control" autocomplete="off" placeholder="Charge Description" value ="Ocean Freight" > -->
                                         </td>
-                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" value="{{(optional($bldraft->booking->quotation)->ofr)}}" placeholder="Weight" autocomplete="off" disabled style="background-color: white;"></td>
-                                        <td><input type="text" class="form-control" id="ofr" name="invoiceChargeDesc[0][total_amount]" value="{{(optional($bldraft->booking->quotation)->ofr) * $qty }}" placeholder="Ofr" autocomplete="off" disabled style="background-color: white;"></td>
+                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" value="{{(optional($bldraft->quotation)->ofr)}}" placeholder="Amount" autocomplete="off"  style="background-color: white;" required></td>
+                                        <td><input type="text" class="form-control" id="ofr" name="invoiceChargeDesc[0][total_amount]" value="{{(optional($bldraft->quotation)->ofr) * $qty }}" placeholder="Ofr" autocomplete="off" disabled style="background-color: white;"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_amount" name="invoiceChargeDesc[0][egy_amount]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount" name="invoiceChargeDesc[0][total_egy]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount_vat" name="invoiceChargeDesc[0][egp_vat]"></td>
@@ -219,12 +190,15 @@
         let exchangeRate = parseFloat($('#custom_rate_input').val());
         let sizeSmall = parseFloat($('input[name="invoiceChargeDesc[0][size_small]"]').val());
         let totalAmount = parseFloat($('input[name="invoiceChargeDesc[0][total_amount]"]').val());
-        let totalAmount = enabled == 1 ? sizeSmall * qty : sizeSmall;
+        let qty = parseFloat($('input[name="qty"]').val());
 
+        let totalUsd = sizeSmall * qty;
         let egyAmount = sizeSmall * exchangeRate;
-        let totalEgy = totalAmount * exchangeRate;
-        let totalEgyaftervat = totalAmount * exchangeRate;
+        let totalEgy = totalUsd * exchangeRate;
+        let totalEgyaftervat = totalUsd * exchangeRate;
 
+        $('input[name="invoiceChargeDesc[0][total_amount]"]').val(totalUsd.toFixed(2));
+        
         $('input[name="invoiceChargeDesc[0][egy_amount]"]').val(egyAmount.toFixed(2));
         $('input[name="invoiceChargeDesc[0][total_egy]"]').val(totalEgy.toFixed(2));
         $('input[name="invoiceChargeDesc[0][egp_vat]"]').val(totalEgy.toFixed(2));
