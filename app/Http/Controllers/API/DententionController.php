@@ -4,7 +4,6 @@ namespace App\Http\Controllers\API;
 
 use App\Models\Bl\BlDraft;
 use Illuminate\Http\Request;
-use App\Models\Booking\Booking;
 use App\Models\Master\Containers;
 use App\Http\Controllers\Controller;
 use App\Models\Containers\Movements;

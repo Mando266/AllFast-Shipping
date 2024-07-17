@@ -8,10 +8,20 @@ use App\Models\Containers\Movements;
 use App\Models\Master\Containers;
 use App\Models\Master\ContainersMovement;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
 class BookingCalculationService
 {
+
+    public function booking(array $columns = ['*'], array $relations = []): Builder
+    {
+        return Booking::select($columns)
+            ->where('booking_type','full')
+            ->with($relations)
+            ->orderBy('id', 'desc');
+
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -40,7 +50,7 @@ class BookingCalculationService
     private function containersCalculation(array $payload, $containers)
     {
         $demurrage = $this->getDemurrageTriff($payload['booking_no']);
-        $bookingFreeTime = $this->getBookingFreeTime($payload['booking_no']);
+        $bookingFreeTime = isset($payload['is_storage']) ? 0: $this->getBookingFreeTime($payload['booking_no']);
         $movementRCVCId = $this->getRCVCMovementId();
         $movementDCHFId = $this->getDCHFMovementId();
         $movementId = $payload['from'] ?? $movementDCHFId;
@@ -71,13 +81,12 @@ class BookingCalculationService
                 $endMovementDate = $endMovement->movement_date;
             }
             $diffBetweenDates = 0;
-
             if ($endMovementDate) {
                 $daysCount = Carbon::parse($endMovementDate)->diffInDays($startMovementDate);
             } else {
-                $daysCount = Carbon::parse(now())->diffInDays($startMovementDate);
+                $daysCount = Carbon::parse(today())->diffInDays($startMovementDate);
             }
-            
+
             $daysCount = $daysCount + $applyDays;
             $tempDaysCount = $daysCount;
             $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
