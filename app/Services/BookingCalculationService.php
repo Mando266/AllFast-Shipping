@@ -2,14 +2,15 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
+use App\Models\Master\Ports;
 use App\Models\Booking\Booking;
+use App\Models\Master\Containers;
 use App\Models\Containers\Demurrage;
 use App\Models\Containers\Movements;
-use App\Models\Master\Containers;
-use App\Models\Master\ContainersMovement;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Master\ContainersMovement;
+use Illuminate\Database\Eloquent\Builder;
 
 class BookingCalculationService
 {
@@ -17,7 +18,7 @@ class BookingCalculationService
     public function booking(array $columns = ['*'], array $relations = []): Builder
     {
         return Booking::select($columns)
-            ->where('booking_type','full')
+            ->where('booking_type', 'full')
             ->with($relations)
             ->orderBy('id', 'desc');
 
@@ -49,8 +50,12 @@ class BookingCalculationService
 
     private function containersCalculation(array $payload, $containers)
     {
-        $demurrage = $this->getDemurrageTriff($payload['booking_no']);
-        $bookingFreeTime = isset($payload['is_storage']) ? 0: $this->getBookingFreeTime($payload['booking_no']);
+        $demurrage = $this->getDemurrageTriff($payload['booking_no'], isset($payload['is_storage']));
+        if ($demurrage instanceof \Illuminate\Http\RedirectResponse) {
+            return $demurrage;
+        }
+
+        $bookingFreeTime = isset($payload['is_storage']) ? 0 : $this->getBookingFreeTime($payload['booking_no']);
         $movementRCVCId = $this->getRCVCMovementId();
         $movementDCHFId = $this->getDCHFMovementId();
         $movementId = $payload['from'] ?? $movementDCHFId;
@@ -280,14 +285,26 @@ class BookingCalculationService
      * @param  string  $booking_no
      * @return \App\Models\Containers\Demurrage|null
      */
-    private function getDemurrageTriff($booking_no)
+    private function getDemurrageTriff($booking_no, $is_storage)
     {
         $booking = $this->getBooking($booking_no);
         if (!$booking) {
             return null;
         }
-        return Demurrage::where('port_id', $booking->discharge_port_id)->with('slabs.periods')->first();
+        $cal_type = $is_storage ? 'STORAGE' : 'DETENTION';
+        $type = strtoupper("{$booking->shipment_type}/{$cal_type}");
+        $demurrage = Demurrage::where('is_storge', $type)
+            ->where('port_id', $booking->discharge_port_id)
+            ->with('slabs.periods')->first();
+
+        if (!$demurrage) {
+            $port = Ports::find($booking->discharge_port_id);
+            return back()->with('error', "There is No ( $type ) Triff for BookingNo: {$booking->ref_no}  in port: $port->name( {$port->code} ) ");
+        }
+        return $demurrage;
+
     }
+
     private function getBookingFreeTime($booking_no)
     {
         $booking = $this->getBooking($booking_no);
