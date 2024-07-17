@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\DententionStorageCalculation;
 
-
-use App\Models\Booking\Booking;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DententionRequest;
 use App\Models\Master\ContainersMovement;
@@ -25,9 +23,7 @@ class StorageController extends Controller
     public function index()
     {
         $movementsCode = ContainersMovement::orderBy('id')->get();
-        $bookings = Booking::select('id', 'ref_no')
-                            ->orderBy('id')->get();
-
+        $bookings = $this->service->booking(['id', 'ref_no','shipment_type'])->get();
         return view('storage_cal.index', compact('bookings', 'movementsCode'));
     }
 
@@ -39,7 +35,8 @@ class StorageController extends Controller
      */
     public function store(DententionRequest $request)
     {
-        $calculation = $this->service->create($request->validated());
+        $data=array_merge($request->validated(),['is_storage'=>1]);
+        $calculation = $this->service->create($data);
         if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
             return $calculation;
         }

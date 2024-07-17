@@ -31,8 +31,6 @@
                                 $calculation = session('calculation');
                                 $input = session('input');
                             @endphp
-
-    
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="BLNo">Booking No</label>
@@ -40,7 +38,7 @@
                                             name="booking_no" data-size="10"
                                             title="{{trans('forms.select')}}">
                                         @foreach ($bookings as $item)
-                                            <option value="{{$item->id}}" {{$item->id == old('booking_no',isset($input) ? $input['booking_no'] : '') ? 'selected':''}}>{{$item->ref_no}}</option>
+                                            <option value="{{$item->id}}" data-shipment_type="{{$item->shipment_type}}" {{$item->id == old('booking_no',isset($input) ? $input['booking_no'] : '') ? 'selected':''}}>{{$item->ref_no}}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -61,7 +59,7 @@
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label>From</label>
-                                    <select class="selectpicker form-control" data-live-search="true" name="from"
+                                    <select class="selectpicker form-control" data-live-search="true" name="from" id="from_code"
                                             data-size="10"
                                             title="{{trans('forms.select')}}" >
                                         @foreach ($movementsCode as $item)
@@ -281,8 +279,6 @@
 
             <script>
                 let company_id = "{{auth()->user()->company_id}}";
-                
-
                 let selectedCodes = '{{ implode(',',$input['container_ids'] ??[]) }}'
                 selectedCodes = selectedCodes.split(',').filter(item => item !== '')
                 $(function() {
@@ -292,8 +288,10 @@
                 });
 
                 $('#booking_no').change(function (e) {
-                     let container = $('#port'); 
-                     let booking_no = $('#booking_no').val();  
+                    let targetText = 'DCHF';
+                    let container = $('#port'); 
+                    let booking_no = $('#booking_no').val();  
+                    let shipment_type = $('#booking_no').find(':selected').data('shipment_type');
                     container.empty();
                     container.append(`<option value='all'  ${selectedCodes.includes( 'all') ? 'selected' : ''}>All</option>`);
                     $.ajax({
@@ -314,6 +312,11 @@
                         });
                         container.selectpicker('refresh');
                     })
+                    if(shipment_type=='Export'){ targetText = 'RCVS'; }
+                    $("#from_code option").filter(function() {
+                        return $(this).text() === targetText;
+                    }).prop('selected', true); 
+                    $('#from_code').trigger('change');
                 });
             </script>
         @endpush
