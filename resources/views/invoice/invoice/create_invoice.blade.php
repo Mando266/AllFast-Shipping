@@ -19,32 +19,38 @@
                               enctype="multipart/form-data">
                             @csrf
                             <div class="form-row">
+                            @if(request()->has('bldraft_id'))
+                                <input type="hidden" name="bldraft_id" value="{{request()->input('bldraft_id')}}">
+                            @else    
                                 <input type="hidden" name="booking_ref" value="{{request()->input('booking_ref')}}">
+                            @endif
                                 <div class="form-group col-md-6">
                                     <label for="customer">Customer<span
-                                                class="text-warning"> * (Required.) </span></label>
+                                                class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" name="customer_id" id="customer"
                                             data-live-search="true" data-size="10"
                                             title="{{trans('forms.select')}}" required>
-                                        @if($bldraft != null)
+                                        @if($bldraft != null && request()->has('booking_ref'))
+                                            @if(optional($bldraft->consignee)->name != null)
+                                                <option value="{{optional($bldraft)->customer_consignee_id}}">{{ optional($bldraft->consignee)->name }}
+                                                    Consignee
+                                                </option>
+                                            @endif
+                                        @elseif($bldraft != null && request()->has('bldraft_id'))
+                                            @if(optional($bldraft->customer)->name != null)
+                                            <option value="{{optional($bldraft)->customer_id}}">{{ optional($bldraft->customer)->name }}
+                                                Shipper
+                                            </option>
+                                            @endif
                                             @if(optional($bldraft->forwarder)->name != null)
                                                 <option value="{{optional($bldraft)->ffw_id}}">{{ optional($bldraft->forwarder)->name }}
                                                     Forwarder
-                                                </option>
-                                            @elseif(optional($bldraft->consignee)->name != null)
-                                                <option value="{{optional($bldraft)->customer_consignee_id}}">{{ optional($bldraft->consignee)->name }}
-                                                    Consignee
                                                 </option>
                                             @endif
                                             @if(optional($bldraft->customerNotify)->name != null)
                                                 <option value="{{optional($bldraft)->customer_notifiy_id}}">{{ optional($bldraft->customerNotify)->name }}
                                                     Notify
                                                 </option>
-                                            @endif
-                                            @if(optional($bldraft->customer)->name != null)
-                                            <option value="{{optional($bldraft)->customer_id}}">{{ optional($bldraft->customer)->name }}
-                                                Shipper
-                                            </option>
                                             @endif
                                         @endif
                                     </select>
@@ -508,13 +514,14 @@
 
 <script>
     // Function to handle the select all checkbox for VAT
-    $('#selectAllVat').change(function() {
-        var isChecked = $(this).is(':checked');
-        $('#charges tbody tr').each(function() {
-            $(this).find('input[name$="[add_vat]"][value="' + (isChecked ? '1' : '0') + '"]').prop('checked', true);
+    $('#selectAllVat').change(function () {
+            var isChecked = $(this).is(':checked');
+            $('#charges tbody tr').each(function () {
+                $(this).find('input[name$="[add_vat]"][value="' + (isChecked ? '1' : '0') + '"]').prop('checked', true);
+            });
+            calculateAmounts(); // Ensure calculations are triggered
         });
-        calculateTotals();
-    });
+
 
     function calculateAmounts() {
         let vat = parseFloat($('input[name="vat"]').val()) / 100;

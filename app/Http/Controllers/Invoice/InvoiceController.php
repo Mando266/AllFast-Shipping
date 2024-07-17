@@ -76,28 +76,27 @@ class InvoiceController extends Controller
         $charges = ChargesDesc::orderBy('id')->get();
         $voyages = Voyages::with('vessel')->where('company_id', $companyId)->get();
     
+        $blId = null;
+        $bldraft = null;
+        $qty = 0;
+        $equipmentTypes = collect();
+        $triffDetails = null;
+    
         if ($request->has('bldraft_id')) {
             $blId = $request->input('bldraft_id');
             $bldraft = BlDraft::where('id', $blId)->with('blDetails')->first();
             $qty = $bldraft->blDetails->count();
             $equipmentTypeIds = $bldraft->booking->bookingContainerDetails->pluck('container_type')->toArray();
-            $equipmentTypes = collect();
-            if (!empty($equipmentTypeIds)) {
-                $equipmentTypes = ContainersTypes::whereIn('id', $equipmentTypeIds)->orderBy('id')->get();
-            }
+            $equipmentTypes = $this->getEquipmentTypes($equipmentTypeIds);
             $triffDetails = $this->getTriffDetails($companyId, $bldraft, $equipmentTypes);
-        }elseif($request->has('booking_ref')){
+        } elseif ($request->has('booking_ref')) {
             $blId = $request->input('booking_ref');
             $bldraft = Booking::where('id', $blId)->with('bookingContainerDetails')->first();
             $qty = $bldraft->bookingContainerDetails->count();
             $equipmentTypeIds = $bldraft->bookingContainerDetails->pluck('container_type')->toArray();
-            $equipmentTypes = collect();
-            if (!empty($equipmentTypeIds)) {
-                $equipmentTypes = ContainersTypes::whereIn('id', $equipmentTypeIds)->orderBy('id')->get();
-            }
-            $triffDetails = $this->getTriffDetails($companyId, $bldraft, $equipmentTypes);    
+            $equipmentTypes = $this->getEquipmentTypes($equipmentTypeIds);
+            $triffDetails = $this->getTriffDetails($companyId, $bldraft, $equipmentTypes);
         }
-
     
         return view('invoice.invoice.create_invoice', [
             'qty' => $qty,
@@ -109,12 +108,21 @@ class InvoiceController extends Controller
         ]);
     }
     
+    private function getEquipmentTypes($equipmentTypeIds)
+    {
+        if (empty($equipmentTypeIds)) {
+            return collect();
+        }
+    
+        return ContainersTypes::whereIn('id', $equipmentTypeIds)->orderBy('id')->get();
+    }
+    
     private function getTriffDetails($companyId, $bldraft, $equipmentTypes)
     {
-        $isExport = $bldraft->booking->shipment_type == "Export";
+        $isExport = optional($bldraft->booking)->shipment_type == "Export";
         $portId = $isExport ? $bldraft->load_port_id : $bldraft->discharge_port_id;
         $isImportOrExport = $isExport ? 1 : 0;
-
+    
         return LocalPortTriff::where('company_id', $companyId)
             ->where('port_id', $portId)
             ->where('validity_to', '>=', Carbon::now()->format("Y-m-d"))
@@ -130,16 +138,12 @@ class InvoiceController extends Controller
             ->first();
     }
     
-
-
     public function storeInvoice(Request $request)
     {
         //dd($request->input());
             request()->validate([
-                'booking_ref' => ['required'],
                 'customer' => ['required'],
                 'customer_id' => ['required'],
-                'add_egp' => ['required'],
             ]);
 
         $totalAmount = 0;
@@ -149,13 +153,10 @@ class InvoiceController extends Controller
         if($totalAmount == 0){
             return redirect()->back()->with('error','Invoice Total Amount Can not be Equal Zero')->withInput($request->input());
         }
-    
-            $bldraft = Booking::where('id',$request->booking_ref)->with('bookingContainerDetails')->first();
-            $blkind = str_split($request->bl_kind, 2);
-            $blkind = $blkind[0];
+      
             $invoice = Invoice::create([
-                'booking_ref'=>$request->booking_ref,
-                // 'bldraft_id'=>$request->bldraft_id,
+                'booking_ref'=>$request->booking_ref ?? null,
+                'bldraft_id'=>$request->bldraft_id ?? null,
                 'qty'=>$request->qty,
                 'tax_discount'=>$request->tax_discount,
                 'customer'=>$request->customer,
@@ -168,45 +169,46 @@ class InvoiceController extends Controller
                 'customize_exchange_rate'=>$request->customize_exchange_rate,
                 'vat'=>$request->vat,
                 'add_egp'=>$request->add_egp,
-                'invoice_kind'=>$blkind,
                 'type'=>'invoice',
                 'invoice_status'=>$request->invoice_status,
                 'notes'=>$request->notes,
             ]);
         
 
+            foreach($request->input('invoiceChargeDesc',[])  as $chargeDesc){
+                InvoiceChargeDesc::create([
+                    'invoice_id'=>$invoice->id,
+                    'charge_description'=>$chargeDesc['charge_description'],
+                    'size_small'=>$chargeDesc['size_small'],
+                    'total_amount'=>$chargeDesc['total'],
+                    'total_egy'=>$chargeDesc['egy_amount'],
+                    'enabled'=>$chargeDesc['enabled'],
+                    'add_vat'=>$chargeDesc['add_vat'],
+                    'usd_vat'=>$chargeDesc['usd_vat'],
+                    'egp_vat'=>$chargeDesc['egp_vat'],
+                ]);
+            }
+
         $setting = Setting::find(1);
-    
-                $invoice_no = 'DRAFTV';
-                $invoice_no = $invoice_no . str_pad( $setting->invoice_draft, 4, "0", STR_PAD_LEFT );
-                $invoice->invoice_no = $invoice_no;
-                $setting->invoice_draft += 1;
-                $setting->save();
-                $invoice->save();
-    
+        $invoice_no = 'DRAFTV';
+        $invoice_no = $invoice_no . str_pad( $setting->invoice_draft, 4, "0", STR_PAD_LEFT );
+        $invoice->invoice_no = $invoice_no;
+        $setting->invoice_draft += 1;
+        $setting->save();
+        $invoice->save();
 
-        foreach($request->input('invoiceChargeDesc',[])  as $chargeDesc){
-            InvoiceChargeDesc::create([
-                'invoice_id'=>$invoice->id,
-                'charge_description'=>$chargeDesc['charge_description'],
-                'size_small'=>$chargeDesc['size_small'],
-                'total_amount'=>$chargeDesc['total'],
-                'total_egy'=>$chargeDesc['egy_amount'],
-                'enabled'=>$chargeDesc['enabled'],
-                'add_vat'=>$chargeDesc['add_vat'],
-                'usd_vat'=>$chargeDesc['usd_vat'],
-                'egp_vat'=>$chargeDesc['egp_vat'],
-            ]);
+        if ($request->has('bldraft_id')) {
+            if($request->bldraft_id != '0'){
+                $bldrafts = BlDraft::where('id',$request->input('bldraft_id'))->first();
+                $bldrafts->has_bl = 1;
+                $bldrafts->save();
+            }
         }
 
-        if($request->booking_ref != '0'){
-            $bldrafts = Booking::where('id',$request->input('booking_ref'))->first();
-            $bldrafts->has_bl = 1;
-            $bldrafts->save();
-        }
         return redirect()->route('invoice.index')->with('success',trans('Invoice.created'));
     }
 
+    
     public function selectBL()
     {
         $bldraft = BlDraft::select('*')
@@ -221,6 +223,7 @@ class InvoiceController extends Controller
             'bldrafts'=>$bldrafts,
         ]);
     }
+
     public function create()
     {
         $this->authorize(__FUNCTION__,Invoice::class);
@@ -280,7 +283,6 @@ class InvoiceController extends Controller
 
         ]);
     }
-
 
     public function store(Request $request)
     {
@@ -559,7 +561,7 @@ class InvoiceController extends Controller
     {
         $charges = ChargesDesc::orderBy('id')->get();
 
-        if($invoice->booking_ref != 0){
+        if($invoice->booking_ref != 0 || $invoice->bldraft_id != 0){
             $bldraft = Booking::where('id',$invoice->booking_ref)->with('bookingContainerDetails')->first();
         }else{
             $bldraft = null;
