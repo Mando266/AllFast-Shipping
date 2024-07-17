@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\DententionStorageCalculation;
 
-
-use App\Models\Booking\Booking;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DententionRequest;
 use App\Models\Master\ContainersMovement;
@@ -13,7 +11,7 @@ class DententionController extends Controller
 {
     private BookingCalculationService $service;
 
-    public function __construct( BookingCalculationService $service)
+    public function __construct(BookingCalculationService $service)
     {
         $this->service = $service;
     }
@@ -25,8 +23,8 @@ class DententionController extends Controller
     public function index()
     {
         $movementsCode = ContainersMovement::orderBy('id')->get();
-        $bookings = Booking::select('id', 'ref_no')
-                            ->orderBy('id')->get();
+        $bookings = $this->service->booking(['id', 'ref_no'])->get();
+
         return view('dentention.index', compact('bookings', 'movementsCode'));
     }
 
