@@ -185,8 +185,8 @@
                                             <td>{{$invoice->customer}}</td>
                                             <td>{{optional($invoice->customerShipperOrFfw)->tax_card_no}}</td>
                                             <td>{{optional($invoice->booking)->ref_no}}</td>
-                                            <td>{{optional(optional($invoice->booking)->voyage)->voyage_no}}</td>
-                                            <td>{{optional(optional(optional($invoice->booking)->voyage)->vessel)->name}}</td>
+                                            <td>{{$invoice->bldraft_id != 0 ? || $invoice->booking_ref != 0 ? optional(optional($invoice->booking)->voyage)->voyage_no}} : {{optional(optional($invoice)->voyage)->voyage_no}}</td>
+                                            <td>{{$invoice->bldraft_id != 0 ? || $invoice->booking_ref != 0 ? optional(optional(optional($invoice->booking)->voyage)->vessel)->name}} : {{optional(optional(optional($invoice)->voyage)->vessel)->name}}</td>
                                             <td>{{optional($invoice)->date}}</td>
                                             <td>{{optional($invoice)->type}}</td>
                                             <td>{{optional($invoice->booking)->payment_kind}}</td>
