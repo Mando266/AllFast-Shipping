@@ -106,8 +106,8 @@
                                 @enderror
                             </div>
                             <div class="form-group col-md-3">
-                                <label for="agent_id">Import Agent <span class="text-warning"> *</span></label>
-                                <select class="selectpicker form-control" id="agentload" data-live-search="true" name="agent_id" data-size="10" required>
+                                <label for="agent_id">Import Agent</label>
+                                <select class="selectpicker form-control" id="agentload" data-live-search="true" name="agent_id" data-size="10">
                                     <option value="">Select...</option>
                                     @foreach ($agents as $item)
                                     <option value="{{$item->id}}" {{$item->id == old('agent_id') ? 'selected':''}}>{{$item->name}}</option>
