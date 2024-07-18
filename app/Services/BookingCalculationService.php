@@ -217,17 +217,18 @@ class BookingCalculationService
     {
         if ($payload['to_date'] == null && $payload['to'] == null) {
             $endMovement = Movements::where('container_id', $containerId)
-                ->whereDate('movement_date', '>=', $startMovementDate)->oldest()->first();
+                ->where('movement_date', '>', $startMovementDate)->oldest()->first();
         } elseif ($payload['to_date'] != null && $payload['to'] == null) {
             $endMovement = Movements::where('container_id', $containerId)
-                ->whereDate('movement_date', '<=', $payload['to_date'])->oldest()->first();
+                ->where('movement_date', '>', $payload['to_date'])->oldest()->first();
         } elseif ($payload['to_date'] == null && $payload['to'] != null) {
             $endMovement = Movements::where('container_id', $containerId)
                 ->where('movement_id', $payload['to'])
                 ->oldest()->first();
         } else {
-            $endMovement = Movements::where('container_id', $containerId)->where('movement_id', $payload['to'])
-                ->whereDate('movement_date', '<=', $payload['to_date'])->oldest()->first();
+            $endMovement = Movements::where('container_id', $containerId)
+                                    ->where('movement_id', $payload['to'])
+                                    ->where('movement_date', '>', $payload['to_date'])->oldest()->first();
         }
 
         return $endMovement;
