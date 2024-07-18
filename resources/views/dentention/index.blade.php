@@ -32,7 +32,6 @@
                                 $input = session('input');
                             @endphp
 
-    
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="BLNo">Booking No</label>
@@ -62,7 +61,7 @@
                                 <div class="form-group col-md-6">
                                     <label>From</label>
                                     <select class="selectpicker form-control" data-live-search="true" name="from"
-                                            data-size="10"
+                                            data-size="10" id="from_code"
                                             title="{{trans('forms.select')}}" >
                                         @foreach ($movementsCode as $item)
                                             <option
@@ -76,11 +75,10 @@
                                 <div class="form-group col-md-6">
                                     <label>To</label>
                                     <select class="selectpicker form-control" data-live-search="true" name="to"
-                                            data-size="10"
+                                            data-size="10" id="to_code"
                                             title="{{trans('forms.select')}}">
                                         @foreach ($movementsCode as $item)
-                                            <option
-                                                    value="{{$item->id}}" {{$item->id == old('to',isset($input) ? $input['to'] : '') }}>{{$item->code}}</option>
+                                            <option value="{{$item->id}}" {{$item->id == old('to',isset($input) ? $input['to'] : '') }}>{{$item->code}} </option>
                                         @endforeach
                                     </select>
                                     @if ($errors->has('to'))
@@ -288,6 +286,8 @@
                 $(function() {
                     if($('#booking_no').val()){
                         $('#booking_no').change();
+                        $('#from_code').val({{ old('from',isset($input) ? $input['from'] : '') }}).trigger('change');
+                        $('#to_code').val({{ old('to',isset($input) ? $input['to'] : '') }}).trigger('change');
                     }
                 });
 

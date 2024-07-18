@@ -76,7 +76,6 @@ class BookingCalculationService
             }
             $startMovementDate = $startMovement->movement_date;
             $endMovement = $this->getEndMovement($payload, $container->id, $startMovementDate);
-
             if (optional($endMovement)->movement_id == $movementRCVCId) {
                 $status = 'completed';
             }
@@ -87,11 +86,10 @@ class BookingCalculationService
             }
             $diffBetweenDates = 0;
             if ($endMovementDate) {
-                $daysCount = Carbon::parse($endMovementDate)->diffInDays($startMovementDate);
+                $daysCount = Carbon::parse($endMovementDate)->startOfDay()->diffInDays(Carbon::parse($startMovementDate)->startOfDay());
             } else {
-                $daysCount = Carbon::parse(today())->diffInDays($startMovementDate);
+                $daysCount =today()->diffInDays(Carbon::parse($startMovementDate)->startOfDay());
             }
-
             $daysCount = $daysCount + $applyDays;
             $tempDaysCount = $daysCount;
             $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
@@ -219,17 +217,17 @@ class BookingCalculationService
     {
         if ($payload['to_date'] == null && $payload['to'] == null) {
             $endMovement = Movements::where('container_id', $containerId)
-                ->where('movement_date', '>', $startMovementDate)->oldest()->first();
+                ->whereDate('movement_date', '>=', $startMovementDate)->oldest()->first();
         } elseif ($payload['to_date'] != null && $payload['to'] == null) {
             $endMovement = Movements::where('container_id', $containerId)
-                ->where('movement_date', '>', $payload['to_date'])->oldest()->first();
+                ->whereDate('movement_date', '<=', $payload['to_date'])->oldest()->first();
         } elseif ($payload['to_date'] == null && $payload['to'] != null) {
             $endMovement = Movements::where('container_id', $containerId)
                 ->where('movement_id', $payload['to'])
                 ->oldest()->first();
         } else {
             $endMovement = Movements::where('container_id', $containerId)->where('movement_id', $payload['to'])
-                ->where('movement_date', '<=', $payload['to_date'])->oldest()->first();
+                ->whereDate('movement_date', '<=', $payload['to_date'])->oldest()->first();
         }
 
         return $endMovement;
