@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use Carbon\Carbon;
-use App\Models\Master\Ports;
 use App\Models\Booking\Booking;
-use App\Models\Master\Containers;
 use App\Models\Containers\Demurrage;
 use App\Models\Containers\Movements;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Master\Containers;
 use App\Models\Master\ContainersMovement;
+use App\Models\Master\Ports;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class BookingCalculationService
 {
@@ -83,23 +83,24 @@ class BookingCalculationService
                 $endMovement == null ||
                 ($payload['to_date'] < $endMovement->movement_date && !is_null($payload['to_date'])) ||
                 !in_array(optional($endMovement)->movement_id, $movementCompletedIds)
-                ) {
-               
+            ) {
+
                 $endMovementDate = $payload['to_date'];
             } else {
                 $endMovementDate = $endMovement->movement_date;
             }
-            $diffBetweenDates = 0;
             if ($endMovementDate) {
                 $daysCount = Carbon::parse($endMovementDate)->startOfDay()->diffInDays(Carbon::parse($startMovementDate)->startOfDay());
             } else {
-                $daysCount =today()->diffInDays(Carbon::parse($startMovementDate)->startOfDay());
+                $daysCount = today()->diffInDays(Carbon::parse($startMovementDate)->startOfDay());
             }
             $daysCount = $daysCount + $applyDays;
             $tempDaysCount = $daysCount;
+            $diffBetweenDates = 0;
             $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
             foreach (optional($slab)->periods as $period) {
                 if ($freeTime > $period->number_off_dayes) {
+
                     if ($tempDaysCount != 0) {
                         if ($period->number_off_dayes < $tempDaysCount) {
                             $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
@@ -134,13 +135,16 @@ class BookingCalculationService
                             $tempDaysCount = 0;
                         }
                     }
+
                 } else {
+
                     if ($tempDaysCount != 0) {
                         if ($period->number_off_dayes < $tempDaysCount) {
                             $tempDaysCount = $tempDaysCount - $period->number_off_dayes;
                             $days = $period->number_off_dayes - $freeTime;
                             $periodtotal = (0 * $freeTime) + ($period->rate * $days);
                             $shownDays = $period->number_off_dayes;
+
                             if ($diffBetweenDates != 0) {
                                 if ($diffBetweenDates >= $period->number_off_dayes) {
                                     $diffBetweenDates = $diffBetweenDates - $period->number_off_dayes;
@@ -166,8 +170,10 @@ class BookingCalculationService
                             $freeTime = 0;
                         } else {
                             $days = $tempDaysCount - $freeTime;
+                            $days = $days < 0 ? 0 : $days;
                             $periodtotal = (0 * $freeTime) + ($period->rate * $days);
                             $shownDays = $tempDaysCount;
+
                             if ($diffBetweenDates != 0) {
                                 if ($diffBetweenDates >= $tempDaysCount) {
                                     $diffBetweenDates = $diffBetweenDates - $tempDaysCount;
@@ -196,6 +202,7 @@ class BookingCalculationService
                     }
                 }
             }
+
             $grandTotal = $grandTotal + $containerTotal;
             $tempCollection = collect([
                 'container_no' => $container->code,
@@ -222,22 +229,22 @@ class BookingCalculationService
     {
         if ($payload['to_date'] == null && $payload['to'] == null) {
             $endMovement = Movements::where('container_id', $containerId)
-                                    ->where('movement_date', '>', $startMovementDate)
-                                    ->latest('movement_date')->first();
-                                    
+                ->where('movement_date', '>', $startMovementDate)
+                ->latest('movement_date')->first();
+
         } elseif ($payload['to_date'] != null && $payload['to'] == null) {
             $endMovement = Movements::where('container_id', $containerId)
-                                    ->where('movement_date', '<=', $payload['to_date'])
-                                    ->latest('movement_date')->first();
+                ->where('movement_date', '<=', $payload['to_date'])
+                ->latest('movement_date')->first();
         } elseif ($payload['to_date'] == null && $payload['to'] != null) {
             $endMovement = Movements::where('container_id', $containerId)
-                                    ->where('movement_id', $payload['to'])
-                                    ->latest('movement_date')->first();
+                ->where('movement_id', $payload['to'])
+                ->latest('movement_date')->first();
         } else {
             $endMovement = Movements::where('container_id', $containerId)
-                                    ->where('movement_id', $payload['to'])
-                                    ->where('movement_date', '<=', $payload['to_date'])
-                                    ->latest('movement_date')->first();
+                ->where('movement_id', $payload['to'])
+                ->where('movement_date', '<=', $payload['to_date'])
+                ->latest('movement_date')->first();
         }
 
         return $endMovement;
@@ -284,7 +291,7 @@ class BookingCalculationService
      */
     private function getMovementCompletedIds()
     {
-        $codes=['RCVC','LODF'];
+        $codes = ['RCVC', 'LODF'];
         return ContainersMovement::whereIn('code', $codes)->pluck('id')->toarray();
     }
 
