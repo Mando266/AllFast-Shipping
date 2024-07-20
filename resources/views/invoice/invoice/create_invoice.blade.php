@@ -42,8 +42,8 @@
                                                 Shipper
                                             </option>
                                             @endif
-                                            @if(optional($bldraft->forwarder)->name != null)
-                                                <option value="{{optional($bldraft)->ffw_id}}">{{ optional($bldraft->forwarder)->name }}
+                                            @if(optional($bldraft->booking->forwarder)->name != null)
+                                                <option value="{{optional($bldraft)->ffw_id}}">{{ optional($bldraft->booking->forwarder)->name }}
                                                     Forwarder
                                                 </option>
                                             @endif

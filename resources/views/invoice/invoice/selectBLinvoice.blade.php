@@ -19,7 +19,7 @@
                             <form>
                     <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label for="Bldraft">BlDraft Number <span class="text-warning"> * </span></label>
+                                <label for="Bldraft">Bill Of Lading No <span class="text-warning"> * </span></label>
                                 <select class="selectpicker form-control" id="Bldraft" data-live-search="true" name="booking_ref" data-size="10"
                                         title="{{trans('forms.select')}}" required>
                                     <optgroup label="Import BL">

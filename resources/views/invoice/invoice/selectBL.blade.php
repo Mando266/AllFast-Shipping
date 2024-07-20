@@ -18,16 +18,22 @@
                             @csrf
                             <form>
                     <div class="form-row"> 
-                            <div class="form-group col-md-6">
-                                <label for="Bldraft">BlDraft Number <span class="text-warning"> * (Required.) </span></label>
-                                <select class="selectpicker form-control" id="Bldraft" data-live-search="true" name="booking_ref" data-size="10"
-                                 title="{{trans('forms.select')}}" required>
-                                 <!-- <option value="0" >Customized Debit</option> -->
-                                    @foreach ($bldrafts as $item)
+                        <div class="form-group col-md-6">
+                            <label for="Bldraft">Bill Of Lading No <span class="text-warning"> * </span></label>
+                            <select class="selectpicker form-control" id="Bldraft" data-live-search="true" name="booking_ref" data-size="10"
+                                    title="{{trans('forms.select')}}" required>
+                                <optgroup label="Import BL">
+                                    @foreach ($booking as $item)
                                         <option value="{{$item->id}}" {{$item->id == old('booking_ref',request()->input('booking_ref')) ? 'selected':''}}>{{$item->ref_no}}</option>
                                     @endforeach
-                                </select>
-                            </div>
+                                </optgroup>
+                                <optgroup label="Export BL">
+                                    @foreach ($bldrafts as $item)
+                                        <option value="{{$item->id}}" {{$item->id == old('bldraft_id',request()->input('bldraft_id')) ? 'selected':''}}>{{$item->ref_no}}</option>
+                                    @endforeach
+                                </optgroup>
+                            </select>
+                        </div>
                     </div>
                         <div class="row">
                             <div class="col-md-12 text-center">
@@ -44,3 +50,18 @@
 </div>
 @endsection
 
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectElement = document.getElementById('Bldraft');
+        selectElement.addEventListener('change', function () {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const isBooking = selectedOption.parentElement.label === 'Import BL';
+            const inputName = isBooking ? 'booking_ref' : 'bldraft_id';
+
+            // Update the name attribute based on the selection
+            selectElement.name = inputName;
+        });
+    });
+</script>
+@endpush

@@ -18,13 +18,37 @@
                     <form id="createForm" action="{{route('invoice.store')}}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="form-row">
-                            <input type="hidden" name="bldraft_id" value="{{request()->input('bldraft_id')}}">
-                            <div class="form-group col-md-6">
-                                <label for="customer">Customer<span class="text-warning"> * (Required.) </span></label>
+                            @if(request()->has('bldraft_id'))
+                                <input type="hidden" name="bldraft_id" value="{{request()->input('bldraft_id')}}">
+                            @else    
+                                <input type="hidden" name="booking_ref" value="{{request()->input('booking_ref')}}">
+                            @endif 
+                           <div class="form-group col-md-6">
+                                <label for="customer">Customer<span class="text-warning"> *</span></label> 
                                 <select class="selectpicker form-control" name="customer_id" id="customer" data-live-search="true" data-size="10" title="{{trans('forms.select')}}">
-                                                <option value="{{optional($bldraft)->customer_consignee_id}}">{{ optional($bldraft->consignee)->name }}
-                                                    Consignee
-                                                </option>
+                                    @if($bldraft != null && request()->has('booking_ref'))
+                                        @if(optional($bldraft->consignee)->name != null)
+                                            <option value="{{optional($bldraft)->customer_consignee_id}}">{{ optional($bldraft->consignee)->name }}
+                                                Consignee
+                                            </option>
+                                        @endif
+                                    @elseif($bldraft != null && request()->has('bldraft_id'))
+                                        @if(optional($bldraft->customer)->name != null)
+                                        <option value="{{optional($bldraft)->customer_id}}">{{ optional($bldraft->customer)->name }}
+                                            Shipper
+                                        </option>
+                                        @endif
+                                        @if(optional($bldraft->booking->forwarder)->name != null)
+                                            <option value="{{optional($bldraft)->ffw_id}}">{{ optional($bldraft->booking->forwarder)->name }}
+                                                Forwarder
+                                            </option>
+                                        @endif
+                                        @if(optional($bldraft->customerNotify)->name != null)
+                                            <option value="{{optional($bldraft)->customer_notifiy_id}}">{{ optional($bldraft->customerNotify)->name }}
+                                                Notify
+                                            </option>
+                                        @endif
+                                    @endif
                                 </select>
                                 @error('customer')
                                 <div style="color: red;">
@@ -44,7 +68,7 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-3">
-                                <label for="Date">Booking Ref</label>
+                                <label for="Date">Bill Of Lading No</label>
                                     <input type="text" class="form-control" placeholder="Booking Ref" autocomplete="off" value="{{(optional($bldraft)->ref_no)}}" style="background-color:#fff" disabled>
                             </div>
                             <div class="form-group col-md-3">
@@ -110,8 +134,8 @@
                             <thead>
                                 <tr>
                                     <th class="text-center">Charge Description</th>
-                                    <th class="text-center">Rate 20/40</th>
-                                    <th class="text-center">Amount 20/40</th>
+                                    <th class="text-center">Amount</th>
+                                    <th class="text-center">Total Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -123,10 +147,14 @@
                                                     <option value="{{$item->name}}" {{$item->name == old($item->charge_description) ? 'selected':''}}>{{$item->name}}</option>
                                                 @endforeach
                                             </select>
-                                            <!-- <input type="text" id="Charge Description" name="invoiceChargeDesc[0][charge_description]" class="form-control" autocomplete="off" placeholder="Charge Description" value ="Ocean Freight" > -->
-                                        </td>
-                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" value="{{(optional($bldraft->quotation)->ofr)}}" placeholder="Amount" autocomplete="off"  style="background-color: white;" required></td>
-                                        <td><input type="text" class="form-control" id="ofr" name="invoiceChargeDesc[0][total_amount]" value="{{(optional($bldraft->quotation)->ofr) * $qty }}" placeholder="Ofr" autocomplete="off" disabled style="background-color: white;"></td>
+                                        </td> 
+                                        @if($ofr != null)
+                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" value="{{$ofr}}" placeholder="Amount" autocomplete="off"  style="background-color: white;" disabled></td>
+                                        <td><input type="text" class="form-control" id="ofr" name="invoiceChargeDesc[0][total_amount]" value="{{ $ofr * $qty }}" placeholder="Total Amount" autocomplete="off" style="background-color: white;" disabled></td>
+                                        @else
+                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" placeholder="Amount" autocomplete="off"  style="background-color: white;" require></td>
+                                        <td><input type="text" class="form-control" id="ofr" name="invoiceChargeDesc[0][total_amount]"  placeholder="Ofr" autocomplete="Total Amount" style="background-color: white;" require></td>
+                                        @endif
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_amount" name="invoiceChargeDesc[0][egy_amount]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount" name="invoiceChargeDesc[0][total_egy]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount_vat" name="invoiceChargeDesc[0][egp_vat]"></td>
@@ -139,7 +167,6 @@
                                                     <option value="{{$item->name}}" {{$item->name == old($item->charge_description) ? 'selected':''}}>{{$item->name}}</option>
                                                 @endforeach
                                             </select>
-                                            <!-- <input type="text" id="Charge Description" name="invoiceChargeDesc[0][charge_description]" class="form-control" autocomplete="off" placeholder="Charge Description" value ="Ocean Freight" > -->
                                         </td>
                                         <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" value="{{$detentionAmount  / $qty}} " placeholder="Weight" autocomplete="off" disabled style="background-color: white;"></td>
                                         <td><input type="text" class="form-control" id="ofr" name="invoiceChargeDesc[0][total_amount]" value="{{$detentionAmount}}" placeholder="Ofr" autocomplete="off" disabled style="background-color: white;"></td>
@@ -198,7 +225,6 @@
         let totalEgyaftervat = totalUsd * exchangeRate;
 
         $('input[name="invoiceChargeDesc[0][total_amount]"]').val(totalUsd.toFixed(2));
-        
         $('input[name="invoiceChargeDesc[0][egy_amount]"]').val(egyAmount.toFixed(2));
         $('input[name="invoiceChargeDesc[0][total_egy]"]').val(totalEgy.toFixed(2));
         $('input[name="invoiceChargeDesc[0][egp_vat]"]').val(totalEgy.toFixed(2));
