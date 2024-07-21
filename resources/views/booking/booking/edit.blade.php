@@ -529,7 +529,7 @@
                                     {{$message}}
                                 </div>
                             @enderror
-                        <div id="tableContainer" style="height: 400px; overflow-y: auto;">
+                        <div id="tableContainer" style=" overflow-y: auto;">
                             <table id="containerDetails" class="table table-bordered">
                                 <thead>
                                     <tr>
@@ -773,14 +773,22 @@ $(function(){
                               <td>
                                   <input type="text" class="form-control" id="weight" name="containerDetails[0][weight]" value="" placeholder="Weight" autocomplete="off">
                               </td>
-                              <td style="width:85px;">
-                                  <button type="button" class="btn btn-danger remove" onclick="removeItem(0)"><i class="fa fa-trash"></i></button>
+                              <td>
+                                 <button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button>
                               </td>
-                          </tr>`;
-          $('#tableBody').prepend(newRow);
-          $('.selectpicker').selectpicker('refresh');
-      });
 
+                          </tr>`;
+        //   $('#tableBody').prepend(newRow);
+        //   $('.selectpicker').selectpicker('refresh');
+
+          $('#containerDetails tbody').append(newRow);
+        // Initialize the selectpicker for the new row
+        $('#containerDetails tbody tr:last .selectpicker').selectpicker('refresh');
+      });
+        // Function to remove a row
+        $(document).on('click', '.remove', function () {
+                $(this).closest('tr').remove();
+            });
 
   });
 
