@@ -209,9 +209,9 @@ class BookingCalculationService
                 'status' => trans("home.$status"),
                 'container_type' => $container->containersTypes->name,
                 'from' => $startMovementDate,
-                'to' => $endMovementDate,
+                'to' => $endMovementDate ?? today(),
                 'from_code' => optional(optional($startMovement)->movementcode)->code,
-                'to_code' => optional(optional($endMovement)->movementcode)->code,
+                'to_code' => optional(optional($endMovement)->movementcode)->code ?? trans("home.no_movement"),
                 'total' => $containerTotal,
                 'periods' => $periodCalc,
             ]);
@@ -234,6 +234,7 @@ class BookingCalculationService
 
         } elseif ($payload['to_date'] != null && $payload['to'] == null) {
             $endMovement = Movements::where('container_id', $containerId)
+                ->where('movement_date', '>', $startMovementDate)
                 ->where('movement_date', '<=', $payload['to_date'])
                 ->latest('movement_date')->first();
         } elseif ($payload['to_date'] == null && $payload['to'] != null) {
@@ -243,6 +244,7 @@ class BookingCalculationService
         } else {
             $endMovement = Movements::where('container_id', $containerId)
                 ->where('movement_id', $payload['to'])
+                ->where('movement_date', '>', $startMovementDate)
                 ->where('movement_date', '<=', $payload['to_date'])
                 ->latest('movement_date')->first();
         }
