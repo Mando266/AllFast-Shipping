@@ -8,4 +8,5 @@ return array (
   'completed' => 'Completed',
   'add_first' => 'Apply First Day',
   'add_last' => 'Execute Last Day',
+  'no_movement' => 'No Next Move',
 );
