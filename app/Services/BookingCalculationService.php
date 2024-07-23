@@ -2,15 +2,16 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
+use App\Models\Master\Ports;
 use App\Models\Booking\Booking;
+use App\Models\Master\Containers;
 use App\Models\Containers\Demurrage;
 use App\Models\Containers\Movements;
-use App\Models\Master\Containers;
-use App\Models\Master\ContainersMovement;
-use App\Models\Master\Ports;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Master\ContainersTypes;
+use App\Models\Master\ContainersMovement;
+use Illuminate\Database\Eloquent\Builder;
 
 class BookingCalculationService
 {
@@ -98,6 +99,11 @@ class BookingCalculationService
             $tempDaysCount = $daysCount;
             $diffBetweenDates = 0;
             $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
+            if (!$slab) {
+                $containersType = ContainersTypes::find($container->container_type_id);
+                return back()->with('error', "There is No slabs to {$containersType->name}");
+            }
+
             foreach (optional($slab)->periods as $period) {
                 if ($freeTime > $period->number_off_dayes) {
 
