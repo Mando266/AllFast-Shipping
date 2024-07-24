@@ -2,15 +2,16 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
+use App\Models\Master\Ports;
 use App\Models\Booking\Booking;
+use App\Models\Master\Containers;
 use App\Models\Containers\Demurrage;
 use App\Models\Containers\Movements;
-use App\Models\Master\Containers;
-use App\Models\Master\ContainersMovement;
-use App\Models\Master\Ports;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Master\ContainersTypes;
+use App\Models\Master\ContainersMovement;
+use Illuminate\Database\Eloquent\Builder;
 
 class BookingCalculationService
 {
@@ -98,6 +99,11 @@ class BookingCalculationService
             $tempDaysCount = $daysCount;
             $diffBetweenDates = 0;
             $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
+            if (!$slab) {
+                $containersType = ContainersTypes::find($container->container_type_id);
+                return back()->with('error', "There is No slabs to {$containersType->name}");
+            }
+
             foreach (optional($slab)->periods as $period) {
                 if ($freeTime > $period->number_off_dayes) {
 
@@ -229,26 +235,30 @@ class BookingCalculationService
     {
         if ($payload['to_date'] == null && $payload['to'] == null) {
             $endMovement = Movements::where('container_id', $containerId)
+                ->where('booking_no', $payload['booking_no'])
                 ->where('movement_date', '>', $startMovementDate)
                 ->latest('movement_date')->first();
 
         } elseif ($payload['to_date'] != null && $payload['to'] == null) {
             $endMovement = Movements::where('container_id', $containerId)
+                ->where('booking_no', $payload['booking_no'])
                 ->where('movement_date', '>', $startMovementDate)
                 ->where('movement_date', '<=', $payload['to_date'])
                 ->latest('movement_date')->first();
         } elseif ($payload['to_date'] == null && $payload['to'] != null) {
+
             $endMovement = Movements::where('container_id', $containerId)
+                ->where('booking_no', $payload['booking_no'])
                 ->where('movement_id', $payload['to'])
                 ->latest('movement_date')->first();
         } else {
             $endMovement = Movements::where('container_id', $containerId)
+                ->where('booking_no', $payload['booking_no'])
                 ->where('movement_id', $payload['to'])
                 ->where('movement_date', '>', $startMovementDate)
                 ->where('movement_date', '<=', $payload['to_date'])
                 ->latest('movement_date')->first();
         }
-
         return $endMovement;
     }
 
@@ -311,12 +321,14 @@ class BookingCalculationService
         }
         $cal_type = $is_storage ? 'STORAGE' : 'DETENTION';
         $type = strtoupper("{$booking->shipment_type}/{$cal_type}");
+        $portId = $booking->shipment_type == 'Export' ? $booking->load_port_id : $booking->discharge_port_id;
+
         $demurrage = Demurrage::where('is_storge', $type)
-            ->where('port_id', $booking->discharge_port_id)
+            ->where('port_id', $portId)
             ->with('slabs.periods')->first();
 
         if (!$demurrage) {
-            $port = Ports::find($booking->discharge_port_id);
+            $port = Ports::find($portId);
             return back()->with('error', "There is No ( $type ) Triff for BookingNo: {$booking->ref_no}  in port: $port->name( {$port->code} ) ");
         }
         return $demurrage;
