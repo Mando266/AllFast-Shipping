@@ -121,8 +121,8 @@
 
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label for="principal_name">Principal Name</label>
-                                <select class="selectpicker form-control" id="Principal" data-live-search="true" name="principal_name" data-size="10" title="{{trans('forms.select')}}">
+                                <label for="principal_name">Principal Name  <span class="text-warning"> *</span></label>
+                                <select class="selectpicker form-control" id="Principal" data-live-search="true" name="principal_name" data-size="10" title="{{trans('forms.select')}}" required>
                                     @foreach ($principals as $item)
                                     <option value="{{$item->id}}" {{$item->id == old('principal_name') ? 'selected':''}}>{{$item->name}}</option>
                                     @endforeach
@@ -132,8 +132,8 @@
                                 @enderror
                             </div>
                             <div class="form-group col-md-6">
-                                <label for="vessel_name">Operator</label>
-                                <select class="selectpicker form-control" id="vessel_name" data-live-search="true" name="vessel_name" data-size="10" title="{{trans('forms.select')}}">
+                                <label for="vessel_name">Operator  <span class="text-warning"> *</span></label>
+                                <select class="selectpicker form-control" id="vessel_name" data-live-search="true" name="vessel_name" data-size="10" title="{{trans('forms.select')}}" required>
                                     @foreach ($oprators as $item)
                                     <option value="{{$item->id}}" {{$item->id == old('vessel_name') ? 'selected':''}}>{{$item->name}}</option>
                                     @endforeach

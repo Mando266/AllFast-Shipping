@@ -63,6 +63,7 @@ class QuotationsController extends Controller
         ->whereHas('types', function ($query) {
             return $query->whereIn('type_id', [5, 7, 9]);
         })->get();
+        //dd($principals);
         $oprators = Lines::where('company_id', Auth::user()->company_id)
         ->whereHas('types', function ($query) {
             return $query->whereIn('type_id', [4, 2, 8]);

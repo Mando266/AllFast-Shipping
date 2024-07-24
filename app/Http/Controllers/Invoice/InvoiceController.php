@@ -337,8 +337,8 @@ class InvoiceController extends Controller
             $blId = $request->input('bldraft_id');
             $bldraft = BlDraft::where('id', $blId)->with('blDetails')->first();
             $qty = $bldraft->blDetails->count();
-            // $ofr = $bldraft->booking->quotation->quotationDesc->pluck('ofr')->first();
-            //dd($ofr);
+            $ofrs = $bldraft->booking->quotation->quotationDesc->pluck('ofr')->toArray();
+dd($ofrs);
         } elseif ($request->has('booking_ref')) {
             $blId = $request->input('booking_ref');
             $bldraft = Booking::where('id', $blId)->with('bookingContainerDetails')->first();
@@ -366,7 +366,6 @@ class InvoiceController extends Controller
                 'customer' => ['required'],
                 'customer_id' => ['required'],
             ]);
-    
 
             $totalAmount = 0;
             foreach($request->input('invoiceChargeDesc',[])  as $desc){
@@ -401,7 +400,6 @@ class InvoiceController extends Controller
             $invoice->invoice_no = $invoice_no;
             $invoice->save();
             $setting->save();
-     
           
             foreach($request->input('invoiceChargeDesc',[])  as $chargeDesc){
                 InvoiceChargeDesc::create([
@@ -411,9 +409,7 @@ class InvoiceController extends Controller
                     'total_amount'=>$chargeDesc['total_amount'],
                 ]);
             }
-        
 
-            
         return redirect()->route('invoice.index')->with('success',trans('Invoice.created'));
     }
 
