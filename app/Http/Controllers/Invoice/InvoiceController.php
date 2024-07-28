@@ -81,7 +81,7 @@ class InvoiceController extends Controller
     {
         $companyId = Auth::user()->company_id;
         $customers = Customers::where('company_id', $companyId)->get();
-        $charges = ChargesDesc::orderBy('id')->get();
+        $charges = ChargesDesc::where('type','!=','1')->orderBy('id')->get();
         $voyages = Voyages::with('vessel')->where('company_id', $companyId)->get();
     
         $blId = null;
@@ -332,18 +332,23 @@ class InvoiceController extends Controller
     {
         $this->authorize(__FUNCTION__,Invoice::class);
         $ofr = null;
-        $charges = ChargesDesc::orderBy('id')->get();
+        $charges = ChargesDesc::where('type','0')->orderBy('id')->get();
         if ($request->has('bldraft_id')) {
             $blId = $request->input('bldraft_id');
             $bldraft = BlDraft::where('id', $blId)->with('blDetails')->first();
             $qty = $bldraft->blDetails->count();
-            $ofrs = $bldraft->booking->quotation->quotationDesc->pluck('ofr')->toArray();
-dd($ofrs);
+            $ofrs = $bldraft->booking->quotation->quotationDesc->pluck('ofr')->all();
+            //dd($ofrs);
         } elseif ($request->has('booking_ref')) {
             $blId = $request->input('booking_ref');
             $bldraft = Booking::where('id', $blId)->with('bookingContainerDetails')->first();
             $qty = $bldraft->bookingContainerDetails->count();
-//i want to ask moataz if the quotation has 2 ofr for 2 equ type the ofr in debit will be the sum or what
+            $quotationDesc = optional($bldraft->quotation)->quotationDesc ?? collect();
+            if (!$quotationDesc->isEmpty()) {
+                $ofrs = $quotationDesc->pluck('ofr')->all();
+            } else {
+                $ofrs = [];
+            }
         }
 
         $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
@@ -351,7 +356,7 @@ dd($ofrs);
         return view('invoice.invoice.create_debit',[
             'cartData' => $cartData ?? null,
             'qty'=>$qty,
-            // 'ofr'=>$ofr,
+            'ofrs'=>$ofrs,
             'bldraft'=>$bldraft,
             'voyages'=>$voyages,
             'charges' => $charges,
@@ -383,7 +388,6 @@ dd($ofrs);
                 'user_id'=>Auth::user()->id,
                 'invoice_no'=>'',
                 'date'=>$request->date,
-                'invoice_kind'=>$blkind,
                 'type'=>'debit',
                 'invoice_status'=>$request->invoice_status,
                 'add_egp'=>'false',
@@ -576,108 +580,5 @@ dd($ofrs);
         $invoice = Invoice::find($id);
         $invoiceModel = $invoice->getTaxInvoiceModel();
         return $invoiceModel->toJson();
-    }
-
-    public function createStorageInvoice()
-    {
-        request()->validate([
-            'calculation_data' => ['required'],
-            'amount' => ['required'],
-        ]);
-        $calculationData = request()->calculation_data;
-        $notes = array_filter(explode('_', $calculationData));
-        $storageAmount = request()->amount;
-        $blId = request()->bldraft_id;
-        $bl = BlDraft::query()->find($blId);
-
-        $charges = ChargesDesc::orderBy('id')->get();
-        $customers = Customers::where('company_id',Auth::user()->company_id)->get();
-
-        $bldraft = $bl;
-        $bldrafts = $bl;
-
-        $qty = $bldraft->blDetails->count();
-        $voyages = Voyages::with('vessel')->where('company_id', Auth::user()->company_id)->get();
-
-        if (optional(optional(optional($bldraft)->booking)->quotation)->shipment_type == "Export") {
-            $triffDetails = LocalPortTriff::where('port_id', $bldraft->load_port_id)
-                ->where('validity_to', '>=', Carbon::now()->format("Y-m-d"))
-                ->with([
-                    "triffPriceDetailes" => function ($q) use ($bldraft) {
-                        $q->where("is_import_or_export", 1)
-                            ->where(function ($query) use ($bldraft) {
-                                $query->where("equipment_type_id", optional($bldraft->equipmentsType)->id)
-                                    ->orWhere('equipment_type_id', '100');
-                            });
-                    },
-                    'triffPriceDetailes.charge'
-                ])
-                ->first();
-        } else {
-            $triffDetails = LocalPortTriff::where('port_id', $bldraft->discharge_port_id)
-                ->where('validity_to', '>=', Carbon::now()->format("Y-m-d"))
-                ->with([
-                    "triffPriceDetailes" => function ($q) use ($bldraft) {
-                        $q->where("is_import_or_export", 0);
-                        $q->where('standard_or_customise', 1)
-                            ->where(function ($query) use ($bldraft) {
-                                $query->where("equipment_type_id", optional($bldraft->equipmentsType)->id)
-                                    ->orWhere('equipment_type_id', '100');
-                            });
-                    },
-                    'triffPriceDetailes.charge'
-                ])
-                ->first();
-        }
-        $quotation = $bl->booking->quotation;
-        $shipmentType = $quotation->shipment_type ?? $booking->shipment_type ?? 'Export';
-        $quotationType = $quotation->quotation_type ?? $booking->booking_type ?? 'full';
-
-        $chargeName = "STORAGE " . strtoupper($quotationType) . " " . strtoupper($shipmentType);
-        return view('invoice.invoice.create_invoice', [
-            'bldrafts' => $bldrafts,
-            'cartData' => $cartData ?? null,
-            'qty' => $qty,
-            'bldraft' => $bldraft,
-            'triffDetails' => $triffDetails,
-            'voyages' => $voyages,
-            'charges' => $charges,
-            'notes' => $notes,
-            'chargeName' => $chargeName,
-            'storageAmount' => $storageAmount,
-            'customers' => $customers,
-        ]);
-    }
-
-    public function createDetentionInvoice()
-    {
-        $calculationData = request()->calculation_data;
-        $notes = array_filter(explode('_', $calculationData));
-        $detentionAmount = request()->amount;
-        $blId = request()->bldraft_id;
-        $bl = BlDraft::query()->find($blId);
-        $bldrafts = $bl;
-
-        $bl_id = $blId;
-        if($bl_id != null){
-            $bldraft = BlDraft::where('id',$bl_id)->with('blDetails')->first();
-        }else{
-            $bldraft = null;
-        }
-        $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
-        $qty = $bldraft->blDetails->count();
-        $cartData = json_decode(request('cart_data_for_invoice'));
-        $charges = ChargesDesc::orderBy('id')->get();
-
-        return view('invoice.invoice.create_debit',[
-            'bldrafts'=>$bldrafts,
-            'cartData' => $cartData ?? null,
-            'qty'=>$qty,
-            'bldraft'=>$bldraft,
-            'voyages'=>$voyages,
-            'notes' => $notes,
-            'detentionAmount' => $detentionAmount,
-            'charges' => $charges,
-        ]);
     }
 }

@@ -76,7 +76,6 @@
                                     <input type="text" class="form-control" id="ref_no" name="ref_no" value="{{old('ref_no',$booking->ref_no)}}"
                                         placeholder="Booking Ref No" autocomplete="off" required>
                                 </div>
-                                <input type="hidden" class="form-control"  name ="shipment_type"  value="Import">
                                     @if($quotation->id != 0)
                                         <input type="hidden" class="form-control" name="booking_type" value="{{$quotation->quotation_type}}">
                                     @else

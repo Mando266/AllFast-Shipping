@@ -148,13 +148,9 @@
                                                 @endforeach
                                             </select>
                                         </td> 
-                                        @if($ofr != null)
-                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" value="{{$ofr}}" placeholder="Amount" autocomplete="off"  style="background-color: white;" disabled></td>
-                                        <td><input type="text" class="form-control" id="ofr" name="invoiceChargeDesc[0][total_amount]" value="{{ $ofr * $qty }}" placeholder="Total Amount" autocomplete="off" style="background-color: white;" disabled></td>
-                                        @else
-                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" placeholder="Amount" autocomplete="off"  style="background-color: white;" require></td>
-                                        <td><input type="text" class="form-control" id="ofr" name="invoiceChargeDesc[0][total_amount]"  placeholder="Ofr" autocomplete="Total Amount" style="background-color: white;" require></td>
-                                        @endif
+                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" value="" placeholder="Amount" autocomplete="off"  style="background-color: white;" disabled></td>
+                                        <td><input type="text" class="form-control" id="ofr" name="invoiceChargeDesc[0][total_amount]" value="" placeholder="Total Amount" autocomplete="off" style="background-color: white;" disabled></td>
+                                    
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_amount" name="invoiceChargeDesc[0][egy_amount]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount" name="invoiceChargeDesc[0][total_egy]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount_vat" name="invoiceChargeDesc[0][egp_vat]"></td>
