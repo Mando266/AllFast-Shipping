@@ -161,32 +161,11 @@ class ReceiptController extends Controller
         //     return redirect()->back()->with('error','Receipt Amount Can Not Be Less Than Invoice Amount');
         // }
 
-        if ($request->input('bank_deposit') != Null){
             $request->validate([
                 'bank_id' => ['required'],
             ],[
                 'bank_id.required'=>'Please Choose Bank Account',
             ]);
-        }
-
-        if ($request->input('bank_transfer') != Null){
-            $request->validate([
-                'bank_transfer_id' => ['required'],
-            ],[
-                'bank_transfer_id.required'=>'Please Choose Bank Account',
-
-            ]);
-        }
-        if($request->input('bank_check') != Null){
-
-            $request->validate([
-                'cheak_no' => ['required'],
-                'bank_cheque_id' => ['required'],
-            ],[
-                'cheak_no.required'=>'Please Enter Cheak No',
-                'bank_cheque_id.required'=>'Please Choose Bank Account',
-            ]);
-        }
 
         $invoice = Invoice::where('id',request('invoice_id'))->with('chargeDesc')->first();
         $oldReceipts = Receipt::where('invoice_id',request('invoice_id'))->get();
@@ -268,17 +247,14 @@ class ReceiptController extends Controller
             'notes'=>$request->notes,
             'paid'=>($paid - $request->matching),
             'user_id'=>Auth::user()->id,
-            'bank_transfer_id'=>$request->bank_transfer_id,
-            'bank_cheque_id'=>$request->bank_cheque_id,
             'bank_id'=>$request->bank_id,
-
         ]);
 
         if(request('receipt_no') != null){
             $receipt->receipt_no = request('receipt_no');
         }else{
             $setting = Setting::find(1);
-            $receipt->receipt_no = 'ALY/ '.$setting->receipt_no.' / 24';
+            $receipt->receipt_no = 'R/ '.$setting->receipt_no.' / 24';
             $setting->receipt_no += 1;
             $setting->save();
         }

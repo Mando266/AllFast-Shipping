@@ -29,6 +29,8 @@
                                         <th>#</th>
                                         <th>Code</th>
                                         <th>Name</th>
+                                        <th>Type</th>
+
                                         <th class='text-center' style='width:100px;'></th>
                                     </tr>
                                 </thead>
@@ -41,6 +43,13 @@
                                             <td>{{ App\Helpers\Utils::rowNumber($items,$loop)}}</td>
                                             <td>{{$item->code}}</td>
                                             <td>{{$item->name}}</td>
+                                            <td class="text-center">
+                                                @if($item->type == 1 )
+                                                    <span class="badge badge-info"> Invoice </span>
+                                                @else
+                                                    <span class="badge badge-danger"> Debit </span>
+                                                @endif
+                                            </td>
                                             <td class="text-center">
                                                 <ul class="table-controls">
                                                     @permission('LocalPortTriff-Edit')

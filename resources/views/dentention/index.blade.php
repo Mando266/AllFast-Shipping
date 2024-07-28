@@ -97,7 +97,7 @@
                                 </div>
                                  <div class="form-group col-md-2 mt-5 ml-2">
                                         <input type="checkbox"  id="apply_first_day" name="apply_first_day"
-                                               value="1" {{ isset($input['apply_first_day']) ?  'checked': '' }}>
+                                               value="1" {{ isset($input['apply_first_day']) ?  'checked': '' }} checked>
                                         <label for="apply_first_day">{{ trans('home.add_first') }}</label>
                                 </div>
                                  <div class="form-group col-md-2 mt-5 ml-2">
@@ -316,4 +316,24 @@
                     })
                 });
             </script>
+
+            <script>
+                    $('#port').change(function () {
+                        var selectedValue = $(this).val();
+                        if (selectedValue.length > 1 && selectedValue.includes('all')) {
+                            selectedValue = selectedValue.filter(function (value) {
+                                return value !== 'all';
+                            });
+                            $(this).val(selectedValue);
+                        }
+
+                        if (selectedValue.includes('all')) {
+                            $('#port option:not(:selected)').prop('disabled', true);
+                        } else {
+                            $('#port option').prop('disabled', false);
+                        }
+                        $('#port').selectpicker('refresh');
+                    });
+            </script>
+
         @endpush

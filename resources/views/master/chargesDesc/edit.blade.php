@@ -23,7 +23,7 @@
                             <p class="alert {{ Session::get('alert-class', 'alert-danger') }}">{{ session('alert') }}</p>
                             @endif
                         <div class="form-row">
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
                                 <label for="nameInput">Name *</label>
                             <input type="text" class="form-control" id="nameInput" name="name" value="{{old('name',$chargesDesc->name)}}"
                                  placeholder="Name" autocomplete="off" autofocus>
@@ -33,12 +33,24 @@
                                 </div>
                                 @enderror
                             </div>
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
                                 <label for="CodeInput">Code</label>
                                 <input type="text" class="form-control" id="CodeInput" name="code" value="{{old('code',$chargesDesc->code)}}"
                                     placeholder="Code" autocomplete="off">
                                 @error('Code')
                                 <div style="color: red;">
+                                    {{$message}}
+                                </div>
+                                @enderror
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="status">Type</label>
+                                <select class="selectpicker form-control" title="{{trans('forms.select')}}" name="type">
+                                    <option value="1" {{ old('type',$chargesDesc->type) == "1" ? 'selected':'' }}>Invoice</option>
+                                    <option value="0" {{ old('type',$chargesDesc->type) == "0" ? 'selected':'' }}>Depit</option>
+                                </select>
+                                @error('status')
+                                <div class="invalid-feedback">
                                     {{$message}}
                                 </div>
                                 @enderror

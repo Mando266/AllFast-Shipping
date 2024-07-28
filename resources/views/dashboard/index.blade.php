@@ -6,7 +6,7 @@
 
     <div class="l-image">
 
-        <img src="{{asset('assets/img/allfastLogo.jpeg')}}" alt="MSL Logo" style="width: 90%;">
+        <img src="{{asset('assets/img/msl.png')}}" alt="MSL Logo" style="width: 50%; display: block; margin-left: auto; margin-right: auto; margin-top: 50px;">
 
     </div>
 
