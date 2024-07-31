@@ -642,155 +642,179 @@ $(function(){
         $(function(){
             let company_id = "{{ optional(Auth::user())->company->id }}";
                 $('#containerDetails').on('change','td.container_type select' , function(e){
-                  let self = $(this);
-                  let equipment_id = self.val();
-                  let parent = self.closest('tr');
+                    let self = $(this);
+                    let equipment_id = self.val();
+                    let parent = self.closest('tr');
                     let value = e.target.value;
                     let container = $('td.containerDetailsID select' , parent);
                     let response =    $.get(`/api/booking/activityContainers/${company_id}/${equipment_id}`).then(function(data){
                         let containers = data.containers || '';
-                       console.log(containers);
                         let list2 = [`<option value=''>Select...</option>`];
                         for(let i = 0 ; i < containers.length; i++){
                         list2.push(`<option value='${containers[i].id}'>${containers[i].code} </option>`);
                     }
-               container.html(list2.join(''));
-               $(container).selectpicker('refresh');
+                container.html(list2.join(''));
+                $(container).selectpicker('refresh');
 
                 });
             });
         });
 
-      let currentPage = 1;
-      const bookingId = '{{ $booking->id }}';
-      const maxVisiblePages = 5; // Number of pagination links to show
+    let currentPage = 1;
+    const bookingId = '{{ $booking->id }}';
+    const maxVisiblePages = 5; // Number of pagination links to show
+    let rowCount = $('#containerDetails tbody tr').length;
+    let removedContainers = [];
 
-      function loadRows(page) {
-          $.ajax({
-              url: `/booking/booking-details/${bookingId}`,
-              method: 'GET',
-              data: { page: page },
-              success: function(response) {
-                  // Replace the existing rows with the new rows
-                  $('#tableBody').html(response.bookingDetails);
-                  setupPagination(response.totalPages, page);
-                  // Refresh the selectpicker to show the newly appended rows correctly
-                  $('.selectpicker').selectpicker('refresh');
-              },
-              error: function(xhr, status, error) {
-                  console.error('Error:', error);
-                  console.error('Response:', xhr.responseText);
-              }
-          });
-      }
+    function loadRows(page) {
+        $.ajax({
+            url: `/booking/booking-details/${bookingId}`,
+            method: 'GET',
+            data: { page: page },
+            success: function(response) {
+                // Replace the existing rows with the new rows
+                $('#tableBody').html(response.bookingDetails);
+                setupPagination(response.totalPages, page);
+                // Refresh the selectpicker to show the newly appended rows correctly
+                $('.selectpicker').selectpicker('refresh');
+                rowCount = $('#containerDetails tbody tr').length;
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+                console.error('Response:', xhr.responseText);
+            }
+        });
+    }
 
-      function setupPagination(totalPages, currentPage) {
-          let paginationHtml = '';
-    if (totalPages > 1) {
-          let startPage = Math.max(currentPage - Math.floor(maxVisiblePages / 2), 1);
-          let endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
+    function setupPagination(totalPages, currentPage) {
+        let paginationHtml = '';
+        if (totalPages > 1) {
+            let startPage = Math.max(currentPage - Math.floor(maxVisiblePages / 2), 1);
+            let endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
 
-          if (startPage > 1) {
-              paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
-              if (startPage > 2) {
-                  paginationHtml += `<li class="page-item disabled"><a class="page-link" href="#">...</a></li>`;
-              }
-          }
+            if (startPage > 1) {
+                paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+                if (startPage > 2) {
+                    paginationHtml += `<li class="page-item disabled"><a class="page-link" href="#">...</a></li>`;
+                }
+            }
 
-          for (let i = startPage; i <= endPage; i++) {
-              paginationHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}">
-                                <a class="page-link" href="#" data-page="${i}">${i}</a>
-                               </li>`;
-          }
+            for (let i = startPage; i <= endPage; i++) {
+                paginationHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                                    </li>`;
+            }
 
-          if (endPage < totalPages) {
-              if (endPage < totalPages - 1) {
-                  paginationHtml += `<li class="page-item disabled"><a class="page-link" href="#">...</a></li>`;
-              }
-              paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
-           }
-          }
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    paginationHtml += `<li class="page-item disabled"><a class="page-link" href="#">...</a></li>`;
+                }
+                paginationHtml += `<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`;
+                }
+        }
 
-          $('#pagination').html(paginationHtml);
-      }
+        $('#pagination').html(paginationHtml);
+    }
 
-      $('#pagination').on('click', 'a', function(e) {
-          e.preventDefault();
-          let page = parseInt($(this).data('page'));
-          if (page !== currentPage) {
-              currentPage = page;
-              loadRows(page);
-          }
-      });
+    $('#pagination').on('click', 'a', function(e) {
+        e.preventDefault();
+        let page = parseInt($(this).data('page'));
+        if (page !== currentPage) {
+            currentPage = page;
+            loadRows(page);
+        }
+    });
 
-      // Initial load
-      loadRows(currentPage);
+    // Initial load
+    loadRows(currentPage);
 
-
-      // Add new container row at the top
-      $('#add').on('click', function() {
-          let newRow = `<tr>
-                        <td class="container_type">
-                            <select class="selectpicker form-control" id="container_type" data-live-search="true" name="containerDetails[0][container_type]" data-size="10" title="{{ trans('forms.select') }}">
-                                @foreach ($equipmentTypes as $equipmentType)
-                                  <option value="{{ $equipmentType->id }}">{{ $equipmentType->name }}</option>
-                                @endforeach
-                                  </select>
-                              </td>
-                              <td class="containerDetailsID">
-                                  <select class="selectpicker form-control" id="containerDetailsID" name="containerDetails[0][container_id]" data-live-search="true" data-size="10" title="{{ trans('forms.select') }}">
-                                                        @foreach ($oldContainers as $container)
-                                  <option value="{{ $container->id }}">{{ $container->code }}</option>
-                                                        @endforeach
-                                  </select>
-                              </td>
-                              <td>
-                                  <input type="text" id="qyt" name="containerDetails[0][qty]" class="form-control input" autocomplete="off" placeholder="QTY" value="1" required>
-                              </td>
-                              <td>
-                                  <select class="selectpicker form-control" id="activity_location_id" name="containerDetails[0][activity_location_id]" data-live-search="true" data-size="10" title="{{ trans('forms.select') }}">
-                                                        @foreach ($activityLocations as $activityLocation)
-                                  <option value="{{ $activityLocation->id }}">{{ $activityLocation->code }}</option>
-                                                        @endforeach
-                                  </select>
-                              </td>
-                              <td>
-                                  <input type="text" id="seal_no" name="containerDetails[0][seal_no]" class="form-control" autocomplete="off" placeholder="Seal No" value="">
-                              </td>
-                              <td>
-                                  <input type="text" id="packs" name="containerDetails[0][packs]" class="form-control" autocomplete="off" placeholder="Packs" value="">
-                              </td>
-                              <td>
-                                  <input type="text" name="containerDetails[0][pack_type]" class="form-control" autocomplete="off" placeholder="Pack Type" value="">
-                              </td>
-                              <td>
-                                  <input type="text" id="haz" name="containerDetails[0][haz]" class="form-control" autocomplete="off" placeholder="HAZ / REEFER/ OOG DETAILS / HAZ APPROVAL REF" value="">
-                              </td>
-                              <td>
-                                  <input type="text" name="containerDetails[0][net_weight]" class="form-control" autocomplete="off" placeholder="Net Weight" value="">
-                              </td>
-                              <td>
-                                  <input type="text" class="form-control" id="weight" name="containerDetails[0][weight]" value="" placeholder="Weight" autocomplete="off">
-                              </td>
-                              <td>
-                                 <button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button>
-                              </td>
-
-                          </tr>`;
-        //   $('#tableBody').prepend(newRow);
-        //   $('.selectpicker').selectpicker('refresh');
-
-          $('#containerDetails tbody').append(newRow);
-        // Initialize the selectpicker for the new row
-        $('#containerDetails tbody tr:last .selectpicker').selectpicker('refresh');
-      });
+    function updateRowIndices() {
+        $('#containerDetails tbody tr').each(function(index, tr) {
+            $(tr).find('select, input').each(function() {
+                const name = $(this).attr('name');
+                if (name) {
+                    const newName = name.replace(/\[\d+\]/, `[${index}]`);
+                    $(this).attr('name', newName);
+                }
+            });
+        });
+    }
+  
+        // Add new container row at the top
+        $('#add').on('click', function() {
+            let newRow = `<tr>
+                          <td class="container_type">
+                              <select class="selectpicker form-control" id="container_type" data-live-search="true" name="containerDetails[${rowCount}][container_type]" data-size="10" title="{{ trans('forms.select') }}">
+                                  @foreach ($equipmentTypes as $equipmentType)
+                                    <option value="{{ $equipmentType->id }}">{{ $equipmentType->name }}</option>
+                                  @endforeach
+                              </select>
+                          </td>
+                          <td class="containerDetailsID">
+                              <select class="selectpicker form-control" id="containerDetailsID" name="containerDetails[${rowCount}][container_id]" data-live-search="true" data-size="10" title="{{ trans('forms.select') }}">
+                                  @foreach ($oldContainers as $container)
+                                    <option value="{{ $container->id }}">{{ $container->code }}</option>
+                                  @endforeach
+                              </select>
+                          </td>
+                          <td>
+                              <input type="text" id="qyt" name="containerDetails[${rowCount}][qty]" class="form-control input" autocomplete="off" placeholder="QTY" value="1" required>
+                          </td>
+                          <td>
+                              <select class="selectpicker form-control" id="activity_location_id" name="containerDetails[${rowCount}][activity_location_id]" data-live-search="true" data-size="10" title="{{ trans('forms.select') }}">
+                                  @foreach ($activityLocations as $activityLocation)
+                                    <option value="{{ $activityLocation->id }}">{{ $activityLocation->code }}</option>
+                                  @endforeach
+                              </select>
+                          </td>
+                          <td>
+                              <input type="text" id="seal_no" name="containerDetails[${rowCount}][seal_no]" class="form-control" autocomplete="off" placeholder="Seal No" value="">
+                          </td>
+                          <td>
+                              <input type="text" id="packs" name="containerDetails[${rowCount}][packs]" class="form-control" autocomplete="off" placeholder="Packs" value="">
+                          </td>
+                          <td>
+                              <input type="text" name="containerDetails[${rowCount}][pack_type]" class="form-control" autocomplete="off" placeholder="Pack Type" value="">
+                          </td>
+                          <td>
+                              <input type="text" id="haz" name="containerDetails[${rowCount}][haz]" class="form-control" autocomplete="off" placeholder="HAZ / REEFER/ OOG DETAILS / HAZ APPROVAL REF" value="">
+                          </td>
+                          <td>
+                              <input type="text" name="containerDetails[${rowCount}][net_weight]" class="form-control" autocomplete="off" placeholder="Net Weight" value="">
+                          </td>
+                          <td>
+                              <input type="text" class="form-control" id="weight" name="containerDetails[${rowCount}][weight]" value="" placeholder="Weight" autocomplete="off">
+                          </td>
+                          <td>
+                             <button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button>
+                          </td>
+                        </tr>`;
+  
+            $('#containerDetails tbody').append(newRow);
+            // Initialize the selectpicker for the new row
+            $('#containerDetails tbody tr:last .selectpicker').selectpicker('refresh');
+  
+            rowCount++;
+            updateRowIndices();
+        });
+  
         // Function to remove a row
         $(document).on('click', '.remove', function () {
-                $(this).closest('tr').remove();
-            });
-
-  });
-
-</script>
+            let row = $(this).closest('tr');
+            let containerId = row.find('input[name*="[id]"]').val();
+            if (containerId) {
+                removedContainers.push(containerId);
+                $('#removed').val(removedContainers.join(','));
+            }
+            row.remove();
+            rowCount--;
+            updateRowIndices();
+        });
+  
+    });
+  
+  </script>
+  
+  
 @endpush
 
