@@ -22,6 +22,7 @@ use App\Models\Voyages\Voyages;
 use App\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
@@ -397,7 +398,6 @@ class BookingController extends Controller
 
     public function store(Request $request)
     {
-  //dd($request->input());
         $request->validate([
             'discharge_port_id' => ['required', 'different:load_port_id'],
         ], [
@@ -640,7 +640,7 @@ class BookingController extends Controller
         )->first();
     
 
-        //dd($booking);
+
         return view('booking.booking.arrivalNotification', [
             'booking' => $booking,
             'firstVoyagePort' => $firstVoyagePort,
@@ -738,7 +738,7 @@ class BookingController extends Controller
             'port_from_name',
             optional($booking->loadPort)->id
         )->first();
-        //dd($booking);
+
         $firstVoyagePortImport = VoyagePorts::where('voyage_id', $booking->voyage_id)->where(
             'port_from_name',
             optional($booking->dischargePort)->id
@@ -862,7 +862,7 @@ class BookingController extends Controller
             optional($booking->loadPort)->id
         )->first();
 
-        //dd($booking);
+
         return view('booking.booking.show', [
             'booking' => $booking,
             'firstVoyagePort' => $firstVoyagePort,
@@ -1024,77 +1024,78 @@ class BookingController extends Controller
 
     public function update(Request $request, Booking $booking)
     {
-        $request->validate([
-            'voyage_id' => ['required'],
-            'commodity_description' => ['required'],
-            //'bl_release' => ['required'],
-            // 'customer_id' => ['required'],
-            // 'containerDetails' => ['required'],
-        ]
-        // ,[
-        //     'containerDetails.required' => 'Container Details Cannot be empty',
-        // ]
-    );
-
-        $quotation = Quotation::find($request->quotation_id);
-        $etaDate = VoyagePorts::where('voyage_id',$request->voyage_id)->where('port_from_name',$request->load_port_id)->pluck('eta')->first();
-
-        // if($booking->quotation_id != null){
-        //     if($booking->quotation->shipment_type == 'Export'){
-        //             if($etaDate <= $quotation->validity_from && $etaDate >= $quotation->validity_to){
-        //                 return redirect()->back()->with('error','Invalid Date '.$etaDate.' Date Must Be Between '.$quotation->validity_from.' and '.$quotation->validity_to)
-        //                 ->withInput($request->input());
-        //             }
-        //     }
-        // }
-
-    if($request->input('movement') == 'FCL/FCL'){
-        $uniqueContainers = array();
-        foreach ($request->containerDetails as $container) {
-            if (!in_array(
-                    $container['container_id'],
-                    $uniqueContainers
-                ) || $container['container_id'] == null || $container['container_id'] == "000") {
-                if ($container['container_id'] != "000" || $container['container_id'] != null) {
-                    array_push($uniqueContainers, $container['container_id']);
+        try {
+            // Validate the incoming request
+            $validated = $request->validate([
+                'voyage_id' => ['required'],
+                'commodity_description' => ['required'],
+                'bl_kind' => ['required'],  // Add bl_kind to the validation rules
+            ]);
+    
+            $quotation = Quotation::find($request->quotation_id);
+            $etaDate = VoyagePorts::where('voyage_id', $request->voyage_id)->where('port_from_name', $request->load_port_id)->pluck('eta')->first();
+    
+            // Check for unique container IDs if movement is FCL/FCL
+            if ($request->input('movement') == 'FCL/FCL') {
+                $uniqueContainers = array();
+                foreach ($request->containerDetails as $container) {
+                    if (!in_array($container['container_id'], $uniqueContainers) || $container['container_id'] == null || $container['container_id'] == "000") {
+                        if ($container['container_id'] != "000" || $container['container_id'] != null) {
+                            array_push($uniqueContainers, $container['container_id']);
+                        }
+                    } else {
+                        return redirect()->back()->with('error', 'Container Numbers Must be unique')->withInput($request->input());
+                    }
                 }
-            } else {
-                return redirect()->back()->with('error', 'Container Numbers Must be unique')->withInput(
-                    $request->input()
-                );
             }
-        }
-    }
         $user = Auth::user();
         $ReferanceNumber = Booking::where('id', '!=', $booking->id)->where('company_id', $user->company_id)->where(
             'ref_no',
             $request->ref_no
         )->count();
-
-        if ($ReferanceNumber > 0) {
-            return back()->with('error', 'The Booking Refrance Number Already Exists');
+            if ($ReferanceNumber > 0) {
+                return back()->with('error', 'The Booking Reference Number Already Exists');
+            }
+    
+            $this->authorize(__FUNCTION__, Booking::class);
+            $inputs = request()->all();
+            unset($inputs['containerDetails'], $inputs['_token'], $inputs['removed']);
+    
+            // Update booking information
+            $booking->update($inputs);
+    
+            // Process container details
+            foreach ($request->containerDetails as $container) {
+                if (isset($container['id']) && !empty($container['id'])) {
+                    // Update existing container
+                    BookingContainerDetails::find($container['id'])->update($container);
+                } else {
+                    // Create new container
+                    $container['booking_id'] = $booking->id;
+                    BookingContainerDetails::create($container);
+                }
+            }
+    
+            // Remove deleted containers
+            if (!empty($request->removed)) {
+                BookingContainerDetails::destroy(explode(',', $request->removed));
+            }
+    
+            // Process certificate file if uploaded
+            if ($request->hasFile('certificat')) {
+                $path = $request->file('certificat')->getClientOriginalName();
+                $request->certificat->move(public_path('certificat'), $path);
+                $booking->update(['certificat' => "certificat/" . $path]);
+            }
+    
+            if ($booking->shipment_type == "Import") {
+                return redirect()->route('booking.index')->with('success', trans('Booking.updated'));
+            } else {
+                return redirect()->route('booking.export')->with('success', trans('Booking.updated'));
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to update booking. Please try again.');
         }
-
-        $this->authorize(__FUNCTION__, Booking::class);
-        $inputs = request()->all();
-        unset($inputs['containerDetails'], $inputs['_token'], $inputs['removed']);
-        $booking->update($inputs);
-        BookingContainerDetails::destroy(explode(',', $request->removed));
-        $booking->createOrUpdateContainerDetails($request->containerDetails);
-        if ($request->hasFile('certificat')) {
-            $path = $request->file('certificat')->getClientOriginalName();
-            $request->certificat->move(public_path('certificat'), $path);
-            $booking->update(['certificat' => "certificat/" . $path]);
-        }
-        if (optional($booking)->shipment_type == "Import"){
-            return redirect()->route('booking.index')->with('success', trans('Booking.created'));
-        }
-        else{
-            return redirect()->route('booking.export')->with('success', trans('Booking.created'));
-
-        }
-        
-        
     }
 
     public function destroy($id)
