@@ -103,24 +103,18 @@ class Quotation extends Model implements PermissionSeederContract
                 $des = QuotationDes::find($input['id']);
                 // dd($des,$inputs);
                 $des->update([
-                    'quotation_id'=>$input['quotation_id'],
-                    'charge_type'=>$input['charge_type'],
-                    'currency'=>$input['currency'],
-                    'unit'=>$input['unit'],
-                    'selling_price'=>$input['selling_price'],
-                    'payer'=>$input['payer'],
-                    'equipment_type_id'=>$input['equipments_type'],
+                     'quotation_id'=>$input['quotation_id'],
+                    'ofr' => $input['ofr'],
+                    'currency' => $input['currency'],
+                    'equipment_type_id' => $input['equipment_type_id'],
                 ]);
             }
             else{
                 QuotationDes::create([
-                    'quotation_id'=>$input['quotation_id'],
-                    'charge_type'=>$input['charge_type'],
-                    'currency'=>$input['currency'],
-                    'unit'=>$input['unit'],
-                    'selling_price'=>$input['selling_price'],
-                    'payer'=>$input['payer'],
-                    'equipment_type_id'=>$input['equipments_type'],
+                     'quotation_id'=>$input['quotation_id'],
+                    'ofr' => $input['ofr'],
+                    'currency' => $input['currency'],
+                    'equipment_type_id' => $input['equipment_type_id'],
                 ]);
             }
         }
@@ -135,23 +129,17 @@ class Quotation extends Model implements PermissionSeederContract
                 $load = QuotationLoad::find($input['id']);
                 $load->update([
                     'quotation_id'=>$input['quotation_id'],
-                    'charge_type'=>$input['charge_type'],
-                    'currency'=>$input['currency'],
-                    'unit'=>$input['unit'],
-                    'selling_price'=>$input['selling_price'],
-                    'payer'=>$input['payer'],
-                    'equipment_type_id'=>$input['equipments_type'],
+                    'ofr' => $input['ofr'],
+                    'currency' => $input['currency'],
+                    'equipment_type_id' => $input['equipment_type_id'],
                 ]);
             }
             else{
                 QuotationLoad::create([
                     'quotation_id'=>$input['quotation_id'],
-                    'charge_type'=>$input['charge_type'],
-                    'currency'=>$input['currency'],
-                    'unit'=>$input['unit'],
-                    'selling_price'=>$input['selling_price'],
-                    'payer'=>$input['payer'],
-                    'equipment_type_id'=>$input['equipments_type'],
+                    'ofr' => $input['ofr'],
+                    'currency' => $input['currency'],
+                    'equipment_type_id' => $input['equipment_type_id'],
                 ]);
             }
         }

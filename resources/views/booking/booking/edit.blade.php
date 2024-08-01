@@ -359,6 +359,7 @@
                                         <div style="color: red;">{{$message}}</div>
                                     @enderror
                                 </div>
+                            @if($booking->shipment_type == 'Import')
                                 <div class="form-group col-md-4">
                                     <label for="terminal_id">Discharge Terminal <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="terminal" data-live-search="true" name="terminal_id" data-size="10" title="{{trans('forms.select')}}" required>
@@ -371,6 +372,21 @@
                                         <div style="color: red;">{{$message}}</div>
                                     @enderror
                                 </div>
+                            @else
+                                <div class="form-group col-md-4">
+                                    <label for="terminal_id">Load Terminal <span class="text-warning"> * </span></label>
+                                    <select class="selectpicker form-control" id="terminal" data-live-search="true" name="load_terminal_id" data-size="10" title="{{trans('forms.select')}}" required>
+                                        <option value="">Select..</option>
+                                        @foreach ($terminals as $item)
+                                            <option value="{{$item->id}}" {{$item->id == old('load_terminal_id',$booking->load_terminal_id) ? 'selected' : ''}}>{{$item->name}}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('terminal_id')
+                                        <div style="color: red;">{{$message}}</div>
+                                    @enderror
+                                </div>
+                            @endif
+
                                 <div class="form-group col-md-4">
                                     <label for="voyage_id">Vessel / Voyage <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="voyage_id" data-live-search="true" name="voyage_id" data-size="10" title="{{trans('forms.select')}}" required>

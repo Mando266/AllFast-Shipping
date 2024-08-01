@@ -46,7 +46,10 @@ class BlDraftController extends Controller
 
     public function selectBooking()
     {
-        $booking  = Booking::orderBy('id','desc')->where('booking_confirm',1)->where('has_bl',0)->where('company_id',Auth::user()->company_id)->with('customer')->get();
+        $booking  = Booking::
+        where('shipment_type', 'Export')->orderBy('id','desc')->
+        where('booking_confirm',1)->where('has_bl',0)->
+        where('company_id',Auth::user()->company_id)->with('customer')->get();
         $transhipments = Booking::orderBy('id','desc')->where('booking_confirm',1)->where('is_transhipment',1)->where('company_id',Auth::user()->company_id)->with('customer')->get();
         return view('bldraft.bldraft.selectBooking',[
             'booking'=>$booking,

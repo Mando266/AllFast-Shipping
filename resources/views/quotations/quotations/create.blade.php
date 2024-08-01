@@ -489,7 +489,7 @@
 
                         if (Array.isArray(equipmentTypes)) {
                             equipmentTypes.forEach(function (item) {
-                                targetSelect.append('<option value="' + item.name + '">' + item.name + '</option>');
+                                targetSelect.append('<option value="' + item.id + '">' + item.name + '</option>');
                             });
                         } else {
                             console.error('Unexpected data format for equipment types:', equipmentTypes);

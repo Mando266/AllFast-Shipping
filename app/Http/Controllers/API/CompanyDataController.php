@@ -109,7 +109,7 @@ class CompanyDataController extends Controller
 
     public function requestType($name)
     {
-        $request_Type = ContainersTypes::where('category', $name)->select('category','name')->get();
+        $request_Type = ContainersTypes::where('category', $name)->select('id','category','name')->get();
 
         return Response::json([
             'request_Type' => $request_Type,

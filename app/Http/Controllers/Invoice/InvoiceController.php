@@ -41,7 +41,8 @@ class InvoiceController extends Controller
         $voyages    = Voyages::where('company_id',Auth::user()->company_id)->get();
         $customers  = Customers::where('company_id',Auth::user()->company_id)->get();
         $etd = VoyagePorts::get();
-
+        $invoice_item = ChargesDesc::orderBy('id')->get();
+        
         return view('invoice.invoice.index',[
             'invoices'=>$invoices,
             'invoiceRef'=>$invoiceRef,
@@ -49,7 +50,7 @@ class InvoiceController extends Controller
             'customers'=>$customers,
             'voyages'=>$voyages,
             'etd'=>$etd,
-
+            'invoice_item'=>$invoice_item,
         ]);
     }
 

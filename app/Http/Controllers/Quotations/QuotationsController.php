@@ -31,7 +31,6 @@ class QuotationsController extends Controller
         $customers = Customers::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
         $ports = Ports::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
 
-//        dd(\request());
         return view('quotations.quotations.index', [
             'items' => $quotations,
             'exportQuotations' => $exportQuotations,
@@ -102,17 +101,12 @@ class QuotationsController extends Controller
         $request->validate([
             'validity_from' => ['required'],
             'customer_id' => ['required'],
-            // 'place_of_acceptence_id' => ['required'],
             'load_port_id' => ['required'],
-            // 'export_detention' => ['required'],
-            // 'import_detention' => ['required'],
-            // 'place_of_delivery_id' => ['required', 'different:place_of_acceptence_id'],
             'discharge_port_id' => ['required', 'different:load_port_id'],
             'validity_to' => ['required', 'after:validity_from'],
             'commodity_des' => ['required'],
         ], [
             'validity_to.after' => 'Validaty To Should Be After Validaty From ',
-            // 'place_of_delivery_id.different' => 'Place Of Delivery The Same  Place Of Acceptence',
             'discharge_port_id.different' => 'Load Port The Same  Discharge Port',
         ]);
 
@@ -347,21 +341,14 @@ class QuotationsController extends Controller
         $request->validate([
             'validity_from' => ['required'],
             'customer_id' => ['required'],
-            // 'place_of_acceptence_id' => ['required'],
             'load_port_id' => ['required'],
-            'equipment_type_id' => ['required'],
-            // 'export_detention' => ['required'],
-            // 'import_detention' => ['required'],
-            // 'place_of_delivery_id' => ['required', 'different:place_of_acceptence_id'],
             'discharge_port_id' => ['required', 'different:load_port_id'],
             'validity_to' => ['required', 'after:validity_from'],
             'commodity_des' => ['required'],
         ], [
             'validity_to.after' => 'Validaty To Should Be After Validaty From ',
-            // 'place_of_delivery_id.different' => 'Place Of Delivery The Same  Place Of Acceptence',
             'discharge_port_id.different' => 'Load Port The Same  Discharge Port',
         ]);
-
 
         $this->authorize(__FUNCTION__, Quotation::class);
         $user = Auth::user();
@@ -409,59 +396,8 @@ class QuotationsController extends Controller
             'payment_location' => $request->payment_location,
             'customer_consignee_id'=>$request->input('customer_consignee_id'),
         ];
-        if ($user->is_super_admin) {
-            if ($quotation->discharge_agent_id != $request->discharge_agent_id || $request->equipment_type_id != $quotation->equipment_type_id) {
-                $deleteOldDes = QuotationDes::where('quotation_id', $quotation->id)->get();
-                foreach ($deleteOldDes as $x) {
-                    $x->delete();
-                }
-            }
-            if ($quotation->agent_id != $request->agent_id || $request->equipment_type_id != $quotation->equipment_type_id) {
-                $deleteOldLoad = QuotationLoad::where('quotation_id', $quotation->id)->get();
-                foreach ($deleteOldLoad as $y) {
-                    $y->delete();
-                }
-            }
-            $input ['vessel_name'] = $request->vessel_name;
-            $input ['principal_name'] = $request->principal_name;
-        } else {
-            if ($request->equipment_type_id != $quotation->equipment_type_id) {
-                $deleteOldDes = QuotationDes::where('quotation_id', $quotation->id)->get();
-                foreach ($deleteOldDes as $x) {
-                    $x->delete();
-                }
-            }
-            if ($request->equipment_type_id != $quotation->equipment_type_id) {
-                $deleteOldLoad = QuotationLoad::where('quotation_id', $quotation->id)->get();
-                foreach ($deleteOldLoad as $y) {
-                    $y->delete();
-                }
-            }
-        }
-
+ 
         $quotation->createOrUpdateDesc($request->quotationDis);
-        // dd($quotation);
-
-
-        $quotation->createOrUpdateLoad($request->quotationLoad);
-        // dd($user);
-        if (isset($request->discharge_agent_id)) {
-            $input ['discharge_agent_id'] = $request->discharge_agent_id;
-            $input ['status'] = "MSL count";
-            $quotation->update($input);
-        } else {
-            if ($quotation->status == 'pending') {
-                // dd($user);
-                $input ['status'] = "pending";
-                $quotation->update($input);
-            } else {
-                $input ['status'] = "Agent count";
-                $quotation->update($input);
-            }
-        }
-
-        QuotationDes::destroy(explode(',', $request->removedDesc));
-        QuotationLoad::destroy(explode(',', $request->removedLoad));
         return redirect()->route('quotations.index')->with('success', trans('Quotation.updated.success'));
     }
 
