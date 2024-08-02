@@ -9,4 +9,5 @@ return array (
   'add_first' => 'Apply First Day',
   'add_last' => 'Execute Last Day',
   'no_movement' => 'No Next Move',
+  'c_invoice' => 'Create Invoive',
 );
