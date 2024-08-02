@@ -22,10 +22,6 @@
                         @permission('Movements-List')
                         <div class="row">
                             <div class="col-md-12 text-right mb-6">
-                                @permission('Booking-Create')
-                                <a href="{{route('containerRefresh')}}" class="btn btn-success">Refresh Container
-                                    Status</a>
-                                @endpermission
                                 @if(!$items->isEmpty())
                                     <a class="btn btn-info" href="{{ route('export.search',['container_id'=>request()->input('container_id'),'port_location_id'=>request()->input('port_location_id'),'voyage_id'=>request()->input('voyage_id'),
                                     'movement_id'=>request()->input('movement_id'),'bl_no'=>request()->input('bl_no'),'booking_no'=>request()->input('booking_no')]) }}">Export Last Movements</a>

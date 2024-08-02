@@ -63,6 +63,7 @@ class QuotationsController extends Controller
         ->whereHas('types', function ($query) {
             return $query->whereIn('type_id', [5, 7, 9]);
         })->get();
+        //dd($principals);
         $oprators = Lines::where('company_id', Auth::user()->company_id)
         ->whereHas('types', function ($query) {
             return $query->whereIn('type_id', [4, 2, 8]);
@@ -306,6 +307,12 @@ class QuotationsController extends Controller
 
         $booking_agency = Agents::where('id',Auth::user()->agent_id)->get();
         
+        $consignee = Customers::where('company_id', Auth::user()->company_id)->whereHas(
+            'CustomerRoles',
+            function ($query) {
+                return $query->where('role_id', 2);
+            }
+        )->with('CustomerRoles.role')->get();
         $isSuperAdmin = false;
         if (Auth::user()->is_super_admin) {
             $isSuperAdmin = true;
@@ -331,6 +338,7 @@ class QuotationsController extends Controller
             'equipment_types' => $equipment_types,
             'country' => $country,
             'booking_agency' => $booking_agency,
+            'consignee' => $consignee,
         ]);
     }
 

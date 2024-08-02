@@ -39,17 +39,14 @@
                             </div>
                     </div> -->
                     <div class="form-row">
-                        <div class="form-group col-md-12">
+                        <div class="form-group col-md-8">
                             <label for="invoice">Invoice No</label>
                             <select class="selectpicker form-control" id="invoice" data-live-search="true" name="invoice_id" data-size="10"
                              title="{{trans('forms.select')}}" required>
                             <option value="">Select...</option>
                             @foreach ($invoiceRef as $item)     
                             <option value="{{$item->id}}" {{$item->id == old('invoice_id',request()->input('invoice_id')) ? 'selected':''}}>
-                            InvoiceNo: {{$item->invoice_no}} &nbsp;&nbsp; BL No: {{optional($item->bldraft)->ref_no}}
-                            &nbsp;&nbsp; Customer: {{$item->customer}}
-                            @if($item->qty != 0) &nbsp;&nbsp; No Of Containers: {{$item->qty}} @endif
-                            &nbsp;&nbsp; Total: {{$item->add_egp == "onlyegp" ? $item->chargeDesc->sum('total_egy')." EGP" : $item->chargeDesc->sum('total_amount')." USD"}}
+                            InvoiceNo: {{$item->invoice_no}} 
                         </option>
                                 @endforeach
                             </select>

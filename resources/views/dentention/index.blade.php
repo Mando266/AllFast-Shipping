@@ -24,7 +24,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                             <span> </span>
                         </div>
-                        <form action="{{route('dententions.store')}}" method="POST">
+                        <form id="invoiceForm" action="{{route('dententions.store')}}" method="POST">
                             @csrf
 
                             @php
@@ -97,7 +97,7 @@
                                 </div>
                                  <div class="form-group col-md-2 mt-5 ml-2">
                                         <input type="checkbox"  id="apply_first_day" name="apply_first_day"
-                                               value="1" {{ isset($input['apply_first_day']) ?  'checked': '' }}>
+                                               value="1" {{ isset($input['apply_first_day']) ?  'checked': '' }} checked>
                                         <label for="apply_first_day">{{ trans('home.add_first') }}</label>
                                 </div>
                                  <div class="form-group col-md-2 mt-5 ml-2">
@@ -112,8 +112,11 @@
                                     <button type="submit" class="btn btn-info mt-3">Calculate</button>
                                 </div>
                             </div>
+
+
                             @isset($calculation)
-                                <h4 style="color:#1b55e2">Calculation
+                            
+                            <h4 style="color:#1b55e2">Calculation
                                     <h4>
                                         <table id="charges" class="table table-bordered">
                                             <thead>
@@ -130,6 +133,9 @@
                                             </tr>
                                             </thead>
                                             <tbody>
+                                            @if($calculation['containers'])
+                                                <input type="hidden" id="periods" value="{{$calculation['containers'][0]['periods']}}">
+                                            @endif
                                             @foreach($calculation['containers'] as $item)
                                                 <tr>
                                                     <td class="col-md-2 text-center">{{$item['container_no']}} {{$item['container_type']}}</td>
@@ -138,7 +144,7 @@
                                                     <td class="col-md-2 text-center">{{$item['from']}}</td>
                                                     <td class="col-md-1 text-center">{{$item['to_code']}}</td>
                                                     <td class="col-md-2 text-center">{{$item['to']}}</td>
-                                                    <td class="col-md-2" style="border-right-style: hidden;">
+                                                    <td class="col-md-3" style="border-right-style: hidden;">
                                                         @foreach($item['periods'] as $period)
                                                             {{ $period['name'] }} <br>
                                                         @endforeach
@@ -170,12 +176,16 @@
                                                 <td class="col-md-2" style="border-right-style: hidden;"></td>
                                                 <td class="col-md-2" style="border-right-style: hidden;"></td>
                                                 <td class="col-md-2"></td>
-                                                <td class="col-md-2 text-center">
+                                                <td class="col-md-2 text-center" id="grandTotal">
                                                     {{$calculation['grandTotal']}}
                                                 </td>
                                             </tr>
                                             </tfoot>
                                         </table>
+                                        <div class="col-md-12 text-right">
+                                            <button type="submit" class="btn btn-warning mt-3" id="create_invoive">{{ trans('home.c_invoice') }}</button>
+                                        </div>
+
 
                             @endisset
                         </form>
@@ -315,5 +325,39 @@
                         container.selectpicker('refresh');
                     })
                 });
+                $('#port').change(function () {
+                    var selectedValue = $(this).val();
+                    if (selectedValue.length > 1 && selectedValue.includes('all')) {
+                        selectedValue = selectedValue.filter(function (value) {
+                            return value !== 'all';
+                        });
+                        $(this).val(selectedValue);
+                    }
+                
+                    if (selectedValue.includes('all')) {
+                        $('#port option:not(:selected)').prop('disabled', true);
+                    } else {
+                        $('#port option').prop('disabled', false);
+                    }
+                    $('#port').selectpicker('refresh');
+                });
             </script>
+            <script>
+                $('#create_invoive').click(function (e) {
+                    e.preventDefault();
+                    
+                    let formData = $('#invoiceForm').serialize();
+                    let grandTotalText = $('#grandTotal').text();
+                    let grandTotal = grandTotalText.match(/\d+/);
+                        grandTotal = grandTotal ? parseInt(grandTotal[0], 10) : 0;
+                    let periods = $('#periods').val();
+                        formData += '&booking_ref=' + encodeURIComponent($('#booking_no').val());
+                        formData += '&grandTotal=' + encodeURIComponent(grandTotal);
+                        formData += '&periods=' + encodeURIComponent(periods);
+
+                        window.location.href = "{{ route('debit-invoice') }}?" + formData;
+
+                });
+            </script>
+
         @endpush

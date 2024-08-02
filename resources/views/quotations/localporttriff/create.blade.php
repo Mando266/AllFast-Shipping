@@ -92,6 +92,7 @@
                                         <th>unit</th>
                                         <th>currency</th>
                                         <th>Customer Rate</th>
+                                        <th>IMO Rate</th>
                                         <th>payer</th>
                                         <th>Shipment Type</th>
                                         <th>standard Or customise</th>
@@ -143,8 +144,16 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="text" id="dayes" name="triffPriceDetailes[0][selling_price]" class="form-control" autocomplete="off" required>
+                                        <input type="text" name="triffPriceDetailes[0][selling_price]" class="form-control" autocomplete="off" required>
                                             @error('selling_price')
+                                            <div style="color:red;">
+                                                {{$message}}
+                                            </div>
+                                            @enderror
+                                    </td>
+                                    <td>
+                                        <input type="text" name="triffPriceDetailes[0][imo_selling_price]" class="form-control" autocomplete="off" required>
+                                            @error('imo_selling_price')
                                             <div style="color:red;">
                                                 {{$message}}
                                             </div>
@@ -253,6 +262,7 @@
         '<td><select class="selectpicker form-control" data-live-search="true" id="selectpickers" name="triffPriceDetailes['+counter+'][unit]"><option>Select</option><option value="Container">Container</option><option value="Document">Document</option></select></td>'+
         '<td><select class="selectpicker form-control" data-live-search="true" id="selectpickers" name="triffPriceDetailes['+counter+'][currency]" data-size="10"><option>Select</option>@foreach ($currency as $item)<option value="{{$item->name}}">{{$item->name}}</option>@endforeach</select></td>'+
         '<td><input type="text" name="triffPriceDetailes['+counter+'][selling_price]" class="form-control" required></td>'+
+        '<td><input type="text" name="triffPriceDetailes['+counter+'][imo_selling_price]" class="form-control" required></td>'+
         // '<td><input type="text" name="triffPriceDetailes['+counter+'][cost]" class="form-control"></td>'+
         // '<td><input type="text" name="triffPriceDetailes['+counter+'][agency_revene]" class="form-control" autocomplete="off" ></td>'+
         // '<td><input type="text" name="triffPriceDetailes['+counter+'][liner]" class="form-control" autocomplete="off"></td>'+

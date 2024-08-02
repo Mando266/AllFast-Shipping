@@ -77,8 +77,10 @@ class DemurageController extends Controller
             'currency' => $request->input('currency'),
             'container_status' => $request->input('container_status'),
             'tariff_id' => $request->input('tariff_id'),
+            'bound_id' => $request->input('bound_id'),
             'company_id' => $user->company_id,
             'tariff_type_id' => $request->input('tariff_type_id'),
+            'is_storge' => $request->input('is_storge'),
         ]);
 
         // Iterate over each container type

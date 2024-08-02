@@ -148,58 +148,72 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($invoices as $invoice)
+                                    
+                                @forelse ($invoices as $invoice)
                                     @php
-                                    $vat = $invoice->vat;
-                                    $vat = $vat / 100;
-                                    $total = 0;
-                                    $total_eg = 0;
-                                    $total_after_vat = 0;
-                                    $total_before_vat = 0;
-                                    $total_eg_after_vat = 0;
-                                    $total_eg_before_vat = 0;
-                                    $totalAftereTax = 0;
-                                    $totalAftereTax_eg = 0;
+                                        $vatRate = $invoice->vat / 100;
+                                        $total = 0;
+                                        $totalEgp = 0;
+                                        $totalAfterVat = 0;
+                                        $totalBeforeVat = 0;
+                                        $totalEgpAfterVat = 0;
+                                        $totalEgpBeforeVat = 0;
+                                        $totalAfterTax = 0;
+                                        $totalAfterTaxEgp = 0;
 
-                                    foreach($invoice->chargeDesc as $chargeDesc){
-                                        $total += $chargeDesc->total_amount;
-                                        $total_eg += $chargeDesc->total_egy;
+                                        foreach ($invoice->chargeDesc as $chargeDesc) {
+                                            $total += $chargeDesc->total_amount;
+                                            $totalEgp += $chargeDesc->total_egy;
 
-                                        $totalAftereTax = (($total * $invoice->tax_discount)/100);
-                                        $totalAftereTax_eg = (($total_eg * $invoice->tax_discount)/100);
+                                            $totalAfterTax = ($total * $invoice->tax_discount) / 100;
+                                            $totalAfterTaxEgp = ($totalEgp * $invoice->tax_discount) / 100;
 
-                                    if($chargeDesc->add_vat == 1){
-                                            $total_after_vat += ($vat * $chargeDesc->total_amount);
-                                            $total_eg_after_vat += ($vat * $chargeDesc->total_egy);
+                                            if ($chargeDesc->add_vat) {
+                                                $totalAfterVat += ($vatRate * $chargeDesc->total_amount);
+                                                $totalEgpAfterVat += ($vatRate * $chargeDesc->total_egy);
+                                            }
                                         }
-                                    }
-                                    $total_before_vat = $total;
-                                    if($total_after_vat != 0){
-                                        $total = $total + $total_after_vat;
-                                    }
-                                    if($total_eg_after_vat != 0){
-                                        $total_eg = $total_eg + $total_eg_after_vat;
-                                    }
-                                    @endphp
 
+                                        $totalBeforeVat = $total;
+                                        $total += $totalAfterVat ? $totalAfterVat : 0;
+                                        $totalEgp += $totalEgpAfterVat ? $totalEgpAfterVat : 0;
+                                    @endphp
                                         <tr>
                                             <td>{{ App\Helpers\Utils::rowNumber($invoices,$loop)}}</td>
                                             <td>{{optional($invoice)->invoice_no}}</td>
                                             <td>{{$invoice->customer}}</td>
                                             <td>{{optional($invoice->customerShipperOrFfw)->tax_card_no}}</td>
-                                            <td>{{optional($invoice->booking)->ref_no}}</td>
-                                            <td>{{optional(optional($invoice->booking)->voyage)->voyage_no}}</td>
-                                            <td>{{optional(optional(optional($invoice->booking)->voyage)->vessel)->name}}</td>
-                                            <td>{{optional($invoice)->date}}</td>
+                                            <td>{{$invoice->bldraft_id != 0 ? optional(optional($invoice->bldraft)->booking)->ref_no : optional($invoice->booking)->ref_no}}</td>
+                                            <td>
+
+                                                {{
+                                                    $invoice->bldraft_id != 0
+                                                        ? optional(optional(optional($invoice->bldraft)->booking)->voyage)->voyage_no
+                                                        : ($invoice->booking_ref != 0
+                                                            ? optional(optional($invoice->booking)->voyage)->voyage_no
+                                                            : optional(optional($invoice->voyage))->voyage_no)
+                                                }}
+                                            </td>
+                                            <td>
+                                                {{
+                                                    $invoice->bldraft_id != 0
+                                                        ? optional(optional(optional($invoice->bldraft)->booking)->voyage->vessel)->name
+                                                        : ($invoice->booking_ref != 0
+                                                            ? optional(optional($invoice->booking)->voyage->vessel)->name
+                                                            : optional(optional($invoice->voyage)->vessel)->name)
+                                                }}
+                                            </td>
+
+                                           <td>{{optional($invoice)->date}}</td>
                                             <td>{{optional($invoice)->type}}</td>
-                                            <td>{{optional($invoice->booking)->payment_kind}}</td>
+                                            <td>{{$invoice->bldraft_id != 0 ?  optional(optional($invoice->bldraft)->booking)->payment_kind : optional($invoice->booking)->payment_kind}}</td>
                                             @if( $invoice->add_egp != 'onlyegp')
                                             <td>{{$total}}</td>
                                             @else
                                             <td></td>
                                             @endif
                                             @if($invoice->add_egp == 'true' || $invoice->add_egp == 'onlyegp')
-                                            <td>{{$total_eg}}</td>
+                                            <td>{{$totalEgp}}</td>
                                             @else
                                             <td></td> 
                                             @endif

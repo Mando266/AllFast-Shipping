@@ -869,7 +869,33 @@ class BookingController extends Controller
             'secondVoyagePort' => $secondVoyagePort
         ]);
     }
+    public function getBookingDetails(Request $request, $bookingId)
+    {
+        try {
+            $perPage = 20;
+            $page = $request->input('page', 1);
+            $offset = ($page - 1) * $perPage;
 
+            $bookingDetails = BookingContainerDetails::where('booking_id', $bookingId)
+                ->offset($offset)
+                ->limit($perPage)
+                ->get();
+
+            $totalRows = BookingContainerDetails::where('booking_id', $bookingId)->count();
+            $totalPages = ceil($totalRows / $perPage);
+
+            $equipmentTypes = ContainersTypes::orderBy('id')->get();
+            $oldContainers = Containers::where('company_id', Auth::user()->company_id)->get();
+            $activityLocations = Ports::get();
+
+            return response()->json([
+                'bookingDetails' => view('booking.partials.booking-details', compact('bookingDetails', 'equipmentTypes', 'oldContainers', 'activityLocations'))->render(),
+                'totalPages' => $totalPages
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
     public function edit(Booking $booking)
     {
         $this->authorize(__FUNCTION__, Booking::class);
@@ -1013,14 +1039,14 @@ class BookingController extends Controller
         $quotation = Quotation::find($request->quotation_id);
         $etaDate = VoyagePorts::where('voyage_id',$request->voyage_id)->where('port_from_name',$request->load_port_id)->pluck('eta')->first();
 
-        if($booking->quotation_id != null){
-            if($quotation->shipment_type == 'Export'){
-                    if($etaDate <= $quotation->validity_from && $etaDate >= $quotation->validity_to){
-                        return redirect()->back()->with('error','Invalid Date '.$etaDate.' Date Must Be Between '.$quotation->validity_from.' and '.$quotation->validity_to)
-                        ->withInput($request->input());
-                    }
-            }
-        }
+        // if($booking->quotation_id != null){
+        //     if($booking->quotation->shipment_type == 'Export'){
+        //             if($etaDate <= $quotation->validity_from && $etaDate >= $quotation->validity_to){
+        //                 return redirect()->back()->with('error','Invalid Date '.$etaDate.' Date Must Be Between '.$quotation->validity_from.' and '.$quotation->validity_to)
+        //                 ->withInput($request->input());
+        //             }
+        //     }
+        // }
 
     if($request->input('movement') == 'FCL/FCL'){
         $uniqueContainers = array();
@@ -1060,7 +1086,15 @@ class BookingController extends Controller
             $request->certificat->move(public_path('certificat'), $path);
             $booking->update(['certificat' => "certificat/" . $path]);
         }
-        return redirect()->route('booking.index')->with('success', trans('Booking.Updated.Success'));
+        if (optional($booking)->shipment_type == "Import"){
+            return redirect()->route('booking.index')->with('success', trans('Booking.created'));
+        }
+        else{
+            return redirect()->route('booking.export')->with('success', trans('Booking.created'));
+
+        }
+        
+        
     }
 
     public function destroy($id)

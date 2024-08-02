@@ -19,32 +19,37 @@
                               enctype="multipart/form-data">
                             @csrf
                             <div class="form-row">
+                            @if(request()->has('bldraft_id'))
+                                <input type="hidden" name="bldraft_id" value="{{request()->input('bldraft_id')}}">
+                            @else    
                                 <input type="hidden" name="booking_ref" value="{{request()->input('booking_ref')}}">
+                            @endif
                                 <div class="form-group col-md-6">
-                                    <label for="customer">Customer<span
-                                                class="text-warning"> * (Required.) </span></label>
+                                    <label for="customer">Customer<span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" name="customer_id" id="customer"
                                             data-live-search="true" data-size="10"
                                             title="{{trans('forms.select')}}" required>
-                                        @if($bldraft != null)
-                                            @if(optional($bldraft->forwarder)->name != null)
-                                                <option value="{{optional($bldraft)->ffw_id}}">{{ optional($bldraft->forwarder)->name }}
-                                                    Forwarder
-                                                </option>
-                                            @elseif(optional($bldraft->consignee)->name != null)
+                                        @if($bldraft != null && request()->has('booking_ref'))
+                                            @if(optional($bldraft->consignee)->name != null)
                                                 <option value="{{optional($bldraft)->customer_consignee_id}}">{{ optional($bldraft->consignee)->name }}
                                                     Consignee
+                                                </option>
+                                            @endif
+                                        @elseif($bldraft != null && request()->has('bldraft_id'))
+                                            @if(optional($bldraft->customer)->name != null)
+                                            <option value="{{optional($bldraft)->customer_id}}">{{ optional($bldraft->customer)->name }}
+                                                Shipper
+                                            </option>
+                                            @endif
+                                            @if(optional($bldraft->booking->forwarder)->name != null)
+                                                <option value="{{optional($bldraft)->ffw_id}}">{{ optional($bldraft->booking->forwarder)->name }}
+                                                    Forwarder
                                                 </option>
                                             @endif
                                             @if(optional($bldraft->customerNotify)->name != null)
                                                 <option value="{{optional($bldraft)->customer_notifiy_id}}">{{ optional($bldraft->customerNotify)->name }}
                                                     Notify
                                                 </option>
-                                            @endif
-                                            @if(optional($bldraft->customer)->name != null)
-                                            <option value="{{optional($bldraft)->customer_id}}">{{ optional($bldraft->customer)->name }}
-                                                Shipper
-                                            </option>
                                             @endif
                                         @endif
                                     </select>
@@ -129,7 +134,7 @@
                             <div class="form-row">
                                 <div class="col-md-3 form-group">
                                     <label> VAT % </label>
-                                    @if(optional($bldraft)->shipment_type == Import)
+                                    @if(optional($bldraft)->shipment_type == "Import")
                                         <input type="text" class="form-control" placeholder="VAT %" name="vat"
                                            autocomplete="off" value="14" style="background-color:#fff" required>
                                     @else
@@ -190,8 +195,10 @@
                                         </span>
                                     </th>                                    
                                     <th class="text-center">Multiply QTY</th>
+                                    @if(request()->input('add_egp') == 'USD')
                                     <th class="text-center">TOTAL USD</th>
                                     <th class="text-center">USD After VAT</th>
+                                    @endif
                                     <th class="text-center">Total Egp</th>
                                     <th class="text-center">EGP After VAT</th>
                                     <th class="text-center"><a id="add"> Add <i class="fas fa-plus"></i></a>
@@ -292,12 +299,21 @@
                                                         @endforeach
                                                     </select>
                                                 </td>
+                                                @if(optional($bldraft)->imo == 1)
+                                                <td><input type="text" class="form-control" id="size_small"
+                                                           name="invoiceChargeDesc[{{ $key }}][size_small]"
+                                                           value="{{ $detail->imo_selling_price }}"
+                                                           placeholder="Amount" autocomplete="off" disabled
+                                                           style="background-color: white;">
+                                                </td>
+                                                @else
                                                 <td><input type="text" class="form-control" id="size_small"
                                                            name="invoiceChargeDesc[{{ $key }}][size_small]"
                                                            value="{{ $detail->selling_price }}"
                                                            placeholder="Amount" autocomplete="off" disabled
                                                            style="background-color: white;">
                                                 </td>
+                                                @endif
                                                 <td>
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="radio"
@@ -332,14 +348,14 @@
                                                                for="item_{{$key}}_enabled_no">No</label>
                                                     </div>
                                                 </td>
-                                                @if($detail->unit == "Container")
+                                                @if($detail->unit == "Container" && request()->input('add_egp') == 'USD')
                                                     <td><input type="text" class="form-control" id="ofr"
                                                                name="invoiceChargeDesc[{{ $key }}][total]"
                                                                value="{{$detail->selling_price * $qty}}"
                                                                placeholder="Total" autocomplete="off" disabled
                                                                style="background-color: white;">
                                                     </td>
-                                                @elseif($detail->unit == "Document")
+                                                @elseif($detail->unit == "Document" && request()->input('add_egp') == 'USD')
                                                     <td><input type="text" class="form-control" id="ofr"
                                                                name="invoiceChargeDesc[{{ $key }}][total]"
                                                                value="{{$detail->selling_price}}"
@@ -347,10 +363,13 @@
                                                                style="background-color: white;">
                                                     </td>
                                                 @endif
-                                                <td><input type="text"
+                                                @if(request()->input('add_egp') == 'USD')
+                                                    <td><input type="text"
                                                            name="invoiceChargeDesc[{{ $key }}][usd_vat]"
                                                            class="form-control" autocomplete="off"
-                                                           placeholder="USD After VAT" disabled></td>
+                                                           placeholder="USD After VAT" disabled>
+                                                    </td>
+                                                @endif 
                                                 @if($detail->unit == "Container")
                                                     <td><input type="text" class="form-control" id="ofr"
                                                                name="invoiceChargeDesc[{{ $key }}][egy_amount]"
@@ -499,13 +518,14 @@
 
 <script>
     // Function to handle the select all checkbox for VAT
-    $('#selectAllVat').change(function() {
-        var isChecked = $(this).is(':checked');
-        $('#charges tbody tr').each(function() {
-            $(this).find('input[name$="[add_vat]"][value="' + (isChecked ? '1' : '0') + '"]').prop('checked', true);
+    $('#selectAllVat').change(function () {
+            var isChecked = $(this).is(':checked');
+            $('#charges tbody tr').each(function () {
+                $(this).find('input[name$="[add_vat]"][value="' + (isChecked ? '1' : '0') + '"]').prop('checked', true);
+            });
+            calculateAmounts(); // Ensure calculations are triggered
         });
-        calculateTotals();
-    });
+
 
     function calculateAmounts() {
         let vat = parseFloat($('input[name="vat"]').val()) / 100;
@@ -548,28 +568,59 @@
 <script>
     $(document).ready(function () {
         localStorage.removeItem('cart');
+
         $("#charges").on("click", ".remove", function () {
             $(this).closest("tr").remove();
         });
-        var counter = '<?= isset($key) ? ++$key : 0 ?>';
+
+        var counter = <?= isset($key) ? ++$key : 0 ?>;
+
         $("#add").click(function () {
             var tr = '<tr>' +
-                '<td><select class="selectpicker form-control" data-live-search="true" id="selectpickers" name="invoiceChargeDesc[' + counter + '][charge_description]" data-size="10"><option>Select</option>@foreach ($charges as $item)<option value="{{$item->name}}">{{$item->name}}</option>@endforeach</select></td>' +
+                '<td>' +
+                    '<select class="selectpicker form-control" data-live-search="true" name="invoiceChargeDesc[' + counter + '][charge_description]" data-size="10">' +
+                        '<option>Select</option>' +
+                        '@foreach ($charges as $item)' +
+                            '<option value="{{ $item->name }}">{{ $item->name }}</option>' +
+                        '@endforeach' +
+                    '</select>' +
+                '</td>' +
                 '<td><input type="text" name="invoiceChargeDesc[' + counter + '][size_small]" class="form-control" autocomplete="off" placeholder="Amount" required></td>' +
-                '<td><div class="form-check"><input class="form-check-input" type="radio" name="invoiceChargeDesc[' + counter + '][add_vat]" id="item_' + counter + '_enabled_yes" value="1"><label class="form-check-label" for="item_' + counter + '_enabled_yes">Yes</label></div><div class="form-check"><input class="form-check-input" type="radio" name="invoiceChargeDesc[' + counter + '][add_vat]" id="item_' + counter + '_enabled_no" value="0" checked><label class="form-check-label" for="item_' + counter + '_enabled_no">No</label></div></td>' +
-                '<td><div class="form-check"><input class="form-check-input" type="radio" name="invoiceChargeDesc[' + counter + '][enabled]" id="item_' + counter + '_enabled_yes" value="1" checked><label class="form-check-label" for="item_' + counter + '_enabled_yes">Yes</label></div><div class="form-check"><input class="form-check-input" type="radio" name="invoiceChargeDesc[' + counter + '][enabled]" id="item_' + counter + '_enabled_no" value="0"><label class="form-check-label" for="item_' + counter + '_enabled_no">No</label></div></td>' +
+                '<td>' +
+                    '<div class="form-check">' +
+                        '<input class="form-check-input" type="radio" name="invoiceChargeDesc[' + counter + '][add_vat]" id="add_vat_' + counter + '_yes" value="1">' +
+                        '<label class="form-check-label" for="add_vat_' + counter + '_yes">Yes</label>' +
+                    '</div>' +
+                    '<div class="form-check">' +
+                        '<input class="form-check-input" type="radio" name="invoiceChargeDesc[' + counter + '][add_vat]" id="add_vat_' + counter + '_no" value="0" checked>' +
+                        '<label class="form-check-label" for="add_vat_' + counter + 'no">No</label>' +
+                    '</div>' +
+                '</td>' +
+                '<td>' +
+                    '<div class="form-check">' +
+                        '<input class="form-check-input" type="radio" name="invoiceChargeDesc[' + counter + '][enabled]" id="enabled_' + counter + '_yes" value="1" checked>' +
+                        '<label class="form-check-label" for="enabled_' + counter + '_yes">Yes</label>' +
+                    '</div>' +
+                    '<div class="form-check">' +
+                        '<input class="form-check-input" type="radio" name="invoiceChargeDesc[' + counter + '][enabled]" id="enabled_' + counter + '_no" value="0">' +
+                        '<label class="form-check-label" for="enabled_' + counter + '_no">No</label>' +
+                    '</div>' +
+                '</td>' +
+                @if(request()->input('add_egp') == 'USD')
                 '<td><input type="text" name="invoiceChargeDesc[' + counter + '][total]" class="form-control" autocomplete="off" placeholder="Total" required></td>' +
                 '<td><input type="text" name="invoiceChargeDesc[' + counter + '][usd_vat]" class="form-control" autocomplete="off" placeholder="USD After VAT" disabled></td>' +
+                @endif
                 '<td><input type="text" name="invoiceChargeDesc[' + counter + '][egy_amount]" class="form-control" autocomplete="off" placeholder="Egp Amount" disabled></td>' +
                 '<td><input type="text" name="invoiceChargeDesc[' + counter + '][egp_vat]" class="form-control" autocomplete="off" placeholder="Egp After VAT"></td>' +
-                '<td style="width:85px;"><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>'
+                '<td style="width:85px;"><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>' +
             '</tr>';
             counter++;
             $('#charges').append(tr);
             $('.selectpicker').selectpicker("render");
-            $('#selectpickers').selectpicker();
         });
+
         $('input[name$="[size_small]"]').trigger("input")
     });
 </script>
+
 @endpush

@@ -47,7 +47,7 @@ class Voyages extends Model implements PermissionSeederContract
     {
         return $this->hasMany(BlDraft::class ,'voyage_id','id');
     }
-    public function xmlBldrafts()
+    public function xmlBldrafts() 
     {
         $voyageId = $this->id;
 

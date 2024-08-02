@@ -145,6 +145,7 @@ Route::group(['middleware' => 'auth'], function () {
     */
     Route::prefix('booking')->namespace('Booking')->group(function () {
         Route::resource('booking', 'BookingController');
+        Route::get('/booking-details/{bookingId}', [BookingController::class, 'getBookingDetails']);
         Route::get('/check-container', [BookingController::class, 'checkContainer']);
         Route::get('/create-container', [BookingController::class, 'createContainer']);
         Route::get('selectImportQuotation', [BookingController::class, 'selectImportQuotation'])
@@ -261,6 +262,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::prefix('dentention-storage-calculation')->namespace('DententionStorageCalculation')->group(function () {
         Route::resource('dententions', 'DententionController');
         Route::resource('storage', 'StorageController');
+        Route::get('debit-invoice',DebitInvoiceController::class)->name('debit-invoice');
     });
     Route::prefix('lessor')->namespace('Master')->group(function () {
         Route::resource('seller', 'LessorSellerController');

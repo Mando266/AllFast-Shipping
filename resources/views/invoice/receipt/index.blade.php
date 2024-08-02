@@ -104,7 +104,7 @@
                                             <td>{{$receipt->receipt_no}}</td>
                                             <td>{{optional($receipt->invoice)->invoice_no}}</td>
                                             <td>{{optional($receipt->bldraft)->ref_no}}</td>
-                                            <td>{{optional($receipt->invoice->customerShipperOrFfw)->name}}</td>
+                                            <td>{{optional(optional($receipt->invoice)->customerShipperOrFfw)->name}}</td>
                                             <td>
                                                 @if($receipt->bank_transfer != null)
                                                     Bank Transfer {{$receipt->bank_transfer}}<br>
