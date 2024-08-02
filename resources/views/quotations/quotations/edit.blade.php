@@ -520,48 +520,6 @@
             updateOptions();
         });
 
-        function fetchAndPopulatePorts(countryId, targetSelectors, oldValues = {}) {
-            $.get(`/api/master/ports/${countryId}`).then(function (data) {
-                let ports = data.ports || '';
-                let options = `<option value=''>Select...</option>`;
-                for (let i = 0; i < ports.length; i++) {
-                    let selected = ports[i].id == oldValues[targetSelectors[i]] ? 'selected' : '';
-                    options += `<option value='${ports[i].id}' ${selected}>${ports[i].name}</option>`;
-                }
-                targetSelectors.forEach((selector, index) => {
-                    $(selector).html(options).selectpicker('refresh');
-                });
-            }).fail(function (xhr, status, error) {
-                console.error('Error fetching ports:', status, error);
-            });
-        }
-
-        let oldValues = {
-            '#place_of_acceptence_id': "{{ old('place_of_acceptence_id', $quotation->place_of_acceptence_id) }}",
-            '#load_port_id': "{{ old('load_port_id', $quotation->load_port_id) }}",
-            '#pick_up_location': "{{ old('pick_up_location', $quotation->pick_up_location) }}",
-            '#place_of_delivery_id': "{{ old('place_of_delivery_id', $quotation->place_of_delivery_id) }}",
-            '#discharge_port_id': "{{ old('discharge_port_id', $quotation->discharge_port_id) }}",
-            '#place_return_id': "{{ old('place_return_id', $quotation->place_return_id) }}"
-        };
-        let countryDis = $('#countryDis');
-            if (countryDis.val()) {
-                fetchAndPopulatePorts(countryDis.val(), ['#place_of_acceptence_id', '#load_port_id', '#pick_up_location'], oldValues);
-            }
-
-            countryDis.on('change', function (e) {
-                fetchAndPopulatePorts(e.target.value, ['#place_of_acceptence_id', '#load_port_id', '#pick_up_location']);
-            });
-
-            let country = $('#country');
-            if (country.val()) {
-                fetchAndPopulatePorts(country.val(), ['#place_of_delivery_id', '#discharge_port_id', '#place_return_id'], oldValues);
-            }
-
-            country.on('change', function (e) {
-                fetchAndPopulatePorts(e.target.value, ['#place_of_delivery_id', '#discharge_port_id', '#place_return_id']);
-            });
-
         let exportCount = "{{ count($quotation->quotationDesc) }}";
         $("#adddis").click(function () {
             var selectedRequestType = $('#requesttype').val();
@@ -632,5 +590,44 @@
         });
     });
     </script>
+    <script>
+        $(function(){
+                let country = $('#countryDis');
+                let company_id = "{{optional(Auth::user())->company->id}}";
+                $('#countryDis').on('change',function(e){
+                    let value = e.target.value;
+                    let response =   $.get(`/api/master/ports/${country.val()}/${company_id}`).then(function(data){
+                        let ports = data.ports || '';
+                        let list2 = [`<option value=''>Select...</option>`];
+                        for(let i = 0 ; i < ports.length; i++){
+                            list2.push(`<option value='${ports[i].id}'>${ports[i].name} </option>`);
+                        }
+                let port = $('.port');
+                port.html(list2.join(''));
+                
+                });
+            });
+        });
+</script>
+<script>
+        $(function(){
+                let country = $('#country');
+                let company_id = "{{optional(Auth::user())->company->id}}";
+                $('#country').on('change',function(e){
+                    let value = e.target.value;
+                    let response =    $.get(`/api/master/ports/${country.val()}/${company_id}`).then(function(data){
+                        let ports = data.ports || '';
+                        let list2 = [`<option value=''>Select...</option>`];
+                        for(let i = 0 ; i < ports.length; i++){
+                            list2.push(`<option value='${ports[i].id}'>${ports[i].name} </option>`);
+                        }
+                let port = $('.importPort');
+                port.html(list2.join(''));
+
+                });
+            });
+        });
+</script>
+
 @endpush
 

@@ -280,8 +280,8 @@ class QuotationsController extends Controller
     {
         $this->authorize(__FUNCTION__, Quotation::class);
         $quotation = Quotation::with('quotationDesc', 'quotationLoad')->find($id);
-        $ports = Ports::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
-        $paymentLocation = Ports::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
+        $ports = Ports::orderBy('id')->get();
+        $paymentLocation = Ports::orderBy('id')->get();
         $container_types = ContainersTypes::orderBy('id')->get();
         $currency = Currency::orderBy('id')->get();
         $customers = Customers::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
