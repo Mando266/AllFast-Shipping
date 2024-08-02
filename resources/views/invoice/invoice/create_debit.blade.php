@@ -126,7 +126,7 @@
                         <div class="form-row">
                             <div class="col-md-12 form-group">
                                 <label> Notes </label>
-                                <textarea class="form-control" name="notes">{{ isset($notes) ? implode("\n", $notes) : '' }}</textarea>
+                                <textarea class="form-control" name="notes" rows="4">{{ isset($notes) ? implode("\n", $notes) : '' }}</textarea>
                             </div>
                         </div>
                         <h4>Charges</h4>
@@ -144,7 +144,7 @@
                                         <td>
                                             <select class="selectpicker form-control" id="Charge Description" data-live-search="true" name="invoiceChargeDesc[0][charge_description]" data-size="10" title="{{trans('forms.select')}}">
                                                 @foreach ($charges as $item)
-                                                    <option value="{{$item->name}}" {{$item->name == old($item->charge_description) ? 'selected':''}}>{{$item->name}}</option>
+                                                    <option value="{{$item->name}}" {{$item->name == old($item->charge_description)? 'selected':''}}>{{$item->name}}</option>
                                                 @endforeach
                                             </select>
                                         </td> 
@@ -160,7 +160,8 @@
                                         <td>
                                             <select class="selectpicker form-control" id="Charge Description" data-live-search="true" name="invoiceChargeDesc[0][charge_description]" data-size="10" title="{{trans('forms.select')}}" required>
                                                 @foreach ($charges as $item)
-                                                    <option value="{{$item->name}}" {{$item->name == old($item->charge_description) ? 'selected':''}}>{{$item->name}}</option>
+                                                    <option value="{{$item->name}}" {{($item->name == old($item->charge_description)|| $item->code =='EG-560161093-ID')  ? 'selected':''}}>{{$item->name}}</option>
+
                                                 @endforeach
                                             </select>
                                         </td>
