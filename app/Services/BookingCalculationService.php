@@ -77,15 +77,18 @@ class BookingCalculationService
             }
             $startMovementDate = $startMovement->movement_date;
             $endMovement = $this->getEndMovement($payload, $container->id, $startMovementDate);
+            $lastMovement = $this->getLastMovement($payload,$container->id);
+           
             if (in_array(optional($endMovement)->movement_id, $movementCompletedIds)) {
                 $status = 'completed';
             }
             if (
                 $endMovement == null ||
                 ($payload['to_date'] < $endMovement->movement_date && !is_null($payload['to_date'])) ||
-                !in_array(optional($endMovement)->movement_id, $movementCompletedIds)
+                (!in_array(optional($endMovement)->movement_id, $movementCompletedIds) &&
+                 $payload['to_date'] &&
+                optional($endMovement)->id != optional($lastMovement)->id )
             ) {
-
                 $endMovementDate = $payload['to_date'];
             } else {
                 $endMovementDate = $endMovement->movement_date;
@@ -231,6 +234,12 @@ class BookingCalculationService
 
     }
 
+    private function getLastMovement(array $payload,$containerId)
+    {
+        return  Movements::where('container_id', $containerId)
+                ->where('booking_no', $payload['booking_no'])
+                ->latest('movement_date')->first();
+    }
     private function getEndMovement(array $payload, $containerId, $startMovementDate)
     {
         if ($payload['to_date'] == null && $payload['to'] == null) {
@@ -246,7 +255,6 @@ class BookingCalculationService
                 ->where('movement_date', '<=', $payload['to_date'])
                 ->latest('movement_date')->first();
         } elseif ($payload['to_date'] == null && $payload['to'] != null) {
-
             $endMovement = Movements::where('container_id', $containerId)
                 ->where('booking_no', $payload['booking_no'])
                 ->where('movement_id', $payload['to'])

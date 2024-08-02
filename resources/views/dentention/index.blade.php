@@ -24,7 +24,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                             <span> </span>
                         </div>
-                        <form action="{{route('dententions.store')}}" method="POST">
+                        <form id="invoiceForm" action="{{route('dententions.store')}}" method="POST">
                             @csrf
 
                             @php
@@ -112,8 +112,18 @@
                                     <button type="submit" class="btn btn-info mt-3">Calculate</button>
                                 </div>
                             </div>
+
+                                    {{-- <div class="col-md-12 text-right">
+                                        <button   class="btn btn-warning mt-3" id="create_invoive">{{ trans('home.c_invoice') }}</button>
+                                    </div> --}}
                             @isset($calculation)
-                                <h4 style="color:#1b55e2">Calculation
+                            
+                            <h4 style="color:#1b55e2">Calculation
+                                @if($calculation['containers'])                                    
+                                    <div class="col-md-12 text-right">
+                                        <button  type="submit" class="btn btn-warning mt-3" id="create_invoive">{{ trans('home.c_invoice') }}</button>
+                                    </div>
+                                @endif
                                     <h4>
                                         <table id="charges" class="table table-bordered">
                                             <thead>
@@ -315,25 +325,31 @@
                         container.selectpicker('refresh');
                     })
                 });
+                $('#port').change(function () {
+                    var selectedValue = $(this).val();
+                    if (selectedValue.length > 1 && selectedValue.includes('all')) {
+                        selectedValue = selectedValue.filter(function (value) {
+                            return value !== 'all';
+                        });
+                        $(this).val(selectedValue);
+                    }
+                
+                    if (selectedValue.includes('all')) {
+                        $('#port option:not(:selected)').prop('disabled', true);
+                    } else {
+                        $('#port option').prop('disabled', false);
+                    }
+                    $('#port').selectpicker('refresh');
+                });
             </script>
-
             <script>
-                    $('#port').change(function () {
-                        var selectedValue = $(this).val();
-                        if (selectedValue.length > 1 && selectedValue.includes('all')) {
-                            selectedValue = selectedValue.filter(function (value) {
-                                return value !== 'all';
-                            });
-                            $(this).val(selectedValue);
-                        }
-
-                        if (selectedValue.includes('all')) {
-                            $('#port option:not(:selected)').prop('disabled', true);
-                        } else {
-                            $('#port option').prop('disabled', false);
-                        }
-                        $('#port').selectpicker('refresh');
-                    });
+                $('#create_invoive').click(function (e) {
+                    e.preventDefault();
+                    let formData = $('#invoiceForm').serialize();
+                        formData += '&booking_ref=' + encodeURIComponent($('#booking_no').val());
+                        formData += '&data=' + encodeURIComponent(1);
+                        window.location.href = "{{ route('invoice.create') }}?" + formData;
+                });
             </script>
 
         @endpush
