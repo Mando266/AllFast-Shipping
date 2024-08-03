@@ -113,17 +113,10 @@
                                 </div>
                             </div>
 
-                                    {{-- <div class="col-md-12 text-right">
-                                        <button   class="btn btn-warning mt-3" id="create_invoive">{{ trans('home.c_invoice') }}</button>
-                                    </div> --}}
+
                             @isset($calculation)
                             
                             <h4 style="color:#1b55e2">Calculation
-                                @if($calculation['containers'])                                    
-                                    <div class="col-md-12 text-right">
-                                        <button  type="submit" class="btn btn-warning mt-3" id="create_invoive">{{ trans('home.c_invoice') }}</button>
-                                    </div>
-                                @endif
                                     <h4>
                                         <table id="charges" class="table table-bordered">
                                             <thead>
@@ -140,6 +133,9 @@
                                             </tr>
                                             </thead>
                                             <tbody>
+                                            @if($calculation['containers'])
+                                                <input type="hidden" id="periods" value="{{$calculation['containers'][0]['periods']}}">
+                                            @endif
                                             @foreach($calculation['containers'] as $item)
                                                 <tr>
                                                     <td class="col-md-2 text-center">{{$item['container_no']}} {{$item['container_type']}}</td>
@@ -148,7 +144,7 @@
                                                     <td class="col-md-2 text-center">{{$item['from']}}</td>
                                                     <td class="col-md-1 text-center">{{$item['to_code']}}</td>
                                                     <td class="col-md-2 text-center">{{$item['to']}}</td>
-                                                    <td class="col-md-2" style="border-right-style: hidden;">
+                                                    <td class="col-md-3" style="border-right-style: hidden;">
                                                         @foreach($item['periods'] as $period)
                                                             {{ $period['name'] }} <br>
                                                         @endforeach
@@ -180,12 +176,16 @@
                                                 <td class="col-md-2" style="border-right-style: hidden;"></td>
                                                 <td class="col-md-2" style="border-right-style: hidden;"></td>
                                                 <td class="col-md-2"></td>
-                                                <td class="col-md-2 text-center">
+                                                <td class="col-md-2 text-center" id="grandTotal">
                                                     {{$calculation['grandTotal']}}
                                                 </td>
                                             </tr>
                                             </tfoot>
                                         </table>
+                                        <div class="col-md-12 text-right">
+                                            <button type="submit" class="btn btn-warning mt-3" id="create_invoive">{{ trans('home.c_invoice') }}</button>
+                                        </div>
+
 
                             @endisset
                         </form>
@@ -345,10 +345,18 @@
             <script>
                 $('#create_invoive').click(function (e) {
                     e.preventDefault();
+                    
                     let formData = $('#invoiceForm').serialize();
+                    let grandTotalText = $('#grandTotal').text();
+                    let grandTotal = grandTotalText.match(/\d+/);
+                        grandTotal = grandTotal ? parseInt(grandTotal[0], 10) : 0;
+                    let periods = $('#periods').val();
                         formData += '&booking_ref=' + encodeURIComponent($('#booking_no').val());
-                        formData += '&data=' + encodeURIComponent(1);
-                        window.location.href = "{{ route('invoice.create') }}?" + formData;
+                        formData += '&grandTotal=' + encodeURIComponent(grandTotal);
+                        formData += '&periods=' + encodeURIComponent(periods);
+
+                        window.location.href = "{{ route('debit-invoice') }}?" + formData;
+
                 });
             </script>
 
