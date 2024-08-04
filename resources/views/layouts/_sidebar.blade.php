@@ -397,6 +397,11 @@
                                     <a href="{{route('bldraft.index')}}"> Bl Gates </a>
                                 </li>
                                 @endpermission
+                                @permission('BlDraft-List')
+                                <li>
+                                    <a href="{{route('bldraft.printcounter')}}"> Bl Prints Counter </a>
+                                </li>
+                                @endpermission
 
                                 <!-- @permission('XML-List')
                                 <li>
