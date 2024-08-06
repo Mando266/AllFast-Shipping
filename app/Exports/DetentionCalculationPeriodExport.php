@@ -19,6 +19,10 @@ class DetentionCalculationPeriodExport extends AbstractExport
     public function collection()
     {
         return $this->data->map(function ($item,$index) {
+
+            $DM_days = $item['daysCount'] - $item['freeTime'];
+            $first_slab = isset($item['periods'][0]) ?  $item['periods'][0]['days']: 0;
+            $second_slab = isset($item['periods'][1]) ? $item['periods'][1]['days']: 0;
             return [
                 ++$index,
                 $item['container_no'],
@@ -28,10 +32,10 @@ class DetentionCalculationPeriodExport extends AbstractExport
                 $item['to'],
                 $item['daysCount'],
                 $item['freeTime'],
-                '0',
-                '0',
-                '0',
-                $item['total']!=0 ? $item['total'] :'0',
+                "$DM_days",
+                "$first_slab",
+                "$second_slab",
+                "{$item['total']}",
             ];
         });
     }
