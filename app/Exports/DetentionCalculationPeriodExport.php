@@ -20,9 +20,11 @@ class DetentionCalculationPeriodExport extends AbstractExport
     {
         return $this->data->map(function ($item,$index) {
 
-            $DM_days = $item['daysCount'] - $item['freeTime'];
-            $first_slab = isset($item['periods'][0]) ?  $item['periods'][0]['days']: 0;
-            $second_slab = isset($item['periods'][1]) ? $item['periods'][1]['days']: 0;
+            $DM_days = max($item['daysCount'] - $item['freeTime'], 0);
+            $days_slabs = $item['periods']->map(function ($period) {
+            return str_pad($period['name'], 12) . ' ' . $period['days'] . ' Days';
+            })->toArray();
+
             return [
                 ++$index,
                 $item['container_no'],
@@ -33,8 +35,7 @@ class DetentionCalculationPeriodExport extends AbstractExport
                 $item['daysCount'],
                 $item['freeTime'],
                 "$DM_days",
-                "$first_slab",
-                "$second_slab",
+                implode("\n", $days_slabs),
                 "{$item['total']}",
             ];
         });
@@ -53,8 +54,7 @@ class DetentionCalculationPeriodExport extends AbstractExport
             'Total days',
             'FREE DAYS',
             'DM days',
-            '10-14 days (20DC - 33usd, 40HC-66usd)',
-            '15 day + onward (20DC-66usd, 40HC-132usd)',
+            'Slabs',
             'usd',
            
         ];
