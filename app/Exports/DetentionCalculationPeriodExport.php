@@ -22,9 +22,8 @@ class DetentionCalculationPeriodExport extends AbstractExport
 
             $DM_days = max($item['daysCount'] - $item['freeTime'], 0);
             $days_slabs = $item['periods']->map(function ($period) {
-            return str_pad($period['name'], 12) . ' ' . $period['days'] . ' Days';
+                return $period['name'].' =>'.$period['days'] . '| ';
             })->toArray();
-
             return [
                 ++$index,
                 $item['container_no'],
@@ -35,7 +34,7 @@ class DetentionCalculationPeriodExport extends AbstractExport
                 $item['daysCount'],
                 $item['freeTime'],
                 "$DM_days",
-                implode("\n", $days_slabs),
+                implode("", $days_slabs),
                 "{$item['total']}",
             ];
         });
@@ -54,7 +53,7 @@ class DetentionCalculationPeriodExport extends AbstractExport
             'Total days',
             'FREE DAYS',
             'DM days',
-            'Slabs',
+            'Slabs Details',
             'usd',
            
         ];
