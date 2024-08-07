@@ -37,10 +37,10 @@ class BookingCalculationService
             $mov = Movements::where('booking_no', $payload['booking_no'])->where('company_id', Auth::user()->company_id)
                 ->distinct()->get()->pluck('container_id')->toarray();
             $containers = Containers::whereIn('id', $mov)->get();
-            $calculation = $this->containersCalculation($payload, $containers);
+            $calculation = $this->containersCalculation($containers,$payload );
         } else {
             $containers = Containers::whereIn('id', $payload['container_ids'])->get();
-            $calculation = $this->containersCalculation($payload, $containers);
+            $calculation = $this->containersCalculation($containers,$payload);
         }
         if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
             return $calculation;
@@ -49,14 +49,9 @@ class BookingCalculationService
         return $calculation;
     }
 
-    private function containersCalculation(array $payload, $containers)
+    public function containersCalculation($containers,array $payload =[])
     {
-        $demurrage = $this->getDemurrageTriff($payload['booking_no'], isset($payload['is_storage']));
-        if ($demurrage instanceof \Illuminate\Http\RedirectResponse) {
-            return $demurrage;
-        }
-
-        $bookingFreeTime = isset($payload['is_storage']) ? 0 : $this->getBookingFreeTime($payload['booking_no']);
+        
         $movementCompletedIds = $this->getMovementCompletedIds();
         $movementDCHFId = $this->getDCHFMovementId();
         $movementId = $payload['from'] ?? $movementDCHFId;
@@ -65,13 +60,26 @@ class BookingCalculationService
         $applyDays -= isset($payload['apply_last_day']) ? 1 : 0;
         $grandTotal = 0;
         $status = 'in_completed';
+        $to_date=isset($payload['to_date'])?Carbon::parse($payload['to_date'])->endOfDay():null;
         $containerCalc = collect();
 
+
         foreach ($containers as $container) {
+
+            $booking_no=optional($container->booking)->booking_id;
+            $payload['booking_no']=$booking_no;
+            
+            $demurrage = $this->getDemurrageTriff($booking_no, isset($payload['is_storage']));
+            if ($demurrage instanceof \Illuminate\Http\RedirectResponse) {
+                    return $demurrage;
+            }
+            
+            
             $periodCalc = collect();
             $containerTotal = 0;
-            $freeTime = $bookingFreeTime;
-            $startMovement = $this->getStartMovement($container->id, $movementId, $payload['booking_no']);
+            $freeTime = isset($payload['is_storage']) ? 0 : $this->getBookingFreeTime($booking_no);
+            $free_time = $freeTime ?? 0;
+            $startMovement = $this->getStartMovement($container->id, $movementId, $booking_no);
             if ($startMovement instanceof \Illuminate\Http\RedirectResponse) {
                 return $startMovement;
             }
@@ -79,20 +87,22 @@ class BookingCalculationService
             $endMovement = $this->getEndMovement($payload, $container->id, $startMovementDate);
             $lastMovement = $this->getLastMovement($payload,$container->id);
            
+
             if (in_array(optional($endMovement)->movement_id, $movementCompletedIds)) {
                 $status = 'completed';
             }
             if (
                 $endMovement == null ||
-                ($payload['to_date'] < $endMovement->movement_date && !is_null($payload['to_date'])) ||
+                ($to_date < $endMovement->movement_date && !is_null($to_date)) ||
                 (!in_array(optional($endMovement)->movement_id, $movementCompletedIds) &&
-                 $payload['to_date'] &&
+                 $to_date &&
                 optional($endMovement)->id != optional($lastMovement)->id )
             ) {
-                $endMovementDate = $payload['to_date'];
+                $endMovementDate = $to_date;
             } else {
                 $endMovementDate = $endMovement->movement_date;
             }
+            
             if ($endMovementDate) {
                 $daysCount = Carbon::parse($endMovementDate)->startOfDay()->diffInDays(Carbon::parse($startMovementDate)->startOfDay());
             } else {
@@ -215,6 +225,7 @@ class BookingCalculationService
             $grandTotal = $grandTotal + $containerTotal;
             $tempCollection = collect([
                 'container_no' => $container->code,
+                'bl_no' => $startMovement->bl_no,
                 'status' => trans("home.$status"),
                 'container_type' => $container->containersTypes->name,
                 'from' => $startMovementDate,
@@ -222,6 +233,8 @@ class BookingCalculationService
                 'from_code' => optional(optional($startMovement)->movementcode)->code,
                 'to_code' => optional(optional($endMovement)->movementcode)->code ?? trans("home.no_movement"),
                 'total' => $containerTotal,
+                'daysCount' => $daysCount,
+                'freeTime' => $free_time,
                 'periods' => $periodCalc,
             ]);
             $containerCalc->add($tempCollection);
@@ -240,34 +253,33 @@ class BookingCalculationService
                 ->where('booking_no', $payload['booking_no'])
                 ->latest('movement_date')->first();
     }
+    
     private function getEndMovement(array $payload, $containerId, $startMovementDate)
     {
-        if ($payload['to_date'] == null && $payload['to'] == null) {
-            $endMovement = Movements::where('container_id', $containerId)
-                ->where('booking_no', $payload['booking_no'])
-                ->where('movement_date', '>', $startMovementDate)
-                ->latest('movement_date')->first();
+        $to_date=isset($payload['to_date'])?Carbon::parse($payload['to_date'])->endOfDay():null;
+        $to=isset($payload['to'])?$payload['to']:null;
+        $booking_no=isset($payload['booking_no'])?$payload['booking_no']:null;
+        $endMovement = Movements::where('container_id', $containerId)
+            ->where('booking_no', $booking_no);
 
-        } elseif ($payload['to_date'] != null && $payload['to'] == null) {
-            $endMovement = Movements::where('container_id', $containerId)
-                ->where('booking_no', $payload['booking_no'])
-                ->where('movement_date', '>', $startMovementDate)
-                ->where('movement_date', '<=', $payload['to_date'])
-                ->latest('movement_date')->first();
-        } elseif ($payload['to_date'] == null && $payload['to'] != null) {
-            $endMovement = Movements::where('container_id', $containerId)
-                ->where('booking_no', $payload['booking_no'])
-                ->where('movement_id', $payload['to'])
-                ->latest('movement_date')->first();
+        if ($to_date == null && $to == null) {
+            $endMovement->where('movement_date', '>', $startMovementDate)
+                ;
+
+        } elseif ($to_date != null && $to == null) {
+            $endMovement->where('movement_date', '>', $startMovementDate)
+                ->where('movement_date', '<=', $to_date)
+                ;
+        } elseif ($to_date == null && $to != null) {
+            $endMovement->where('movement_id', $to)
+                ;
         } else {
-            $endMovement = Movements::where('container_id', $containerId)
-                ->where('booking_no', $payload['booking_no'])
-                ->where('movement_id', $payload['to'])
+            $endMovement->where('movement_id', $to)
                 ->where('movement_date', '>', $startMovementDate)
-                ->where('movement_date', '<=', $payload['to_date'])
-                ->latest('movement_date')->first();
+                ->where('movement_date', '<=', $to_date)
+                ;
         }
-        return $endMovement;
+        return $endMovement->latest('movement_date')->first();
     }
 
     private function getStartMovement($containerId, $movementId, $bookingNo)

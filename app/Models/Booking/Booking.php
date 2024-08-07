@@ -150,14 +150,24 @@ class Booking extends Model implements PermissionSeederContract
 
                 $input['booking_id'] = $this->id;
 
-                if (isset($input['id'])) {
-                    BookingContainerDetails::find($input['id'])
-                        ->update($input);
+                if (isset($input['id']) && !empty($input['id'])) {
+                    $containerDetail = BookingContainerDetails::find($input['id']);
+
+                    if ($containerDetail) {
+                        $containerDetail->update($input);
+                    } else {
+                        \Log::warning('Container detail not found for update:', ['id' => $input['id']]);
+                    }
                 } else {
                     BookingContainerDetails::create($input);
                 }
             }
 
+            // Delete any removed container details
+            $existingIds = collect($inputs)->pluck('id')->filter();
+            BookingContainerDetails::where('booking_id', $this->id)
+                ->whereNotIn('id', $existingIds)
+                ->delete();
             $this->has_gate_in = $has_gate_in;
             $this->save();
         }
