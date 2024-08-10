@@ -62,9 +62,12 @@ class CalculationPeriodController extends Controller
         $payload['to_date'] =$request->to_date;
         $payload['apply_first_day']=1;
         $calculation = $this->service->containersCalculation( $containers,$payload);
+        if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
+            return $calculation;
+        }
         // return response()->json($calculation);
         $filename = 'CalculationPeriod_' . now()->timestamp . '.xls';
-           return Excel::download( new DetentionCalculationPeriodExport($calculation),$filename,\Maatwebsite\Excel\Excel::XLS);
+        return Excel::download( new DetentionCalculationPeriodExport($calculation),$filename,\Maatwebsite\Excel\Excel::XLS);
     }
 
 }
