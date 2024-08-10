@@ -93,15 +93,20 @@ class BookingCalculationService
             }
             if (
                 $endMovement == null ||
-                ($to_date < $endMovement->movement_date && !is_null($to_date)) ||
-                (!in_array(optional($endMovement)->movement_id, $movementCompletedIds) &&
-                 $to_date &&
-                optional($endMovement)->id != optional($lastMovement)->id )
+                ($to_date <= $endMovement->movement_date && !is_null($to_date)) ||
+                (!in_array(optional($endMovement)->movement_id, $movementCompletedIds))
             ) {
-                $endMovementDate = $to_date;
+                if(in_array(optional($lastMovement)->movement_id, $movementCompletedIds) ){
+                    $endMovementDate = $endMovement->movement_date;
+                }else{
+                    $endMovementDate = $to_date;
+                }
             } else {
                 $endMovementDate = $endMovement->movement_date;
             }
+
+
+
             
             if ($endMovementDate) {
                 $daysCount = Carbon::parse($endMovementDate)->startOfDay()->diffInDays(Carbon::parse($startMovementDate)->startOfDay());
@@ -229,7 +234,7 @@ class BookingCalculationService
                 'status' => trans("home.$status"),
                 'container_type' => $container->containersTypes->name,
                 'from' => $startMovementDate,
-                'to' => $endMovementDate ?? today(),
+                'to' => $endMovementDate?? today(),
                 'from_code' => optional(optional($startMovement)->movementcode)->code,
                 'to_code' => optional(optional($endMovement)->movementcode)->code ?? trans("home.no_movement"),
                 'total' => $containerTotal,
@@ -263,8 +268,8 @@ class BookingCalculationService
             ->where('booking_no', $booking_no);
 
         if ($to_date == null && $to == null) {
-            $endMovement->where('movement_date', '>', $startMovementDate)
-                ;
+
+            $endMovement->where('movement_date', '>', $startMovementDate);
 
         } elseif ($to_date != null && $to == null) {
             $endMovement->where('movement_date', '>', $startMovementDate)
