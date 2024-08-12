@@ -2,13 +2,14 @@
 
 namespace App\Models\Master;
 
-use Illuminate\Database\Eloquent\Builder;
+use App\Traits\HasFilter;
+use App\Models\Containers\Movements;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use App\Models\Booking\BookingContainerDetails;
 use Bitwise\PermissionSeeder\PermissionSeederContract;
 use Bitwise\PermissionSeeder\Traits\PermissionSeederTrait;
-use App\Traits\HasFilter;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Containers\Movements;
 
 class Containers extends Model implements PermissionSeederContract
 {
@@ -27,6 +28,9 @@ class Containers extends Model implements PermissionSeederContract
     }
 
 
+    public function booking(){
+        return $this->hasOne(BookingContainerDetails::class,'container_id','id');
+    }
     public function containersOwner (){
         return $this->belongsto(ContinerOwnership::class,'container_ownership_id','id');
     }
