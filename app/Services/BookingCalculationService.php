@@ -58,17 +58,14 @@ class BookingCalculationService
         $applyDays = 0;
         $applyDays += isset($payload['apply_first_day']) ? 1 : 0;
         $applyDays -= isset($payload['apply_last_day']) ? 1 : 0;
+        $main_booking_no = !isset($payload['from_date']) ? $payload['booking_no'] : null;
         $grandTotal = 0;
         $status = 'in_completed';
         $to_date=isset($payload['to_date'])?Carbon::parse($payload['to_date'])->endOfDay():null;
         $containerCalc = collect();
-
-
         foreach ($containers as $container) {
-
-            $booking_no=optional($container->booking)->booking_id;
+            $booking_no=$main_booking_no??$this->getRCVCBookingNoMovement($payload,$container->id)->booking_no;
             $payload['booking_no']=$booking_no;
-            
             $demurrage = $this->getDemurrageTriff($booking_no, isset($payload['is_storage']));
             if ($demurrage instanceof \Illuminate\Http\RedirectResponse) {
                     return $demurrage;
@@ -96,8 +93,8 @@ class BookingCalculationService
                 ($to_date <= $endMovement->movement_date && !is_null($to_date)) ||
                 (!in_array(optional($endMovement)->movement_id, $movementCompletedIds))
             ) {
-                if(in_array(optional($lastMovement)->movement_id, $movementCompletedIds) ){
-                    $endMovementDate = $endMovement->movement_date;
+                if(in_array(optional($lastMovement)->movement_id, $movementCompletedIds) && $endMovement ){
+                    $endMovementDate = optional($endMovement)->movement_date;
                 }else{
                     $endMovementDate = $to_date;
                 }
@@ -252,6 +249,17 @@ class BookingCalculationService
 
     }
 
+    private function getRCVCBookingNoMovement(array $payload,$containerId)
+    {
+        $fromDate = Carbon::parse($payload['from_date'])->startOfDay();
+        $toDate = Carbon::parse($payload['to_date'])->endOfDay();
+        return Movements::select('booking_no')
+                ->where('movement_id', 6)
+                ->where('container_id', $containerId)
+                ->where('company_id', Auth::user()->company_id)
+                ->whereBetween('movement_date', [$fromDate, $toDate])
+                ->latest('movement_date')->first();
+    }
     private function getLastMovement(array $payload,$containerId)
     {
         return  Movements::where('container_id', $containerId)
