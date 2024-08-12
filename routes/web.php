@@ -1,23 +1,24 @@
 <?php
 
-use App\Http\Controllers\BlDraft\BlDraftController;
-use App\Http\Controllers\BlDraft\PDFController;
-use App\Http\Controllers\BlDraft\WinPDFController;
-use App\Http\Controllers\Booking\BookingController;
-use App\Http\Controllers\ImportExportController;
-use App\Http\Controllers\Invoice\InvoiceController;
-use App\Http\Controllers\Invoice\ReceiptController;
-use App\Http\Controllers\PortChargeController;
-use App\Http\Controllers\PortChargeInvoiceController;
-use App\Http\Controllers\Preview\PreviewController;
-use App\Http\Controllers\Quotations\LocalPortTriffDetailesController;
-use App\Http\Controllers\Quotations\QuotationsController;
-use App\Http\Controllers\Trucker\TruckerGateController;
-use App\Http\Controllers\Update\RefreshController;
-use App\Http\Controllers\XML\XmlController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\XML\XmlController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\PortChargeController;
+use App\Http\Controllers\BlDraft\PDFController;
+use App\Http\Controllers\ImportExportController;
+use App\Http\Controllers\BlDraft\WinPDFController;
+use App\Http\Controllers\Update\RefreshController;
+use App\Http\Controllers\BlDraft\BlDraftController;
+use App\Http\Controllers\Booking\BookingController;
+use App\Http\Controllers\Invoice\InvoiceController;
+use App\Http\Controllers\Invoice\ReceiptController;
+use App\Http\Controllers\Preview\PreviewController;
+use App\Http\Controllers\PortChargeInvoiceController;
+use App\Http\Controllers\Trucker\TruckerGateController;
+use App\Http\Controllers\Quotations\QuotationsController;
+use App\Http\Controllers\Quotations\LocalPortTriffDetailesController;
+use App\Http\Controllers\DententionStorageCalculation\CalculationPeriodController;
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', 'HomeController@index')->name('home');
@@ -262,8 +263,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::prefix('dentention-storage-calculation')->namespace('DententionStorageCalculation')->group(function () {
         Route::resource('dententions', 'DententionController');
         Route::resource('storage', 'StorageController');
+        Route::resource('calculation-period','CalculationPeriodController');
         Route::get('debit-invoice',DebitInvoiceController::class)->name('debit-invoice');
     });
+    Route::get('export_calculation_period',[CalculationPeriodController::class,'export'])->name('export_calculation_period');
     Route::prefix('lessor')->namespace('Master')->group(function () {
         Route::resource('seller', 'LessorSellerController');
     });
