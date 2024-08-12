@@ -46,18 +46,12 @@ class CalculationPeriodController extends Controller
     */
     public function export(Request $request)
     {
-        ob_end_clean();
-        ob_start();
         $fromDate = Carbon::parse($request->from_date)->startOfDay();
         $toDate = Carbon::parse($request->to_date)->endOfDay();
-        $containerIds = Movements::select('container_id')->whereIn('movement_id', [5, 6])
-                        ->where('company_id', Auth::user()->company_id)
-                        ->where('movement_date','>=',$fromDate)
-                        ->where('movement_date','<=',$toDate)
-                        ->groupBy('container_id', 'booking_no', 'bl_no')
-                        ->havingRaw('COUNT(DISTINCT movement_id) = 2')
-                        ->distinct()
-                        ->pluck('container_id')->toArray(); 
+        $containerIds = $this->getContainerIds($fromDate, $toDate);
+        if (empty($containerIds)) {
+           return back()->with('error', "No RCVC Movement for in this Period $fromDate to $toDate");
+        }
         $containers = Containers::with('booking')->whereIn('id', $containerIds)->get();
         $payload['to_date'] =$request->to_date;
         $payload['apply_first_day']=1;
@@ -65,9 +59,22 @@ class CalculationPeriodController extends Controller
         if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
             return $calculation;
         }
-        // return response()->json($calculation);
+        return $this->downloadExcel($calculation);
+    }
+
+    private function getContainerIds($fromDate, $toDate)
+    {
+        return Movements::select('container_id')
+            ->where('movement_id', 6)
+            ->where('company_id', Auth::user()->company_id)
+            ->whereBetween('movement_date', [$fromDate, $toDate])
+            ->distinct()->pluck('container_id')->toArray();
+    }
+
+    private function downloadExcel($calculation)
+    {
         $filename = 'CalculationPeriod_' . now()->timestamp . '.xls';
-        return Excel::download( new DetentionCalculationPeriodExport($calculation),$filename,\Maatwebsite\Excel\Excel::XLS);
+        return Excel::download(new DetentionCalculationPeriodExport($calculation), $filename,\Maatwebsite\Excel\Excel::XLS);
     }
 
 }
