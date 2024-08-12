@@ -53,6 +53,7 @@ class CalculationPeriodController extends Controller
            return back()->with('error', "No RCVC Movement for in this Period $fromDate to $toDate");
         }
         $containers = Containers::with('booking')->whereIn('id', $containerIds)->get();
+        $payload['from_date'] =$request->from_date;
         $payload['to_date'] =$request->to_date;
         $payload['apply_first_day']=1;
         $calculation = $this->service->containersCalculation( $containers,$payload);
@@ -68,7 +69,8 @@ class CalculationPeriodController extends Controller
             ->where('movement_id', 6)
             ->where('company_id', Auth::user()->company_id)
             ->whereBetween('movement_date', [$fromDate, $toDate])
-            ->distinct()->pluck('container_id')->toArray();
+            ->distinct('container_id')
+            ->pluck('container_id',)->toArray();
     }
 
     private function downloadExcel($calculation)
