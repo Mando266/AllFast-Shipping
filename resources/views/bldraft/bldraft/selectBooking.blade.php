@@ -22,7 +22,7 @@
                                 <select class="selectpicker form-control" id="Booking" name="booking_id" data-live-search="true" data-size="10"
                                     title="{{trans('forms.select')}}">
                                     @foreach ($booking as $item)
-                                        <option value="{{$item->id}}" {{$item->id == old('booking_id') ? 'selected':''}}>{{$item->ref_no}} - {{optional($item->customer)->name}}</option>
+                                        <option value="{{$item->id}}" {{$item->id == old('booking_id') ? 'selected':''}}>{{$item->ref_no}}</option>
                                     @endforeach
                                 </select>
                                 @error('booking_id')

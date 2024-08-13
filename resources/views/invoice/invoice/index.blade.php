@@ -108,14 +108,27 @@
                             </select>
                         </div>
                         </div>
-
-                            <div class="form-row">
-                                <div class="col-md-12 text-center">
-                                    <button  type="submit" class="btn btn-success mt-3">Search</button>
-                                    <button type="button" id="reset-select" class="btn btn-info mt-3">Reset</button>
-                                    <a href="{{route('invoice.index')}}" class="btn btn-danger mt-3">{{trans('forms.cancel')}}</a>
-                                </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                            <label>Invoice Items</label>
+                                <select class="selectpicker form-control" id="Charge Description" data-live-search="true"
+                                        name="charge_description[]"
+                                        data-size="10"
+                                        title="{{trans('forms.select')}}" multiple>
+                                    @foreach ($invoice_item as $item)
+                                        <option value="{{$item->name}}" {{$item->name == old('charge_description',request()->input('charge_description')) ? 'selected':''}}>{{$item->name}}</option>
+                                    @endforeach
+                                </select>
                             </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col-md-12 text-center">
+                                <button  type="submit" class="btn btn-success mt-3">Search</button>
+                                <button type="button" id="reset-select" class="btn btn-info mt-3">Reset</button>
+                                <a href="{{route('invoice.index')}}" class="btn btn-danger mt-3">{{trans('forms.cancel')}}</a>
+                            </div>
+                        </div>
                     </form>
                     @php
                     $totalusd = 0;
@@ -185,7 +198,6 @@
                                             <td>{{optional($invoice->customerShipperOrFfw)->tax_card_no}}</td>
                                             <td>{{$invoice->bldraft_id != 0 ? optional(optional($invoice->bldraft)->booking)->ref_no : optional($invoice->booking)->ref_no}}</td>
                                             <td>
-
                                                 {{
                                                     $invoice->bldraft_id != 0
                                                         ? optional(optional(optional($invoice->bldraft)->booking)->voyage)->voyage_no
