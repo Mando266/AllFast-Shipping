@@ -126,7 +126,7 @@
                                 <div class="form-group col-md-6">
                                     <label for="vessel_name">Operator</label>
                                     <select class="selectpicker form-control" id="vessel_name" data-live-search="true" name="vessel_name" data-size="10" title="{{trans('forms.select')}}">
-                                        @foreach ($oprators as $item)
+                                        @foreach ($operators as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('vessel_name', $quotation->vessel_name) ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>

@@ -122,7 +122,7 @@ class Quotation extends Model implements PermissionSeederContract
                     'ofr' => $input['ofr'],
                     'currency' => $input['currency'],
                     'equipment_type_id' => $input['equipment_type_id'],
-                    'free_time' => $quotationDis['free_time'],
+                    'free_time' => $input['free_time'],
                     'thc_payment' => $input['thc_payment'],
                     'soc' => $input['soc'] ?? 0,
                     'imo' => $input['imo'] ?? 0,
