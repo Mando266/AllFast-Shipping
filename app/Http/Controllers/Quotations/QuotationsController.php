@@ -48,7 +48,7 @@ class QuotationsController extends Controller
         $agent_id = $user->agent_id;
         $paymentLocation = Ports::orderBy('id')->get();
         $equipment_types = ContainersTypes::orderBy('id')->get();
-        $currency = Currency::orderBy('id')->get();
+        $currency = Currency::where('name','!=','EGP')->orderBy('id')->get();
         $customers = Customers::where('company_id', $company_id)
             ->orderBy('id')
             ->with('CustomerRoles.role')
@@ -231,7 +231,7 @@ class QuotationsController extends Controller
         $ports = Ports::orderBy('id')->get();
         $paymentLocation = Ports::orderBy('id')->get();
         $container_types = ContainersTypes::orderBy('id')->get();
-        $currency = Currency::orderBy('id')->get();
+        $currency = Currency::where('name','!=','EGP')->orderBy('id')->get();
         $customers = Customers::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
         $country = Country::orderBy('name')->get();
         $equipment_types = ContainersTypes::orderBy('id')->get();

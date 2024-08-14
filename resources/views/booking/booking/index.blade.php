@@ -451,6 +451,7 @@
 
             searchForm.submit();
         });
+
         $('#search-btn').click(() => {
             searchForm.attr('method', 'get');
             searchForm.attr('action', '{{ route('booking.index') }}');

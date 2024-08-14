@@ -180,26 +180,15 @@
                                 @enderror
                             </div>
                         </div>
-
                         <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label for="special_requirements">Special Requirements</label>
-                                <div class="form-check">
-                                    <input type="checkbox" id="soc" name="soc" value="1"> <label for="soc" class="form-check-label">SOC</label>
-                                    <input type="checkbox" id="imo" name="imo" value="1"> <label for="imo" class="form-check-label">IMO</label>
-                                    <input type="checkbox" id="oog" name="oog" value="1"> <label for="oog" class="form-check-label">OOG</label>
-                                    <input type="checkbox" id="rf" name="rf" value="1"> <label for="rf" class="form-check-label">RF</label>
-                                    <input type="checkbox" id="nor" name="nor" value="1"> <label for="nor" class="form-check-label">NOR</label>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-6">
                                 <label for="validity_from">Validity From <span class="text-warning"> *</span></label>
                                 <input type="date" class="form-control" id="validity_from" name="validity_from" value="{{old('validity_from')}}" autocomplete="off" required>
                                 @error('validity_from')
                                 <div style="color:red;">{{$message}}</div>
                                 @enderror
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-6">
                                 <label for="validity_to">Validity To<span class="text-warning"> *</span></label>
                                 <input type="date" class="form-control" id="validity_to" name="validity_to" value="{{old('validity_to')}}" autocomplete="off" required>
                                 @error('validity_to')
@@ -336,15 +325,21 @@
                                     <th>Currency</th>
                                     <th>OFR</th>
                                     <th>Free Time</th>
+                                    <th>THC Term</th>
+                                    <th>SOC</th>
+                                    <th>IMO</th>
+                                    <th>OOG</th>
+                                    <th>RF</th>
+                                    <th>NOR</th>
                                     <th>
-                                        <a id="adddis"> Add Equ <i class="fas fa-plus"></i></a>
+                                        <a id="adddis"> Add <i class="fas fa-plus"></i></a>
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td id="equpmints">
-                                        <select class="selectpicker form-control equipment-type" id="equpmint" data-live-search="true" name="quotationDis[0][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}">
+                                        <select class="selectpicker form-control equipment-type" id="equpmint" data-live-search="true" name="quotationDis[0][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" required>
                                             @foreach ($equipment_types as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('equipment_type_id') ? 'selected':''}}>{{$item->name}}</option>
                                             @endforeach
@@ -353,15 +348,37 @@
                                     <td>
                                         <select class="selectpicker form-control" id="currency" data-live-search="true" name="quotationDis[0][currency]" data-size="10" title="{{trans('forms.select')}}" required>
                                             @foreach ($currency as $item)
-                                            <option value="{{$item->name}}" {{$item->id == old('currency') ? 'selected':''}}>{{$item->name}}</option>
+                                                <option value="{{$item->name}}" {{ (old('currency') == $item->id || $item->id == 1) ? 'selected' : '' }}>{{$item->name}}</option>
                                             @endforeach
                                         </select>
+                                    </td> 
+        
+                                    <td>
+                                        <input type="text" id="dayes" name="quotationDis[0][ofr]" placeholder="OFR"  class="form-control" autocomplete="off" required>
                                     </td>
                                     <td>
-                                        <input type="text" id="dayes" name="quotationDis[0][ofr]" placeholder="OFR"  class="form-control" autocomplete="off">
+                                        <input type="text" id="dayes" name="quotationDis[0][free_time]" placeholder="Free Time"  class="form-control" autocomplete="off" required>
                                     </td>
                                     <td>
-                                        <input type="text" id="dayes" name="quotationDis[0][free_time]" placeholder="Free Time"  class="form-control" autocomplete="off">
+                                        <select class="selectpicker form-control" data-live-search="true" name="quotationDis[0][thc_payment]" id="payment_kind" title="{{trans('forms.select')}}" required>
+                                                <option value="pod">POD</option>
+                                                <option value="pol">POL</option>
+                                        </select>
+                                    </td>  
+                                    <td>
+                                        <input type="checkbox"  value="1" name="quotationDis[0][soc]"> 
+                                    </td>
+                                    <td>
+                                        <input type="checkbox"  value="1" name="quotationDis[0][imo]"> 
+                                    </td>
+                                    <td>
+                                        <input type="checkbox"  value="1" name="quotationDis[0][oog]"> 
+                                    </td>
+                                    <td>
+                                        <input type="checkbox"  value="1" name="quotationDis[0][rf]"> 
+                                    </td>
+                                    <td>
+                                        <input type="checkbox"  value="1" name="quotationDis[0][nor]"> 
                                     </td>
                                     <td></td>
                                 </tr>
@@ -440,10 +457,16 @@
 
         $("#adddis").click(function () {
             var tr = '<tr>' +
-                '<td id="equpmints"><select class="selectpicker form-control equipment-type" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}">@foreach ($equipment_types as $item)<option value="{{$item->id}}" {{$item->id == old('equipment_type_id') ? 'selected':''}}>{{$item->name}}</option>@endforeach </select></td>' +
-                '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][currency]" data-size="10"><option value="">Select...</option>@foreach ($currency as $item)<option value="{{$item->name}}">{{$item->name}}</option>@endforeach</select></td>' +
+                '<td id="equpmints"><select class="selectpicker form-control equipment-type" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" required>@foreach ($equipment_types as $item)<option value="{{$item->id}}" {{$item->id == old('equipment_type_id') ? 'selected':''}}>{{$item->name}}</option>@endforeach </select></td>' +
+                '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][currency]" data-size="10" title="{{trans('forms.select')}}">@foreach ($currency as $item)<option value="{{$item->name}}" {{ (old('currency') == $item->id || $item->id == 1) ? 'selected' : '' }}>{{$item->name}}</option>@endforeach</select></td>' +
                 '<td><input type="text" name="quotationDis[' + exportCount + '][ofr]" class="form-control" autocomplete="off" placeholder="OFR" required></td>' +
                 '<td><input type="text" name="quotationDis[' + exportCount + '][free_time]" class="form-control" autocomplete="off" placeholder="Free Time" required></td>' +
+                '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][thc_payment]" data-size="10" title="{{trans('forms.select')}}" required><option value="pod">POD</option><option value="pol">POL</option></select></td>' +
+                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][soc]" value="1" autocomplete="off"></td>' +
+                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][imo]" value="1" autocomplete="off"></td>' +
+                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][oog]" value="1" autocomplete="off"></td>' +
+                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][rf]" value="1" autocomplete="off"></td>' +
+                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][nor]" value="1" autocomplete="off"></td>' +
                 '<td style="width:85px;"><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>' +
                 '</tr>';
             $('#ofr tbody').append(tr);
