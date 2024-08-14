@@ -183,24 +183,14 @@
                             </div>
 
                             <div class="form-row">
-                                <div class="form-group col-md-4">
-                                    <label for="special_requirements">Special Requirements</label>
-                                    <div class="form-check">
-                                        <input type="checkbox" id="soc" name="soc" value="1" {{$quotation->soc == 1 ? 'checked="checked"' : '' }}> <label for="soc" class="form-check-label">SOC</label>
-                                        <input type="checkbox" id="imo" name="imo" value="1" {{$quotation->imo == 1 ? 'checked="checked"' : '' }}> <label for="imo" class="form-check-label">IMO</label>
-                                        <input type="checkbox" id="oog" name="oog" value="1" {{$quotation->oog == 1 ? 'checked="checked"' : '' }}> <label for="oog" class="form-check-label">OOG</label>
-                                        <input type="checkbox" id="rf" name="rf" value="1" {{$quotation->rf == 1 ? 'checked="checked"' : '' }}> <label for="rf" class="form-check-label">RF</label>
-                                        <input type="checkbox" id="nor" name="nor" value="1" {{$quotation->nor == 1 ? 'checked="checked"' : '' }}> <label for="nor" class="form-check-label">NOR</label>
-                                    </div>
-                                </div>
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-6">
                                     <label for="validity_from">Validity From <span class="text-warning"> * </span></label>
                                     <input type="date" class="form-control" id="validity_from" name="validity_from" value="{{old('validity_from', $quotation->validity_from)}}" autocomplete="off" required>
                                     @error('validity_from')
                                     <div style="color:red;">{{$message}}</div>
                                     @enderror
                                 </div>
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-6">
                                     <label for="validity_to">Validity To <span class="text-warning"> * </span></label>
                                     <input type="date" class="form-control" id="validity_to" name="validity_to" value="{{old('validity_to', $quotation->validity_to)}}" autocomplete="off" required>
                                     @error('validity_to')
@@ -280,31 +270,6 @@
                                     @enderror
                                 </div>
                             </div>
-
-                            <div class="form-row">
-                                <div class="form-group col-md-4">
-                                    <label for="export_detention">Export Free Time</label>
-                                    <input type="text" class="form-control" id="export_detention" name="export_detention" value="{{old('export_detention', $quotation->export_detention)}}" placeholder="Export Detention" autocomplete="off">
-                                    @error('export_detention')
-                                    <div style="color:red;">{{$message}}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="import_detention">Import Free Time</label>
-                                    <input type="text" class="form-control" id="import_detention" name="import_detention" value="{{old('import_detention', $quotation->import_detention)}}" placeholder="Import Detention" autocomplete="off">
-                                    @error('import_detention')
-                                    <div style="color:red;">{{$message}}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="power_charges">Power Charges Free Days</label>
-                                    <input type="text" class="form-control" id="power_charges" name="power_charges" value="{{old('power_charges', $quotation->power_charges)}}" placeholder="Power Charges Free Days" autocomplete="off">
-                                    @error('power_charges')
-                                    <div style="color:red;">{{$message}}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
                             <div class="form-row">
                                 <div class="form-group col-md-3">
                                     <label for="oog_dimensions">HAZ / Reefer/ OOG Details</label>
@@ -354,25 +319,21 @@
                                 </div>
                             </div>
 
-                            <div class="form-row">
-                                <div class="form-group col-md-3">
-                                    <label>Request Type <span class="text-warning"> * </span></label>
-                                    <select class="selectpicker form-control" id="requesttype" data-live-search="true" name="request_type" data-size="10" title="{{trans('forms.select')}}" required>
-                                        <option value="General" {{$quotation->request_type == "General" ? 'selected':''}}>General</option>
-                                        <option value="Reefer" {{$quotation->request_type == "Reefer" ? 'selected':''}}>Reefer</option>
-                                        <option value="Special Equipment" {{$quotation->request_type == "Special Equipment" ? 'selected':''}}>Special Equipment</option>
-                                    </select>
-                                </div>
-                            </div>
-
                             <table id="quotationTriffDischarge" class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th>Equipment Type</th>
                                     <th>Currency</th>
                                     <th>OFR</th>
+                                    <th>Free Time</th>
+                                    <th>THC Term</th>
+                                    <th>SOC</th>
+                                    <th>IMO</th>
+                                    <th>OOG</th>
+                                    <th>RF</th>
+                                    <th>NOR</th>
                                     <th>
-                                        <a id="adddis"> Add CHARGE <i class="fas fa-plus"></i></a>
+                                        <a id="adddis"> Add <i class="fas fa-plus"></i></a>
                                     </th>
                                 </tr>
                                 </thead>
@@ -402,6 +363,7 @@
                                         <td>
                                             <input type="text" id="dayes" name="quotationDis[{{$key}}][ofr]" class="form-control" autocomplete="off" value="{{old('ofr',$desc->ofr)}}" readonly>
                                         </td>
+
                                         <td style="width:85px;">
                                             <button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button>
                                         </td>
@@ -524,9 +486,17 @@
         $("#adddis").click(function () {
             var selectedRequestType = $('#requesttype').val();
             var tr = '<tr>' +
-                '<td><select class="selectpicker form-control equipment-type" id="equpmint_' + exportCount + '" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10"><option value="">Select...</option></select></td>' +
+                '<td id="equpmints"><select class="selectpicker form-control equipment-type" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" required>@foreach ($equipment_types as $item)<option value="{{$item->id}}" {{$item->id == old('equipment_type_id') ? 'selected':''}}>{{$item->name}}</option>@endforeach </select></td>' +
                 '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][currency]" data-size="10"><option value="">Select...</option>@foreach ($currency as $item)<option value="{{$item->name}}">{{$item->name}}</option>@endforeach</select></td>' +
-                '<td><input type="text" name="quotationDis[' + exportCount + '][ofr]" class="form-control" autocomplete="off" required></td>' +
+                '<td><input type="text" name="quotationDis[' + exportCount + '][ofr]"  placeholder="Ofr" class="form-control" autocomplete="off" required></td>' +
+                '<td><input type="text" name="quotationDis[' + exportCount + '][free_time]" class="form-control" autocomplete="off" placeholder="Free Time" required></td>' +
+                '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][thc_payment]" data-size="10" title="{{trans('forms.select')}}" required><option value="pod">POD</option><option value="pol">POL</option></select></td>' +
+                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][soc]" value="1" autocomplete="off"></td>' +
+                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][imo]" value="1" autocomplete="off"></td>' +
+                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][oog]" value="1" autocomplete="off"></td>' +
+                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][rf]" value="1" autocomplete="off"></td>' +
+                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][nor]" value="1" autocomplete="off"></td>' +
+
                 '<td style="width:85px;"><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>' +
                 '</tr>';
             $('#quotationTriffDischarge tbody').append(tr);
