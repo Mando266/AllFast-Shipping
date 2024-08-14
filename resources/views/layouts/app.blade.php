@@ -241,7 +241,21 @@
             'use strict';
             var form = document.getElementById('createForm');
             form.addEventListener('submit', function (event) {
-                if (form.checkValidity() === false) {
+                var isValid = true;
+                var selectpickers = form.querySelectorAll('.selectpicker[required]');
+
+                selectpickers.forEach(function (selectpicker) {
+                    if (!selectpicker.value || selectpicker.value.trim() === '') {
+                        isValid = false;
+                        var button = selectpicker.parentElement.querySelector('.dropdown-toggle');
+                        button.style.border = '1px solid red'; 
+                    } else {
+                        var button = selectpicker.parentElement.querySelector('.dropdown-toggle');
+                        button.style.border = ''; 
+                    }
+                });
+
+                if (!isValid) {
                     event.preventDefault();
                     event.stopPropagation();
                 }

@@ -17,10 +17,12 @@ use App\Models\Master\ContinerOwnership;
 use App\Models\Master\Ports;
 use App\Models\Master\Vessels;
 use App\Models\Voyages\Voyages;
+use App\Models\Voyages\VoyagePorts;
 use App\MovementImportErrors;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class MovementController extends Controller
 {
@@ -331,58 +333,66 @@ class MovementController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->input());
         $this->authorize(__FUNCTION__, Movements::class);
 
         $request->validate([
-            'movement' => 'required',
+            'movement' => 'required|array',
             'container_type_id' => 'required',
             'movement_id' => 'required',
-            'movement_date' => 'required',
+            'movement_date' => 'required|date',
             'port_location_id' => 'required',
         ]);
         foreach ($request->movement as $move) {
             $containerNo = Containers::where('id', $move['container_id'])->pluck('code')->first();
 
-            // Get All movements and sort it and get the last movement before this movement
-            $movements = Movements::where('container_id', $move['container_id'])->orderBy(
-                'movement_date',
-                'desc'
-            )->with('movementcode')->get();
+        // Get the movement type from the ContainersMovement table
+        $movementType = ContainersMovement::where('id', $request->input('movement_id'))->pluck('name')->first();
 
-            $new = $movements;
-            $new = $new->groupBy('movement_date');
+        // Validate movement_date with eta and etd
+        $voyageId = $request->input('voyage_id');
+        $portId = null;
 
-            foreach ($new as $key => $m) {
-                $m = $m->sortByDesc('movementcode.sequence');
-                $new[$key] = $m;
+        if ($movementType == 'Discharge Full' || $movementType == 'Loaded Full') {
+            if ($movementType == 'Discharge Full') {
+                $portId = $request->input('pod_id');
+            } else {
+                $portId = $request->input('pol_id');
             }
-            $new = $new->collapse();
 
-            $movements = $new;
-            $lastMove = $movements->where('movement_date', '<=', $request->input('movement_date'))->pluck(
-                'movement_id'
-            )->first();
-            // End Get All movements and sort it and get the last movement before this movement
+            $voyagePort = VoyagePorts::where('voyage_id', $voyageId)
+                ->where('port_from_name', $portId)
+                ->first();
 
-            $nextMoves = ContainersMovement::where('id', $lastMove)->pluck('next_move')->first();
-            $nextMoves = explode(', ', $nextMoves);
-            $moveCode = ContainersMovement::where('id', $request->movement_id)->pluck('code')->first();
-            if (!$nextMoves[0] == null) {
-                if (!in_array($moveCode, $nextMoves)) {
+            if ($voyagePort) {
+                $eta = new \DateTime($voyagePort->eta);
+                $etd = new \DateTime($voyagePort->etd);
+                $movementDate = new \DateTime($request->input('movement_date'));
+
+                // Compare only dates
+                $etaDate = $eta->format('Y-m-d');
+                $etdDate = $etd->format('Y-m-d');
+                $movementDateOnly = $movementDate->format('Y-m-d');
+
+                if (!($movementDateOnly >= $etaDate && $movementDateOnly <= $etdDate)) {
+                    Log::info('Movement date out of range.', [
+                        'movementDate' => $movementDateOnly,
+                        'eta' => $etaDate,
+                        'etd' => $etdDate
+                    ]);
                     return redirect()->route('movements.create')->with(
                         'error',
-                        'container number: ' . $containerNo . ' with movement: '
-                        . $moveCode . ' not allowed!, the allowed movements for this container is ' . implode(
-                            ", ",
-                            $nextMoves
-                        )
-                    );
+                        'Movement date must be between ETA: ' . $etaDate . ' and ETD: ' . $etdDate . ' for the selected voyage and port.'
+                    )->withInput();
                 }
+            } else {
+                return redirect()->route('movements.create')->with(
+                    'error',
+                    'No ETA and ETD found for the selected voyage and port.'
+                )->withInput();
             }
         }
-        foreach ($request->movement as $move) {
-            //dd($user->company_id);
+
+        // Proceed with saving the movement if validation passes
             $user = Auth::user();
             $movem = Movements::create([
                 'container_id' => $move['container_id'],
@@ -603,6 +613,15 @@ class MovementController extends Controller
         $agents = Agents::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
         $bookings = Booking::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
         $containerstatus = ContainerStatus::orderBy('id')->get();
+    
+        // Fetch the related booking, voyage, vessel information
+        $booking = Booking::where('id', $movement->booking_no)->with(['voyage.leg', 'voyage.vessel', 'loadPort', 'dischargePort'])->first();
+        $voyage = $booking->voyage;
+        $leg = $voyage->leg->name ?? '';
+        $vessel = $voyage->vessel->name ?? '';
+        $loadPort = $booking->loadPort->code ?? '';
+        $dischargePort = $booking->dischargePort->code ?? '';
+    
         return view('containers.movements.edit', [
             'movement' => $movement,
             'voyages' => $voyages,
@@ -614,6 +633,11 @@ class MovementController extends Controller
             'ports' => $ports,
             'agents' => $agents,
             'containerstatus' => $containerstatus,
+            'voyage_no' => $voyage->voyage_no,
+            'leg_name' => $leg,
+            'vessel_name' => $vessel,
+            'load_port_code' => $loadPort,
+            'discharge_port_code' => $dischargePort,
         ]);
     }
 
@@ -676,4 +700,96 @@ class MovementController extends Controller
         $movement->delete();
         return redirect()->back()->with('success', trans('Movement.deleted.success'));
     }
+
+
+    public function fetchBookingDetails(Request $request)
+    {
+        try {
+            $booking = Booking::where('id', $request->booking_no)
+                ->with(['voyage.leg', 'voyage.vessel', 'loadPort', 'dischargePort', 'bookingContainerDetails.container'])
+                ->first();
+    
+            if (!$booking) {
+                return response()->json(['success' => false, 'message' => 'Booking not found']);
+            }
+    
+            $voyage = $booking->voyage;
+            if (!$voyage) {
+                return response()->json(['success' => false, 'message' => 'Voyage not found for this booking']);
+            }
+    
+            $leg = $voyage->leg ?? null;
+            $vessel = $voyage->vessel ?? null;
+            $loadPort = $booking->loadPort ?? null;
+            $dischargePort = $booking->dischargePort ?? null;
+    
+            $voyage_no = $voyage->voyage_no ?? null;
+            $leg_name = $leg->name ?? null;
+            $voyage_id = $voyage->id ?? null;
+            $vessel_name = $vessel->name ?? null;
+            $vessel_id = $vessel->id ?? null;
+            $load_port_code = $loadPort->code ?? null;
+            $load_port_id = $loadPort->id ?? null;
+            $discharge_port_code = $dischargePort->code ?? null;
+            $discharge_port_id = $dischargePort->id ?? null;
+    
+            // Get containers
+            $containers = $booking->bookingContainerDetails->map(function ($detail) {
+                if ($detail->container) {
+                    return [
+                        'id' => $detail->container->id,
+                        'container_type_id' => $detail->container->container_type_id,
+                        'code' => $detail->container->code
+                    ];
+                }
+                return null;
+            })->filter();
+    
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'voyage_no' => $voyage_no,
+                    'leg_name' => $leg_name,
+                    'voyage_id' => $voyage_id,
+                    'vessel_name' => $vessel_name,
+                    'vessel_id' => $vessel_id,
+                    'load_port_code' => $load_port_code,
+                    'load_port_id' => $load_port_id,
+                    'discharge_port_code' => $discharge_port_code,
+                    'discharge_port_id' => $discharge_port_id,
+                    'containers' => $containers
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching booking details: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Internal server error']);
+        }
+    }
+    
+    
+    
+    public function fetchVoyagePortDetails(Request $request)
+    {
+        try {
+            $voyagePort = VoyagePorts::where('voyage_id', $request->voyage_id)
+                ->where('port_from_name', $request->port_id)
+                ->first();
+    
+            if ($voyagePort) {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'eta' => $voyagePort->eta,
+                        'etd' => $voyagePort->etd
+                    ]
+                ]);
+            } else {
+                return response()->json(['success' => false, 'message' => 'Voyage port details not found']);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error fetching voyage port details: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Internal server error']);
+        }
+    }
+
 }
