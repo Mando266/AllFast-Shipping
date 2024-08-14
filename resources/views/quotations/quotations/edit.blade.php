@@ -319,7 +319,7 @@
                                 </div>
                             </div>
 
-                            <table id="quotationTriffDischarge" class="table table-bordered">
+                            <table id="ofr" class="table table-bordered">
                                 <thead>
                                 <tr>
                                     <th>Equipment Type</th>
@@ -362,6 +362,31 @@
                                         </td>
                                         <td>
                                             <input type="text" id="dayes" name="quotationDis[{{$key}}][ofr]" class="form-control" autocomplete="off" value="{{old('ofr',$desc->ofr)}}" readonly>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="dayes" name="quotationDis[{{$key}}][free_time]" placeholder="Free Time"  class="form-control" autocomplete="off" value="{{old('free_time',$desc->free_time)}}"  required>
+                                        </td>
+                                        <td>
+                                        <select class="selectpicker form-control" data-live-search="true" name="quotationDis[{{$key}}][thc_payment]" id="payment_kind" title="{{trans('forms.select')}}" required>
+                                            <option value="pod" {{$desc->thc_payment == "pod" ? 'selected':''}}>POD</option>
+                                            <option value="pol" {{$desc->thc_payment == "pol" ? 'selected':''}}>POL</option>
+                                        </select>
+                                        </td>  
+                                        <td>
+                                        <input type="checkbox" id="soc" name="quotationDis[{{$key}}][soc]" value="1" {{$desc->soc == 1 ? 'checked="checked"' : '' }}>
+
+                                        </td>
+                                        <td>
+                                            <input type="checkbox"  value="1" name="quotationDis[{{$key}}][imo]" {{$desc->imo == 1 ? 'checked="checked"' : '' }}> 
+                                        </td>
+                                        <td>
+                                            <input type="checkbox"  value="1" name="quotationDis[{{$key}}][oog]" {{$desc->oog == 1 ? 'checked="checked"' : '' }}> 
+                                        </td>
+                                        <td>
+                                            <input type="checkbox"  value="1" name="quotationDis[{{$key}}][rf]" {{$desc->rf == 1 ? 'checked="checked"' : '' }}> 
+                                        </td>
+                                        <td>
+                                            <input type="checkbox"  value="1" name="quotationDis[{{$key}}][nor]" {{$desc->nor == 1 ? 'checked="checked"' : '' }}> 
                                         </td>
 
                                         <td style="width:85px;">
@@ -406,89 +431,14 @@
                 $('#additionalSelect').hide();
             }
         });
+  
+        let exportCount = 1;
 
-        function fetchEquipmentTypes(requestType, targetSelect) {
-            $.ajax({
-                url: '/api/master/requesttype/' + requestType,
-                method: 'GET',
-                success: function (data) {
-                    targetSelect.empty();
-                    targetSelect.append('<option value="">Select...</option>');
-
-                    if (data.hasOwnProperty('request_Type')) {
-                        var equipmentTypes = data.request_Type;
-
-                        if (Array.isArray(equipmentTypes)) {
-                            equipmentTypes.forEach(function (item) {
-                                targetSelect.append('<option value="' + item.id + '">' + item.name + '</option>');
-                            });
-                        } else {
-                            console.error('Unexpected data format for equipment types:', equipmentTypes);
-                        }
-
-                        targetSelect.selectpicker('refresh');
-                        updateOptions();
-                    } else {
-                        console.error('Unexpected data format:', data);
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error('Failed to fetch equipment types:', error);
-                }
-            });
-        }
-
-        function updateOptions() {
-            var selectedValues = [];
-            $('select[name^="quotationDis"][name$="[equipment_type_id]"]').each(function() {
-                var selectedValue = $(this).val();
-                if (selectedValue) {
-                    selectedValues.push(selectedValue);
-                }
-            });
-
-            $('select[name^="quotationDis"][name$="[equipment_type_id]"]').each(function() {
-                var currentSelect = $(this);
-                var currentValue = currentSelect.val();
-                currentSelect.find('option').each(function() {
-                    var optionValue = $(this).val();
-                    if (selectedValues.includes(optionValue) && optionValue !== currentValue) {
-                        $(this).remove();
-                    } else if (!selectedValues.includes(optionValue) && !currentSelect.find('option[value="' + optionValue + '"]').length) {
-                        currentSelect.append(`<option value="${optionValue}">${$(this).text()}</option>`);
-                    }
-                });
-                currentSelect.selectpicker('refresh');
-            });
-        }
-
-        // Initial fetch for existing rows
-        var initialRequestType = $('#requesttype').val();
-        $('select[name^="quotationDis"][name$="[equipment_type_id]"]').each(function() {
-            var equipmentSelect = $(this);
-            fetchEquipmentTypes(initialRequestType, equipmentSelect);
-        });
-
-        // Event listener for request type change
-        $('#requesttype').on('change', function () {
-            var selectedRequestType = $(this).val();
-            $('select[name^="quotationDis"][name$="[equipment_type_id]"]').each(function() {
-                fetchEquipmentTypes(selectedRequestType, $(this));
-            });
-        });
-
-        // Event listener for equipment type change
-        $(document).on('change', 'select[name^="quotationDis"][name$="[equipment_type_id]"]', function () {
-            updateOptions();
-        });
-
-        let exportCount = "{{ count($quotation->quotationDesc) }}";
         $("#adddis").click(function () {
-            var selectedRequestType = $('#requesttype').val();
             var tr = '<tr>' +
                 '<td id="equpmints"><select class="selectpicker form-control equipment-type" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" required>@foreach ($equipment_types as $item)<option value="{{$item->id}}" {{$item->id == old('equipment_type_id') ? 'selected':''}}>{{$item->name}}</option>@endforeach </select></td>' +
-                '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][currency]" data-size="10"><option value="">Select...</option>@foreach ($currency as $item)<option value="{{$item->name}}">{{$item->name}}</option>@endforeach</select></td>' +
-                '<td><input type="text" name="quotationDis[' + exportCount + '][ofr]"  placeholder="Ofr" class="form-control" autocomplete="off" required></td>' +
+                '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][currency]" data-size="10" title="{{trans('forms.select')}}">@foreach ($currency as $item)<option value="{{$item->name}}" {{ (old('currency') == $item->id || $item->id == 1) ? 'selected' : '' }}>{{$item->name}}</option>@endforeach</select></td>' +
+                '<td><input type="text" name="quotationDis[' + exportCount + '][ofr]" class="form-control" autocomplete="off" placeholder="OFR" required></td>' +
                 '<td><input type="text" name="quotationDis[' + exportCount + '][free_time]" class="form-control" autocomplete="off" placeholder="Free Time" required></td>' +
                 '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][thc_payment]" data-size="10" title="{{trans('forms.select')}}" required><option value="pod">POD</option><option value="pol">POL</option></select></td>' +
                 '<td><input type="checkbox" name="quotationDis[' + exportCount + '][soc]" value="1" autocomplete="off"></td>' +
@@ -496,108 +446,73 @@
                 '<td><input type="checkbox" name="quotationDis[' + exportCount + '][oog]" value="1" autocomplete="off"></td>' +
                 '<td><input type="checkbox" name="quotationDis[' + exportCount + '][rf]" value="1" autocomplete="off"></td>' +
                 '<td><input type="checkbox" name="quotationDis[' + exportCount + '][nor]" value="1" autocomplete="off"></td>' +
-
                 '<td style="width:85px;"><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>' +
                 '</tr>';
-            $('#quotationTriffDischarge tbody').append(tr);
+            $('#ofr tbody').append(tr);
             $('.selectpicker').selectpicker('refresh');
-
-            fetchEquipmentTypes(selectedRequestType, $('#equpmint_' + exportCount));
             exportCount++;
+            updateEquipmentOptions();
         });
 
-        $("#quotationTriffDischarge").on("click", ".remove", function () {
-            var removedValue = $(this).closest("tr").find('select[name^="quotationDis"][name$="[equipment_type_id]"]').val();
-            $(this).closest("tr").remove();
-            updateOptions();
+        $(document).on('change', '.equipment-type', function () {
+            updateEquipmentOptions();
+        });
 
-            if (removedValue) {
-                $('select[name^="quotationDis"][name$="[equipment_type_id]"]').each(function() {
-                    if (!$(this).find('option[value="' + removedValue + '"]').length) {
-                        $(this).append('<option value="' + removedValue + '">' + removedValue + '</option>');
+        function updateEquipmentOptions() {
+            let selectedOptions = [];
+            $('.equipment-type').each(function () {
+                selectedOptions.push($(this).val());
+            });
+
+            $('.equipment-type').each(function () {
+                let currentSelect = $(this);
+                currentSelect.find('option').each(function () {
+                    let optionValue = $(this).val();
+                    if (selectedOptions.includes(optionValue) && optionValue !== currentSelect.val()) {
+                        $(this).hide();
+                    } else {
+                        $(this).show();
                     }
-                    $(this).selectpicker('refresh');
                 });
-            }
+                currentSelect.selectpicker('refresh');
+            });
+        }
+
+        $(document).on('click', '.remove', function () {
+            $(this).closest('tr').remove();
+            updateEquipmentOptions();
         });
 
-        function fetchAndPopulateAgents(countryId, targetSelector, oldValue = '') {
-            $.get(`/api/agent/agentCountry/${countryId}`).then(function (data) {
+        // Call the function on page load to handle the initial state
+        $(document).ready(function () {
+            updateEquipmentOptions();
+        });
+        country.on('change', function (e) {
+            let value = e.target.value;
+            $.get(`/api/agent/agentCountry/${value}`).then(function (data) {
                 let agents = data.agents || '';
                 let options = [`<option value=''>Select...</option>`];
                 for (let i = 0; i < agents.length; i++) {
-                    let selected = agents[i].id == oldValue ? 'selected' : '';
-                    options.push(`<option value='${agents[i].id}' ${selected}>${agents[i].name}</option>`);
+                    options.push(`<option value='${agents[i].id}'>${agents[i].name}</option>`);
                 }
-                $(targetSelector).html(options.join('')).selectpicker('refresh');
-            }).fail(function (xhr, status, error) {
-                console.error('Error fetching agents:', status, error);
+                $('#agentload').html(options.join('')).selectpicker('refresh');
             });
-        }
-
-        let exportCountry = $('#countryDis');  // Renamed from 'country'
-        let importCountry = $('#country');     // Kept original name for clarity
-
-        let oldAgentLoadValue = "{{ old('agent_id', $quotation->agent_id) }}";
-        let oldAgentDisValue = "{{ old('discharge_agent_id', $quotation->discharge_agent_id) }}";
-
-        // Load agents on page load if country value is present
-        if (exportCountry.val()) {
-            fetchAndPopulateAgents(exportCountry.val(), '#agentDis', oldAgentDisValue);
-        }
-
-        if (importCountry.val()) {
-            fetchAndPopulateAgents(importCountry.val(), '#agentload', oldAgentLoadValue);
-        }
-
-        // Load agents on country change
-        exportCountry.on('change', function (e) {
-            fetchAndPopulateAgents(e.target.value, '#agentDis');
         });
 
-        importCountry.on('change', function (e) {
-            fetchAndPopulateAgents(e.target.value, '#agentload');
+        countryDis.on('change', function (e) {
+            let value = e.target.value;
+            $.get(`/api/agent/agentCountry/${value}`).then(function (data) {
+                let agents = data.agents || '';
+                let options = [`<option value=''>Select...</option>`];
+                for (let i = 0; i < agents.length; i++) {
+                    options.push(`<option value='${agents[i].id}'>${agents[i].name}</option>`);
+                }
+                $('#agentDis').html(options.join('')).selectpicker('refresh');
+            });
         });
+
+
     });
-    </script>
-    <script>
-        $(function(){
-                let country = $('#countryDis');
-                let company_id = "{{optional(Auth::user())->company->id}}";
-                $('#countryDis').on('change',function(e){
-                    let value = e.target.value;
-                    let response =   $.get(`/api/master/ports/${country.val()}/${company_id}`).then(function(data){
-                        let ports = data.ports || '';
-                        let list2 = [`<option value=''>Select...</option>`];
-                        for(let i = 0 ; i < ports.length; i++){
-                            list2.push(`<option value='${ports[i].id}'>${ports[i].name} </option>`);
-                        }
-                let port = $('.port');
-                port.html(list2.join(''));
-                
-                });
-            });
-        });
 </script>
-<script>
-        $(function(){
-                let country = $('#country');
-                let company_id = "{{optional(Auth::user())->company->id}}";
-                $('#country').on('change',function(e){
-                    let value = e.target.value;
-                    let response =    $.get(`/api/master/ports/${country.val()}/${company_id}`).then(function(data){
-                        let ports = data.ports || '';
-                        let list2 = [`<option value=''>Select...</option>`];
-                        for(let i = 0 ; i < ports.length; i++){
-                            list2.push(`<option value='${ports[i].id}'>${ports[i].name} </option>`);
-                        }
-                let port = $('.importPort');
-                port.html(list2.join(''));
-
-                });
-            });
-        });
-</script>
-
 @endpush
 
