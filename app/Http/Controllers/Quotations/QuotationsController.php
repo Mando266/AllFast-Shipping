@@ -77,7 +77,6 @@ class QuotationsController extends Controller
                 $query->whereIn('type_id', [4, 2, 8]);
             })
             ->get();
-        $booking_agency = Agents::where('id', $agent_id)->get();    
         $agents = Agents::where('company_id', $company_id)
             ->where('is_active', 1)
             ->get();
@@ -94,7 +93,6 @@ class QuotationsController extends Controller
             'country' => $country,
             'principals' => $principals,
             'operators' => $operators,
-            'booking_agency' => $booking_agency,
             'consignee' => $consignee,
         ]);
     }
@@ -115,7 +113,8 @@ class QuotationsController extends Controller
             'discharge_port_id.different' => 'Load Port cannot be the same as Discharge Port',
         ]);
     
-        $user = Auth::user();    
+        $user = Auth::user();
+        $agent_id = $user->agent_id;  
         $validityFrom = Carbon::parse($request->validity_from)->format('d-m-Y');
         $placeOfAcceptance = Ports::where('id', $request->place_of_acceptence_id)->pluck('code')->first();
         $placeOfAcceptance = substr($placeOfAcceptance, -3);
@@ -162,7 +161,7 @@ class QuotationsController extends Controller
             'discharge_agent_id' => $user->agent_id,
             'company_id' => $user->company_id,
             'quoted_by_id' => $user->id,
-            'agent_id' => $request->input('discharge_agent_id'),
+            'agent_id' => $request->input('agent_id'),
             'countryload' => $request->input('countryload'),
             'countrydis' => $user->agent->country_id,
             'validity_from' => $request->input('validity_from'),
@@ -186,7 +185,7 @@ class QuotationsController extends Controller
             'transportation_mode' => $request->input('transportation_mode'),
             'status' => "pending",
             'shipment_type' => $shipment_type,
-            'booking_agency' => $request->input('booking_agency'),
+            'booking_agency' => $agent_id,
             'agency_bookingr_ref' => $request->input('agency_bookingr_ref'),
             'operator_frieght_payment' => $request->input('operator_frieght_payment'),
             'payment_location' => $request->input('payment_location'),
@@ -247,7 +246,6 @@ class QuotationsController extends Controller
             return $query->where('role_id', 6);
         })->with('CustomerRoles.role')->get();
 
-        $booking_agency = Agents::where('id',Auth::user()->agent_id)->get();
         $agents = Agents::where('company_id', Auth::user()->company_id)->where('is_active', 1)->get();
 
         $consignee = Customers::where('company_id', Auth::user()->company_id)->whereHas(
@@ -272,7 +270,6 @@ class QuotationsController extends Controller
             'operators'  => $operators,
             'equipment_types' => $equipment_types,
             'country' => $country,
-            'booking_agency' => $booking_agency,
             'consignee' => $consignee,
         ]);
     }
@@ -293,6 +290,7 @@ class QuotationsController extends Controller
 
         $this->authorize(__FUNCTION__, Quotation::class);
         $user = Auth::user();
+        $agent_id = $user->agent_id;  
         $quotation = Quotation::with('quotationDesc', 'quotationLoad')->find($id);
    
         $input = [ 
@@ -314,19 +312,18 @@ class QuotationsController extends Controller
             'commodity_code' => $request->commodity_code,
             'commodity_des' => $request->commodity_des,
             'pick_up_location' => $request->pick_up_location,
-            'show_import' => $request->show_import,
             'agent_id' => $request->agent_id,
             'oog_dimensions' => $request->oog_dimensions,
             'payment_kind' => $request->payment_kind,
             'quotation_type' => $request->quotation_type,
-            'transportation_mode' => $request->transportation_mode,
-            'booking_agency' => $request->booking_agency,
+            //'transportation_mode' => $request->transportation_mode,
+            'booking_agency' => $agent_id,
             'agency_bookingr_ref' => $request->agency_bookingr_ref,
             'operator_frieght_payment' => $request->operator_frieght_payment,
             'payment_location' => $request->payment_location,
             'customer_consignee_id'=>$request->input('customer_consignee_id'),
         ];
- 
+        QuotationDes::destroy(explode(',', $request->removedDesc));
         $quotation->createOrUpdateDesc($request->quotationDis);
         return redirect()->route('quotations.index')->with('success', trans('Quotation.updated.success'));
     }

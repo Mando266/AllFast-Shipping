@@ -17,14 +17,7 @@
                     <form novalidate id="createForm" action="{{route('quotations.store')}}" method="POST">
                         @csrf
                         <div class="form-row">
-                            <div class="form-group col-md-3">
-                                <label> Ref No <span class="text-warning"> *</span></label>
-                                <input type="text" class="form-control" name="ref_no" value="{{old('ref_no')}}" autocomplete="off" placeholder="Ref No" required>
-                                @error('ref_no')
-                                <div style="color:red;">{{$message}}</div>
-                                @enderror
-                            </div>
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-4">
                                 <label for="quotation_type">Quotation Type<span class="text-warning"> *</span></label>
                                 <select class="selectpicker form-control" data-live-search="true" name="quotation_type" title="{{trans('forms.select')}}" required>
                                     <option value="full">Full</option>
@@ -34,31 +27,21 @@
                                 <div style="color:red;">{{$message}}</div>
                                 @enderror
                             </div>
-                            <div class="form-group col-md-3">
-                                <label for="transportation_mode">Transportation Mode<span class="text-warning"> *</span></label>
-                                <select class="selectpicker form-control" data-live-search="true" name="transportation_mode" title="{{trans('forms.select')}}" required>
-                                    <option value="vessel">Vessel</option>
-                                    <option value="trucker">Trucker</option>
-                                    <option value="train">Train</option>
-                                </select>
-                                @error('transportation_mode')
+                            <input type="hidden" name="transportation_mode" value="vessel"> 
+                            <div class="form-group col-md-4">
+                                <label for="validity_from">Validity From <span class="text-warning"> *</span></label>
+                                <input type="date" class="form-control" id="validity_from" name="validity_from" value="{{old('validity_from')}}" autocomplete="off" required>
+                                @error('validity_from')
                                 <div style="color:red;">{{$message}}</div>
                                 @enderror
                             </div>
-                            <div class="form-group col-md-3">
-                                <label for="booking_agency">Booking Agency<span class="text-warning"> *</span></label>
-                                <select class="selectpicker form-control" data-live-search="true" name="booking_agency" title="{{trans('forms.select')}}" required>
-                                    @foreach ($booking_agency as $item)
-                                    <option value="{{$item->id}}" {{ $item->id == old('booking_agency', Auth::user()->agent_id) ? 'selected':'' }}>
-                                        {{$item->name}}
-                                    </option>
-                                    @endforeach
-                                </select>
-                                @error('booking_agency')
+                            <div class="form-group col-md-4">
+                                <label for="validity_to">Validity To<span class="text-warning"> *</span></label>
+                                <input type="date" class="form-control" id="validity_to" name="validity_to" value="{{old('validity_to')}}" autocomplete="off" required>
+                                @error('validity_to')
                                 <div style="color:red;">{{$message}}</div>
                                 @enderror
-                            </div>
-                      
+                            </div>       
                         </div>
 
                         <div class="form-row">
@@ -180,23 +163,6 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="validity_from">Validity From <span class="text-warning"> *</span></label>
-                                <input type="date" class="form-control" id="validity_from" name="validity_from" value="{{old('validity_from')}}" autocomplete="off" required>
-                                @error('validity_from')
-                                <div style="color:red;">{{$message}}</div>
-                                @enderror
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label for="validity_to">Validity To<span class="text-warning"> *</span></label>
-                                <input type="date" class="form-control" id="validity_to" name="validity_to" value="{{old('validity_to')}}" autocomplete="off" required>
-                                @error('validity_to')
-                                <div style="color:red;">{{$message}}</div>
-                                @enderror
-                            </div>
-                        </div>
-
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="place_of_acceptence_id">Place Of Acceptance </label>
@@ -400,6 +366,7 @@
 @endsection
 @push('scripts')
 <script>
+    
     $(document).ready(function () {
         $('.selectpicker').selectpicker();
 
@@ -435,19 +402,11 @@
         }
 
         let countryDis = $('#countryDis');
-        if (countryDis.val()) {
-            fetchAndPopulatePorts(countryDis.val(), ['#place_of_acceptence_id', '#load_port_id', '#pick_up_location']);
-        }
-
         countryDis.on('change', function (e) {
             fetchAndPopulatePorts(e.target.value, ['#place_of_acceptence_id', '#load_port_id', '#pick_up_location']);
         });
 
         let country = $('#country');
-        if (country.val()) {
-            fetchAndPopulatePorts(country.val(), ['#place_of_delivery_id', '#discharge_port_id', '#place_return_id']);
-        }
-
         country.on('change', function (e) {
             fetchAndPopulatePorts(e.target.value, ['#place_of_delivery_id', '#discharge_port_id', '#place_return_id']);
         });
