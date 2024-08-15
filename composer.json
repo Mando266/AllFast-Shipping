@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.2.5|8.1",
+        "ext-http": "*",
         "fideloper/proxy": "^4.2",
         "fruitcake/laravel-cors": "^1.0",
         "guzzlehttp/guzzle": "^7.7",
@@ -19,11 +20,11 @@
         "laravel/tinker": "^2.0",
         "laravel/ui": "^2.0",
         "maatwebsite/excel": "^3.1",
+        "sabas/edifact": "0.6.0",
         "santigarcor/laratrust": "5.2.*",
         "setasign/fpdf": "^1.8",
         "setasign/fpdi": "^2.3",
-        "tecnickcom/tcpdf": "^6.6",
-      "ext-http": "*"
+        "tecnickcom/tcpdf": "^6.6"
     },
     "require-dev": {
         "facade/ignition": "^2.0",

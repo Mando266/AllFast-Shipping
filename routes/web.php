@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\XML\XmlController;
+use App\Http\Controllers\EdiController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\PortChargeController;
 use App\Http\Controllers\BlDraft\PDFController;
@@ -247,6 +248,17 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('creditNote', 'CreditController');
         Route::get('get_invoice_json/{invoice}', 'InvoiceController@invoiceJson')->name('invoice.get_invoice_json');
     });
+
+
+    /*
+    |-------------------------------------------
+    | EDI routes
+    |--------------------------------------------
+    */
+
+    Route::get('/edi', [EdiController::class, 'index'])->name('edi.index');
+    Route::post('/edi/upload', [EdiController::class, 'upload'])->name('edi.upload');   
+
     /*
     |-------------------------------------------
     | Manual Updates
