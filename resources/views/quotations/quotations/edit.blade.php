@@ -35,31 +35,21 @@
                                     <div style="color:red;">{{$message}}</div>
                                     @enderror
                                 </div>
-
                                 <div class="form-group col-md-3">
-                                    <label>Transportation Mode <span class="text-warning"> * </span></label>
-                                    <select class="selectpicker form-control" data-live-search="true" name="transportation_mode" title="{{trans('forms.select')}}" required>
-                                        <option value="vessel" {{$quotation->transportation_mode == "vessel" ? 'selected':''}}>Vessel</option>
-                                        <option value="trucker" {{$quotation->transportation_mode == "trucker" ? 'selected':''}}>Trucker</option>
-                                        <option value="train" {{$quotation->transportation_mode == "train" ? 'selected':''}}>Train</option>
-                                    </select>
-                                    @error('transportation_mode')
-                                    <div style="color:red;">
-                                        {{$message}}
-                                    </div>
-                                    @enderror
-                                </div>
-                                <div class="form-group col-md-3">
-                                    <label>Booking Agency<span class="text-warning"> * </span></label>
-                                    <select class="selectpicker form-control" id="booking_agency" name="booking_agency" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" required>
-                                        @foreach ($booking_agency as $item)
-                                            <option value="{{$item->id}}" {{ $item->id == old('booking_agency', $quotation->booking_agency) ? 'selected':'' }}>{{$item->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('booking_agency')
+                                    <label for="validity_from">Validity From <span class="text-warning"> * </span></label>
+                                    <input type="date" class="form-control" id="validity_from" name="validity_from" value="{{old('validity_from', $quotation->validity_from)}}" autocomplete="off" required>
+                                    @error('validity_from')
                                     <div style="color:red;">{{$message}}</div>
                                     @enderror
                                 </div>
+                                <div class="form-group col-md-3">
+                                    <label for="validity_to">Validity To <span class="text-warning"> * </span></label>
+                                    <input type="date" class="form-control" id="validity_to" name="validity_to" value="{{old('validity_to', $quotation->validity_to)}}" autocomplete="off" required>
+                                    @error('validity_to')
+                                    <div style="color:red;">{{$message}}</div>
+                                    @enderror
+                                </div>
+                                <input type="hidden" name="transportation_mode" value="vessel">
                             </div>
 
                             <div class="form-row">
@@ -177,23 +167,6 @@
                                         @endforeach
                                     </select>
                                     @error('customer_consignee_id')
-                                    <div style="color:red;">{{$message}}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="validity_from">Validity From <span class="text-warning"> * </span></label>
-                                    <input type="date" class="form-control" id="validity_from" name="validity_from" value="{{old('validity_from', $quotation->validity_from)}}" autocomplete="off" required>
-                                    @error('validity_from')
-                                    <div style="color:red;">{{$message}}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <label for="validity_to">Validity To <span class="text-warning"> * </span></label>
-                                    <input type="date" class="form-control" id="validity_to" name="validity_to" value="{{old('validity_to', $quotation->validity_to)}}" autocomplete="off" required>
-                                    @error('validity_to')
                                     <div style="color:red;">{{$message}}</div>
                                     @enderror
                                 </div>
@@ -413,106 +386,124 @@
 @endsection
 @push('scripts')
 <script>
-    $(document).ready(function () {
-        $('.selectpicker').selectpicker();
+  $(document).ready(function () {
+    // Initialize selectpicker
+    $('.selectpicker').selectpicker();
 
-        $('#payment_kind').change(function () {
-            if ($(this).val() === 'else_where') {
-                $('#elseWhereSelect').show();
-            } else {
-                $('#elseWhereSelect').hide();
-            }
-        });
-
-        $('#vessel_name').change(function () {
-            if ($('#Principal').val() !== $('#vessel_name').val()) {
-                $('#additionalSelect').show();
-            } else {
-                $('#additionalSelect').hide();
-            }
-        });
-  
-        let exportCount = 1;
-
-        $("#adddis").click(function () {
-            var tr = '<tr>' +
-                '<td id="equpmints"><select class="selectpicker form-control equipment-type" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" required>@foreach ($equipment_types as $item)<option value="{{$item->id}}" {{$item->id == old('equipment_type_id') ? 'selected':''}}>{{$item->name}}</option>@endforeach </select></td>' +
-                '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][currency]" data-size="10" title="{{trans('forms.select')}}">@foreach ($currency as $item)<option value="{{$item->name}}" {{ (old('currency') == $item->id || $item->id == 1) ? 'selected' : '' }}>{{$item->name}}</option>@endforeach</select></td>' +
-                '<td><input type="text" name="quotationDis[' + exportCount + '][ofr]" class="form-control" autocomplete="off" placeholder="OFR" required></td>' +
-                '<td><input type="text" name="quotationDis[' + exportCount + '][free_time]" class="form-control" autocomplete="off" placeholder="Free Time" required></td>' +
-                '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][thc_payment]" data-size="10" title="{{trans('forms.select')}}" required><option value="pod">POD</option><option value="pol">POL</option></select></td>' +
-                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][soc]" value="1" autocomplete="off"></td>' +
-                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][imo]" value="1" autocomplete="off"></td>' +
-                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][oog]" value="1" autocomplete="off"></td>' +
-                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][rf]" value="1" autocomplete="off"></td>' +
-                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][nor]" value="1" autocomplete="off"></td>' +
-                '<td style="width:85px;"><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>' +
-                '</tr>';
-            $('#ofr tbody').append(tr);
-            $('.selectpicker').selectpicker('refresh');
-            exportCount++;
-            updateEquipmentOptions();
-        });
-
-        $(document).on('change', '.equipment-type', function () {
-            updateEquipmentOptions();
-        });
-
-        function updateEquipmentOptions() {
-            let selectedOptions = [];
-            $('.equipment-type').each(function () {
-                selectedOptions.push($(this).val());
-            });
-
-            $('.equipment-type').each(function () {
-                let currentSelect = $(this);
-                currentSelect.find('option').each(function () {
-                    let optionValue = $(this).val();
-                    if (selectedOptions.includes(optionValue) && optionValue !== currentSelect.val()) {
-                        $(this).hide();
-                    } else {
-                        $(this).show();
-                    }
-                });
-                currentSelect.selectpicker('refresh');
-            });
+    // Handle changes for the payment_kind select element
+    $('#payment_kind').change(function () {
+        if ($(this).val() === 'else_where') {
+            $('#elseWhereSelect').show();
+        } else {
+            $('#elseWhereSelect').hide();
         }
-
-        $(document).on('click', '.remove', function () {
-            $(this).closest('tr').remove();
-            updateEquipmentOptions();
-        });
-
-        // Call the function on page load to handle the initial state
-        $(document).ready(function () {
-            updateEquipmentOptions();
-        });
-        country.on('change', function (e) {
-            let value = e.target.value;
-            $.get(`/api/agent/agentCountry/${value}`).then(function (data) {
-                let agents = data.agents || '';
-                let options = [`<option value=''>Select...</option>`];
-                for (let i = 0; i < agents.length; i++) {
-                    options.push(`<option value='${agents[i].id}'>${agents[i].name}</option>`);
-                }
-                $('#agentload').html(options.join('')).selectpicker('refresh');
-            });
-        });
-
-        countryDis.on('change', function (e) {
-            let value = e.target.value;
-            $.get(`/api/agent/agentCountry/${value}`).then(function (data) {
-                let agents = data.agents || '';
-                let options = [`<option value=''>Select...</option>`];
-                for (let i = 0; i < agents.length; i++) {
-                    options.push(`<option value='${agents[i].id}'>${agents[i].name}</option>`);
-                }
-                $('#agentDis').html(options.join('')).selectpicker('refresh');
-            });
-        });
-
-
     });
+
+    // Handle changes for the vessel_name select element
+    $('#vessel_name').change(function () {
+        if ($('#Principal').val() !== $('#vessel_name').val()) {
+            $('#additionalSelect').show();
+        } else {
+            $('#additionalSelect').hide();
+        }
+    });
+
+    // Function to fetch and populate ports based on selected country
+    function fetchAndPopulatePorts(countryId, targetSelectors) {
+        $.get(`/api/master/ports/${countryId}`).then(function (data) {
+            let ports = data.ports || '';
+            let options = `<option value=''>Select...</option>`;
+            for (let i = 0; i < ports.length; i++) {
+                options += `<option value='${ports[i].id}'>${ports[i].name}</option>`;
+            }
+            targetSelectors.forEach(selector => {
+                $(selector).html(options).selectpicker('refresh');
+            });
+        }).fail(function (xhr, status, error) {
+            console.error('Error fetching ports:', status, error);
+        });
+    }
+
+    let exportCount = 1;
+
+    // Add new row to the table
+
+    $("#adddis").click(function () {
+        var tr = '<tr>' +
+            '<td id="equpmints"><select class="selectpicker form-control equipment-type" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" required>@foreach ($equipment_types as $item)<option value="{{$item->id}}" {{$item->id == old('equipment_type_id') ? 'selected':''}}>{{$item->name}}</option>@endforeach </select></td>' +
+            '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][currency]" data-size="10" title="{{trans('forms.select')}}">@foreach ($currency as $item)<option value="{{$item->name}}" {{ (old('currency') == $item->id || $item->id == 1) ? 'selected' : '' }}>{{$item->name}}</option>@endforeach</select></td>' +
+            '<td><input type="text" name="quotationDis[' + exportCount + '][ofr]" class="form-control" autocomplete="off" placeholder="OFR" required></td>' +
+            '<td><input type="text" name="quotationDis[' + exportCount + '][free_time]" class="form-control" autocomplete="off" placeholder="Free Time" required></td>' +
+            '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][thc_payment]" data-size="10" title="{{trans('forms.select')}}" required><option value="pod">POD</option><option value="pol">POL</option></select></td>' +
+            '<td><input type="checkbox" name="quotationDis[' + exportCount + '][soc]" value="1" autocomplete="off"></td>' +
+            '<td><input type="checkbox" name="quotationDis[' + exportCount + '][imo]" value="1" autocomplete="off"></td>' +
+            '<td><input type="checkbox" name="quotationDis[' + exportCount + '][oog]" value="1" autocomplete="off"></td>' +
+            '<td><input type="checkbox" name="quotationDis[' + exportCount + '][rf]" value="1" autocomplete="off"></td>' +
+            '<td><input type="checkbox" name="quotationDis[' + exportCount + '][nor]" value="1" autocomplete="off"></td>' +
+            '<td style="width:85px;"><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>' +
+            '</tr>';
+        $('#ofr tbody').append(tr);
+        $('.selectpicker').selectpicker('refresh');
+        exportCount++;
+        updateEquipmentOptions();
+    });
+
+    // Delegate the remove button event to a static parent element
+    $(document).on('click', '.remove', function () {
+        $(this).closest('tr').remove();
+        updateEquipmentOptions();
+    });
+
+    // Update equipment options to avoid duplicates
+    function updateEquipmentOptions() {
+        let selectedOptions = [];
+        $('.equipment-type').each(function () {
+            selectedOptions.push($(this).val());
+        });
+
+        $('.equipment-type').each(function () {
+            let currentSelect = $(this);
+            currentSelect.find('option').each(function () {
+                let optionValue = $(this).val();
+                if (selectedOptions.includes(optionValue) && optionValue !== currentSelect.val()) {
+                    $(this).hide();
+                } else {
+                    $(this).show();
+                }
+            });
+            currentSelect.selectpicker('refresh');
+        });
+    }
+
+    // Fetch and update agents when country changes
+    country.on('change', function (e) {
+        let value = e.target.value;
+        $.get(`/api/agent/agentCountry/${value}`).then(function (data) {
+            let agents = data.agents || '';
+            let options = [`<option value=''>Select...</option>`];
+            for (let i = 0; i < agents.length; i++) {
+                options.push(`<option value='${agents[i].id}'>${agents[i].name}</option>`);
+            }
+            $('#agentload').html(options.join('')).selectpicker('refresh');
+        });
+    });
+
+    countryDis.on('change', function (e) {
+        let value = e.target.value;
+        $.get(`/api/agent/agentCountry/${value}`).then(function (data) {
+            let agents = data.agents || '';
+            let options = [`<option value=''>Select...</option>`];
+            for (let i = 0; i < agents.length; i++) {
+                options.push(`<option value='${agents[i].id}'>${agents[i].name}</option>`);
+            }
+            $('#agentDis').html(options.join('')).selectpicker('refresh');
+        });
+    });
+
+    // Call the function on page load to handle the initial state
+    updateEquipmentOptions();
+});
+
 </script>
 @endpush
 
