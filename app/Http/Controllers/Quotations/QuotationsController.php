@@ -283,9 +283,11 @@ class QuotationsController extends Controller
             'discharge_port_id' => ['required', 'different:load_port_id'],
             'validity_to' => ['required', 'after:validity_from'],
             'commodity_des' => ['required'],
+            'quotationDis.*.free_time' => ['required'],
         ], [
-            'validity_to.after' => 'Validaty To Should Be After Validaty From ',
-            'discharge_port_id.different' => 'Load Port The Same  Discharge Port',
+            'validity_to.after' => 'Validity To Should Be After Validity From',
+            'discharge_port_id.different' => 'Load Port cannot be the same as Discharge Port',
+            'quotationDis.*.free_time.required' => 'Free Time is required for each equipment type',
         ]);
 
         $this->authorize(__FUNCTION__, Quotation::class);
@@ -321,9 +323,17 @@ class QuotationsController extends Controller
             'agency_bookingr_ref' => $request->agency_bookingr_ref,
             'operator_frieght_payment' => $request->operator_frieght_payment,
             'payment_location' => $request->payment_location,
-            'customer_consignee_id'=>$request->input('customer_consignee_id'),
+            // 'customer_consignee_id'=>$request->input('customer_consignee_id'),
         ];
+        
+        // Update the quotation
+        $quotation->update($input);
+
+        // Handle Remove
+        if ($request->filled('removedDesc')) {
         QuotationDes::destroy(explode(',', $request->removedDesc));
+        }
+
         $quotation->createOrUpdateDesc($request->quotationDis);
         return redirect()->route('quotations.index')->with('success', trans('Quotation.updated.success'));
     }
