@@ -434,7 +434,7 @@
             fetchAndPopulatePorts(e.target.value, ['#place_of_delivery_id', '#discharge_port_id', '#place_return_id']);
         });
         
-    let exportCount = 1;
+    let exportCount = $('#ofr tbody tr').length;
 
     // Add new row to the table
 
@@ -498,6 +498,10 @@
             currentSelect.selectpicker('refresh');
         });
     }
+    
+    $(document).on('change', '.equipment-type', function () {
+        updateEquipmentOptions();
+    });
 
     // Fetch and update agents when country changes
     country.on('change', function (e) {
