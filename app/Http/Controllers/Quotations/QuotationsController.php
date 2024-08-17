@@ -146,6 +146,9 @@ class QuotationsController extends Controller
             ->where("load_port_id", $request->input('load_port_id'))
             ->where("discharge_port_id", $request->input('discharge_port_id'))
             ->where("place_return_id", $request->input('place_return_id'))
+            ->where("equipment_type_id", $request->input('equipment_type_id'))
+            ->where("export_storage", $request->input('export_storage'))
+            ->where("import_storage", $request->input('import_storage'))
             ->where("oog_dimensions", $request->input('oog_dimensions'))
             ->get();
     
@@ -170,6 +173,8 @@ class QuotationsController extends Controller
             'load_port_id' => $request->input('load_port_id'),
             'discharge_port_id' => $request->input('discharge_port_id'),
             'place_return_id' => $request->input('place_return_id'),
+            'export_storage' => $request->input('export_storage'),
+            'import_storage' => $request->input('import_storage'),
             'oog_dimensions' => $request->input('oog_dimensions'),
             'commodity_code' => $request->input('commodity_code'),
             'commodity_des' => $request->input('commodity_des'),
@@ -181,6 +186,7 @@ class QuotationsController extends Controller
             'status' => "pending",
             'shipment_type' => $shipment_type,
             'booking_agency' => $agent_id,
+            'agency_bookingr_ref' => $request->input('agency_bookingr_ref'),
             'operator_frieght_payment' => $request->input('operator_frieght_payment'),
             'payment_location' => $request->input('payment_location'),
             'customer_consignee_id' => $request->input('customer_consignee_id'),
@@ -287,7 +293,7 @@ class QuotationsController extends Controller
         $this->authorize(__FUNCTION__, Quotation::class);
         $user = Auth::user();
         $agent_id = $user->agent_id;  
-        $quotation = Quotation::with('quotationDesc')->find($id);
+        $quotation = Quotation::with('quotationDesc', 'quotationLoad')->find($id);
    
         $input = [ 
             'ref_no' => $request->ref_no,
@@ -301,7 +307,10 @@ class QuotationsController extends Controller
             'place_of_delivery_id' => $request->place_of_delivery_id,
             'load_port_id' => $request->load_port_id,
             'discharge_port_id' => $request->discharge_port_id,
+            'equipment_type_id' => $request->equipment_type_id,
             'place_return_id' => $request->place_return_id,
+            'export_storage' => $request->export_storage,
+            'import_storage' => $request->import_storage,
             'commodity_code' => $request->commodity_code,
             'commodity_des' => $request->commodity_des,
             'pick_up_location' => $request->pick_up_location,
@@ -309,7 +318,9 @@ class QuotationsController extends Controller
             'oog_dimensions' => $request->oog_dimensions,
             'payment_kind' => $request->payment_kind,
             'quotation_type' => $request->quotation_type,
+            //'transportation_mode' => $request->transportation_mode,
             'booking_agency' => $agent_id,
+            'agency_bookingr_ref' => $request->agency_bookingr_ref,
             'operator_frieght_payment' => $request->operator_frieght_payment,
             'payment_location' => $request->payment_location,
             'customer_consignee_id'=>$request->input('customer_consignee_id'),
