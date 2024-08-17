@@ -99,7 +99,6 @@ class Quotation extends Model implements PermissionSeederContract
         if($inputs != null){
         foreach($inputs as $input){
             $input['quotation_id'] = $this->id;
-            if( isset($input['id']) ){
                 $des = QuotationDes::find($input['id']);
                 // dd($des,$inputs);
                 $des->update([
@@ -115,22 +114,6 @@ class Quotation extends Model implements PermissionSeederContract
                     'rf' => $input['rf'] ?? 0,
                     'nor' => $input['nor'] ?? 0,
                 ]);
-            }
-            else{
-                QuotationDes::create([
-                    'quotation_id'=>$input['quotation_id'],
-                    'ofr' => $input['ofr'],
-                    'currency' => $input['currency'],
-                    'equipment_type_id' => $input['equipment_type_id'],
-                    'free_time' => $input['free_time'],
-                    'thc_payment' => $input['thc_payment'],
-                    'soc' => $input['soc'] ?? 0,
-                    'imo' => $input['imo'] ?? 0,
-                    'oog' => $input['oog'] ?? 0,
-                    'rf' => $input['rf'] ?? 0,
-                    'nor' => $input['nor'] ?? 0,
-                ]);
-            }
         }
         }
     }
