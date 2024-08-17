@@ -458,6 +458,11 @@
             });
         }
 
+        $(document).on('change', '.equipment-type', function () {
+            updateEquipmentOptions();
+        });
+
+
         $(document).on('click', '.remove', function () {
             $(this).closest('tr').remove();
             updateEquipmentOptions();
