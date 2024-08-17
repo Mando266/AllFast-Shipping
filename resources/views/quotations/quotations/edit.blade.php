@@ -424,6 +424,16 @@
         });
     }
 
+    let countryDis = $('#countryDis');
+        countryDis.on('change', function (e) {
+            fetchAndPopulatePorts(e.target.value, ['#place_of_acceptence_id', '#load_port_id', '#pick_up_location']);
+        });
+
+        let country = $('#country');
+        country.on('change', function (e) {
+            fetchAndPopulatePorts(e.target.value, ['#place_of_delivery_id', '#discharge_port_id', '#place_return_id']);
+        });
+        
     let exportCount = 1;
 
     // Add new row to the table
