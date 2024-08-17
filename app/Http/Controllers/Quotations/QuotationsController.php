@@ -146,7 +146,6 @@ class QuotationsController extends Controller
             ->where("load_port_id", $request->input('load_port_id'))
             ->where("discharge_port_id", $request->input('discharge_port_id'))
             ->where("place_return_id", $request->input('place_return_id'))
-            ->where("equipment_type_id", $request->input('equipment_type_id'))
             ->where("oog_dimensions", $request->input('oog_dimensions'))
             ->get();
     
@@ -302,7 +301,6 @@ class QuotationsController extends Controller
             'place_of_delivery_id' => $request->place_of_delivery_id,
             'load_port_id' => $request->load_port_id,
             'discharge_port_id' => $request->discharge_port_id,
-            'equipment_type_id' => $request->equipment_type_id,
             'place_return_id' => $request->place_return_id,
             'commodity_code' => $request->commodity_code,
             'commodity_des' => $request->commodity_des,
