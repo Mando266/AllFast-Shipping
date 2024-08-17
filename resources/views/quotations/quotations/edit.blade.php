@@ -450,7 +450,21 @@
 
     // Delegate the remove button event to a static parent element
     $(document).on('click', '.remove', function () {
-        $(this).closest('tr').remove();
+        let row = $(this).closest('tr');
+        let rowId = row.find('input[type="hidden"]').val();
+
+        if (rowId) {
+            // Append the row ID to the removedDesc hidden input
+            let removedDesc = $('#removedDesc').val();
+            if (removedDesc) {
+                removedDesc += ',' + rowId;
+            } else {
+                removedDesc = rowId;
+            }
+            $('#removedDesc').val(removedDesc);
+        }
+
+        row.remove();
         updateEquipmentOptions();
     });
 
