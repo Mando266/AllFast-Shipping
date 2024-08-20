@@ -239,31 +239,51 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             'use strict';
-            var form = document.getElementById('createForm');
-            form.addEventListener('submit', function (event) {
-                var isValid = true;
-                var selectpickers = form.querySelectorAll('.selectpicker[required]');
+            const form = document.getElementById('createForm');
 
-                selectpickers.forEach(function (selectpicker) {
+            function validateSelectpicker(selectpicker) {
+                const button = selectpicker.parentElement.querySelector('.dropdown-toggle');
+                const searchBox = selectpicker.parentElement.querySelector('.bs-searchbox input');
+                const dropdownItems = selectpicker.parentElement.querySelectorAll('.dropdown-item .check-mark');
+                const isValid = selectpicker.value && selectpicker.value.trim() !== '';
+
+                button.style.border = isValid ? '1px solid green' : '1px solid red';
+                button.style.boxShadow = 'none';
+
+                if (searchBox) {
+                    searchBox.style.border = isValid ? '1px solid green' : '1px solid red';
+                    searchBox.style.boxShadow = 'none';
+                }
+
+                selectpicker.style.borderColor = '';
+                selectpicker.style.backgroundImage = 'none';
+                selectpicker.style.boxShadow = 'none';
+
+                if (isValid) {
+                    dropdownItems.forEach(item => item.style.display = 'none');
+                }
+            }
+
+            form.querySelectorAll('.selectpicker[required]').forEach(selectpicker => {
+                selectpicker.addEventListener('change', () => validateSelectpicker(selectpicker));
+            });
+
+            form.addEventListener('submit', function (event) {
+                let isValid = true;
+                form.querySelectorAll('.selectpicker[required]').forEach(selectpicker => {
                     if (!selectpicker.value || selectpicker.value.trim() === '') {
                         isValid = false;
-                        var button = selectpicker.parentElement.querySelector('.dropdown-toggle');
-                        button.style.border = '1px solid red'; 
-                    } else {
-                        var button = selectpicker.parentElement.querySelector('.dropdown-toggle');
-                        button.style.border = ''; 
                     }
+                    validateSelectpicker(selectpicker);
                 });
 
                 if (!isValid) {
                     event.preventDefault();
-                    event.stopPropagation();
                 }
 
                 form.classList.add('was-validated');
             });
 
-            // Initialize selectpicker after the document is fully loaded
             $('.selectpicker').selectpicker();
         });
     </script>
