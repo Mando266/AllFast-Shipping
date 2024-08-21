@@ -361,7 +361,7 @@
                                         </td>
 
                                         <td class="text-center">
-                                            <ul class="table-controls">
+                                            <ul class="table-controls d-flex flex-row justify-content-between">
                                                 @if($item->certificat == !null)
                                                     <li>
                                                         <a href='{{asset($item->certificat)}}' target="_blank">
@@ -373,7 +373,7 @@
                                                 @permission('Booking-Edit')
                                                 <li>
                                                     <a href="{{route('booking.edit',['booking'=>$item->id,'quotation_id'=>$item->quotation_id])}}"
-                                                       data-toggle="tooltip" data-placement="top" title=""
+                                                       data-toggle="tooltip" data-placement="top" title="Edit"
                                                        data-original-title="edit">
                                                         <i class="far fa-edit text-success"></i>
                                                     </a>
@@ -382,9 +382,16 @@
                                                     @permission('Booking-Show')
                                                     <li>
                                                     <a href="{{route('booking.arrivalNotification',['booking'=>$item->id])}}"
-                                                    data-toggle="tooltip" data-placement="top" title=""
+                                                    data-toggle="tooltip" data-placement="top" title="Show"
                                                            data-original-title="show">
-                                                            <i class="far fa-eye text-primary"></i>
+                                                            <i class="far fa-eye text-primary px-2"></i>
+                                                        </a>
+                                                    </li>
+                                                    @endpermission
+                                                    @permission('Booking-Edit')
+                                                    <li>
+                                                        <a href="{{ route('booking.clone', ['booking' => $item->id]) }}" data-toggle="tooltip" data-placement="top" title="Clone">
+                                                            <i class="far fa-copy text-warning"></i>
                                                         </a>
                                                     </li>
                                                     @endpermission

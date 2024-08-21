@@ -1124,4 +1124,51 @@ class BookingController extends Controller
             ]);
     }
 
+
+    public function clone($id)
+    {
+        // Retrieve the original booking to be cloned
+        $originalBooking = Booking::with('bookingContainerDetails')->findOrFail($id);
+    
+        // Start a transaction to ensure atomicity
+        DB::beginTransaction();
+        try {
+            // Clone the booking
+            $newBooking = $originalBooking->replicate(); 
+    
+            // Check the shipment type and set the ref_no accordingly
+            if ($originalBooking->shipment_type === 'Import') {
+                $newBooking->ref_no = null;
+            } elseif ($originalBooking->shipment_type === 'Export') {
+                $newBooking->ref_no = $this->incrementRefNo($originalBooking->ref_no);
+            }
+            $newBooking->created_at = now(); 
+            $newBooking->save(); 
+    
+            // Clone each container detail and assign it to the new booking
+            foreach ($originalBooking->bookingContainerDetails as $detail) {
+                $newDetail = $detail->replicate();
+                $newDetail->booking_id = $newBooking->id; 
+                $newDetail->save();
+            }
+    
+            DB::commit();
+    
+            return redirect()->route('booking.index')->with('success', 'Booking cloned successfully');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('booking.index')->with('error', 'Failed to clone booking: ' . $e->getMessage());
+        }
+    }
+    
+    protected function incrementRefNo($refNo)
+    {
+        // Example: if ref_no is "BOOK001", it will become "BOOK002"
+        $number = preg_replace('/\D/', '', $refNo);
+        $prefix = preg_replace('/\d/', '', $refNo);
+        $newNumber = (int)$number + 1;
+    
+        return $prefix . str_pad($newNumber, strlen($number), '0', STR_PAD_LEFT);
+    }
+
 }
