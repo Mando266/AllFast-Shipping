@@ -93,8 +93,7 @@
                                 <label for="Date">Booking Ref</label>
                                 <select class="selectpicker form-control" id="booking_ref" data-live-search="true" name="booking_ref" data-size="10"
                                     title="{{trans('forms.select')}}">
-                                    <option value="">Select...</option>
-                                    @foreach($bookings as $booking)
+                                                                         @foreach($bookings as $booking)
                                         <option value="{{$booking->id}}" {{$booking->id == old('booking_ref',$invoice->booking_ref) ? 'selected':''}}>{{$booking->ref_no}}</option>
                                     @endforeach
                                 </select>

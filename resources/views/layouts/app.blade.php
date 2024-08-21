@@ -267,7 +267,15 @@
             $('.selectpicker').selectpicker();
         });
     </script>
-
+    <script>
+        $(document).ready(function() {
+            $('.selectpicker').each(function() {
+                    $(this).prepend('<option value="">{{ trans("forms.select") }}</option>');
+                
+                $(this).selectpicker('refresh'); // Refresh the selectpicker to include the new option
+            });
+        });
+    </script>
     <script src="{{asset('assets/js/custom.js')}}"></script>
     <!-- END GLOBAL MANDATORY SCRIPTS -->
     <!-- BEGIN PAGE LEVEL PLUGINS/CUSTOM SCRIPTS -->

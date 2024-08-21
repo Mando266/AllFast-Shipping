@@ -202,8 +202,7 @@
                             <label for="countryInput">Other Currency</label>
                             <select class="selectpicker form-control" id="othercurrency" data-live-search="true" name="othercurrency" data-size="10"
                             title="{{trans('forms.select')}}" autofocus>
-                            <option value="">Select...</option>
-                                @foreach ($currency as $item)
+                                                             @foreach ($currency as $item)
                                     <option value="{{$item->name}}" {{$item->name == old('othercurrency') ? 'selected':''}}>{{$item->name}}</option>
                                 @endforeach
                             </select>

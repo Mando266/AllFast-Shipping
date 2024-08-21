@@ -35,8 +35,7 @@
                                 <div class="form-group col-md-4">
                                     <label for="port">Port <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="port" data-live-search="true" name="port_id" data-size="10" required>
-                                        <option value="">Select...</option>
-                                        @foreach ($ports as $item)
+                                                                                 @foreach ($ports as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('port_id') ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -49,8 +48,7 @@
                                 <div class="form-group col-md-4">
                                     <label for="terminal">Terminal <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="terminal" data-live-search="true" name="terminal_id" data-size="10" required>
-                                        <option value="">Select...</option>
-                                        @foreach ($terminals as $item)
+                                                                                 @foreach ($terminals as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('terminal_id') ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -144,8 +142,7 @@
                                 <div class="form-group col-md-12">
                                     <label for="containersTypesInput">Container Types</label>
                                     <select class="selectpicker form-control" id="containersTypesInput" data-live-search="true" data-size="10">
-                                        <option value="">Select...</option>
-                                        @foreach ($containersTypes as $item)
+                                                                                 @foreach ($containersTypes as $item)
                                             <option value="{{$item->id}}">{{$item->name}}</option>
                                         @endforeach
                                     </select>

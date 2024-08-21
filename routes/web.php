@@ -139,6 +139,10 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('{quotation}/approve', [QuotationsController::class, 'approve'])->name('quotation.approve');
         Route::get('{quotation}/reject', [QuotationsController::class, 'reject'])->name('quotation.reject');
         Route::resource('localporttriff', 'LocalPortTriffController');
+        Route::get('import', [QuotationsController::class, 'import'])->name('quotation.import');
+
+        Route::get('importcreate', [QuotationsController::class, 'importcreate'])
+        ->name('quotation.importcreate');
         Route::get('localporttriffdetailes/{id}', [LocalPortTriffDetailesController::class, 'destroy'])->name(
             'LocalPortTriffDetailes.destroy'
         );
@@ -159,10 +163,7 @@ Route::group(['middleware' => 'auth'], function () {
         ->name('booking.selectExportQuotation');
         Route::get('exportcreate', [BookingController::class, 'exportcreate'])
         ->name('booking.exportcreate');
-
-        Route::get('export', [BookingController::class, 'export'])
-        ->name('booking.export');
-
+        Route::get('export', [BookingController::class, 'export'])->name('booking.export');
         Route::get('selectGateOut/{booking}', [BookingController::class, 'selectGateOut'])
             ->name('booking.selectGateOut');
         Route::get('showShippingOrder/{booking}', [BookingController::class, 'showShippingOrder'])

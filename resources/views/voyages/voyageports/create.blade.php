@@ -43,8 +43,7 @@
                                 <td class="terminal">
                                   <select class="form-control" id="terminal" data-live-search="true" name="voyageport[0][terminal_name]" data-size="10"
                                           title="{{trans('forms.select')}}">
-                                          <option value="">Select...</option>
-                                          @foreach ($terminals as $item)
+                                                                                     @foreach ($terminals as $item)
                                               <option value="{{$item->id}}" {{$item->id == old('terminal_name') ? 'selected':''}}>{{$item->name}} {{$item->code}}</option>
                                           @endforeach
                                   </select>

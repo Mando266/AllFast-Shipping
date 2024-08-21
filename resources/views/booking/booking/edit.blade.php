@@ -350,8 +350,7 @@
                                 <div class="form-group col-md-4">
                                     <label for="Transhipment">Transhipment Port</label>
                                     <select class="selectpicker form-control" id="transhipment_port" data-live-search="true" name="transhipment_port" data-size="10" title="{{trans('forms.select')}}">
-                                        <option value="">Select...</option>
-                                        @foreach ($ports as $item)
+                                                                                 @foreach ($ports as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('transhipment_port',$booking->transhipment_port) ? 'selected' : ''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -454,7 +453,7 @@
                         @endif
                         </div>
                         <div class="form-row">
-                            @if($isDraft)
+                            @if(!$isDraft)
                                 <div class="form-group col-md-3">
                                     <label for="status">Bl Payment<span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" data-live-search="true" name="payment_kind" title="{{trans('forms.select')}}" required>
@@ -511,8 +510,8 @@
                             </div>
                             <div class="form-group col-md-6">
                                 <label for="details">Notes</label>
-                                <textarea class="form-control" id="details" name="notes" value="{{old('notes',$booking->notes)}}"
-                                 placeholder="Notes" autocomplete="off"></textarea>
+                                <textarea class="form-control" id="details" name="notes"
+                                 placeholder="Notes" autocomplete="off">{{ old('notes',$booking->notes) }}</textarea>
                                 @error('notes')
                                 <div class="invalid-feedback">
                                     {{$message}}
@@ -544,7 +543,7 @@
                                     {{$message}}
                                 </div>
                             @enderror
-                        <div id="tableContainer" style=" overflow-y: auto;">
+                        <div id="tableContainer">
                             <table id="containerDetails" class="table table-bordered">
                                 <thead>
                                     <tr>
