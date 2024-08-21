@@ -190,6 +190,8 @@ Route::group(['middleware' => 'auth'], function () {
             ->name('importBooking');
         Route::get('{booking}/temperatureDiscrepancy', [BookingController::class, 'temperatureDiscrepancy'])
             ->name('temperature-discrepancy');
+        Route::get('{booking}/clone', [BookingController::class, 'clone'])
+        ->name('booking.clone');
     });
     /*
     |-------------------------------------------
