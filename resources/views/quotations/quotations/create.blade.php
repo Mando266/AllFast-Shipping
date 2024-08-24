@@ -373,10 +373,10 @@
     $(document).ready(function () {
         $('.selectpicker').selectpicker();
 
-           // Event delegation for dynamically added rows
-    $(document).on('change', 'select[name^="quotationDis"][name$="[request_type]"]', function () {
-        const row = $(this).closest('tr');
-        let selectedRequestType = $(this).val();
+        // Event delegation for dynamically added rows
+        $(document).on('change', 'select[name^="quotationDis"][name$="[request_type]"]', function () {
+            const row = $(this).closest('tr');
+            let selectedRequestType = $(this).val();
 
         // Make an AJAX request to get the equipment types based on the selected request type
         $.get(`/api/master/requesttype/${selectedRequestType}`).then(function (data) {

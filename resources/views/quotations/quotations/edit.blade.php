@@ -292,11 +292,7 @@
                                     <th>OFR</th>
                                     <th>Free Time</th>
                                     <th>THC Term</th>
-                                    <th>SOC</th>
-                                    <th>IMO</th>
-                                    <th>OOG</th>
-                                    <th>RF</th>
-                                    <th>NOR</th>
+                                    <th>Special Equipment</th>
                                     <th>
                                         <a id="adddis"> Add <i class="fas fa-plus"></i></a>
                                     </th>
@@ -314,7 +310,7 @@
                                             </select>
                                         </td>  
                                         <td>
-                                            <select class="selectpicker form-control equipment-type" id="equipments_type" data-live-search="true" name="quotationDis[{{ $key }}][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}">
+                                            <select class="selectpicker form-control equipment-type" id="equipments_type" data-live-search="true" name="quotationDis[{{ $key }}][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" readonly>
                                                 @foreach ($equipment_types as $item)
                                                     <option value="{{$item->id}}" {{$item->id == old('equipment_type_id', $desc->equipment_type_id) ? 'selected':''}}>{{$item->name}}</option>
                                                 @endforeach
@@ -345,21 +341,33 @@
                                         </select>
                                         </td>  
                                         <td>
-                                        <input type="checkbox" id="soc" name="quotationDis[{{$key}}][soc]" value="1" {{$desc->soc == 1 ? 'checked="checked"' : '' }}>
-
-                                        </td>
-                                        <td>
-                                            <input type="checkbox"  value="1" name="quotationDis[{{$key}}][imo]" {{$desc->imo == 1 ? 'checked="checked"' : '' }}> 
-                                        </td>
-                                        <td>
-                                            <input type="checkbox"  value="1" name="quotationDis[{{$key}}][oog]" {{$desc->oog == 1 ? 'checked="checked"' : '' }}> 
-                                        </td>
-                                        <td>
-                                            <input type="checkbox"  value="1" name="quotationDis[{{$key}}][rf]" {{$desc->rf == 1 ? 'checked="checked"' : '' }}> 
-                                        </td>
-                                        <td>
-                                            <input type="checkbox"  value="1" name="quotationDis[{{$key}}][nor]" {{$desc->nor == 1 ? 'checked="checked"' : '' }}> 
-                                        </td>
+                                            <div class="checkbox-group d-flex flex-row">
+                                                <div style="display: inline-block; width: 50%;" class="mr-3">
+                                                    <div style="margin-bottom: 5px;">
+                                                        <label style="margin-right: 10px; width: 25px; display: inline-block;">SOC</label>
+                                                        <input type="checkbox" id="soc" name="quotationDis[{{$key}}][soc]" value="1" {{$desc->soc == 1 ? 'checked="checked"' : '' }} disabled>
+                                                    </div>
+                                                    <div style="margin-bottom: 5px;">
+                                                        <label style="margin-right: 10px; width: 25px; display: inline-block;">IMO</label>
+                                                        <input type="checkbox" value="1" name="quotationDis[{{$key}}][imo]" {{$desc->imo == 1 ? 'checked="checked"' : '' }} disabled>
+                                                    </div>
+                                                    <div>
+                                                        <label style="margin-right: 10px; width: 25px; display: inline-block;">OOG</label>
+                                                        <input type="checkbox" value="1" name="quotationDis[{{$key}}][oog]" {{$desc->oog == 1 ? 'checked="checked"' : '' }} disabled>
+                                                    </div>
+                                                </div>
+                                                <div style="display: inline-block; width: 50%;">
+                                                    <div style="margin-bottom: 5px;">
+                                                        <label style="margin-right: 10px; width: 25px; display: inline-block;">RF</label>
+                                                        <input type="checkbox" value="1" name="quotationDis[{{$key}}][rf]" {{$desc->rf == 1 ? 'checked="checked"' : '' }} disabled>
+                                                    </div>
+                                                    <div>
+                                                        <label style="margin-right: 10px; width: 25px; display: inline-block;">NOR</label>
+                                                        <input type="checkbox" value="1" name="quotationDis[{{$key}}][nor]" {{$desc->nor == 1 ? 'checked="checked"' : '' }} disabled>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>                                         
 
                                         <td style="width:85px;">
                                             <button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button>
@@ -446,19 +454,42 @@
 
     // Add new row to the table
 
-    $("#adddis").click(function () {
+        $("#adddis").click(function () {
         var tr = '<tr>' +
-            '<td><select class="selectpicker form-control" id="requesttype" data-live-search="true" name="quotationDis[0][request_type]" data-size="10" title="{{trans('forms.select')}}" required><option value="Dry">Dry</option><option value="Reefer">Reefer</option><option value="Special Equipment">Special Equipment</option></select></td>' +
-            '<td id="equpmints"><select class="selectpicker form-control equipment-type" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" required>@foreach ($equipment_types as $item)<option value="{{$item->id}}" {{$item->id == old('equipment_type_id') ? 'selected':''}}>{{$item->name}}</option>@endforeach </select></td>' +
+            '<td><select class="selectpicker form-control" id="requesttype" data-live-search="true" name="quotationDis[' + exportCount + '][request_type]" data-size="10" title="{{trans('forms.select')}}" required><option value="Dry">Dry</option><option value="Reefer">Reefer</option><option value="Special Equipment">Special Equipment</option></select></td>' +
+            '<td id="equpmints"><select class="selectpicker form-control equipment-type" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" required disabled>@foreach ($equipment_types as $item)<option value="{{$item->id}}" {{$item->id == old('equipment_type_id') ? 'selected':''}}>{{$item->name}}</option>@endforeach </select></td>' +
             '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][currency]" data-size="10" title="{{trans('forms.select')}}">@foreach ($currency as $item)<option value="{{$item->name}}" {{ (old('currency') == $item->id || $item->id == 1) ? 'selected' : '' }}>{{$item->name}}</option>@endforeach</select></td>' +
             '<td><input type="text" name="quotationDis[' + exportCount + '][ofr]" class="form-control" autocomplete="off" placeholder="OFR" required></td>' +
             '<td><input type="text" name="quotationDis[' + exportCount + '][free_time]" class="form-control" autocomplete="off" placeholder="Free Time" required></td>' +
             '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][thc_payment]" data-size="10" title="{{trans('forms.select')}}" required><option value="pod">POD</option><option value="pol">POL</option></select></td>' +
-            '<td><input type="checkbox" name="quotationDis[' + exportCount + '][soc]" value="1" autocomplete="off"></td>' +
-            '<td><input type="checkbox" name="quotationDis[' + exportCount + '][imo]" value="1" autocomplete="off"></td>' +
-            '<td><input type="checkbox" name="quotationDis[' + exportCount + '][oog]" value="1" autocomplete="off"></td>' +
-            '<td><input type="checkbox" name="quotationDis[' + exportCount + '][rf]" value="1" autocomplete="off"></td>' +
-            '<td><input type="checkbox" name="quotationDis[' + exportCount + '][nor]" value="1" autocomplete="off"></td>' +
+            '<td>' +
+            '<div class="checkbox-group d-flex flex-row">' +
+            '<div style="display: inline-block; width: 50%;" class="mr-3">' +
+            '<div style="margin-bottom: 5px;">' +
+            '<label style="margin-right: 10px; width: 25px; display: inline-block;">SOC</label>' +
+            '<input type="checkbox" value="1" name="quotationDis[' + exportCount + '][soc]" disabled>' +
+            '</div>' +
+            '<div style="margin-bottom: 5px;">' +
+            '<label style="margin-right: 10px; width: 25px; display: inline-block;">IMO</label>' +
+            '<input type="checkbox" value="1" name="quotationDis[' + exportCount + '][imo]" disabled>' +
+            '</div>' +
+            '<div>' +
+            '<label style="margin-right: 10px; width: 25px; display: inline-block;">OOG</label>' +
+            '<input type="checkbox" value="1" name="quotationDis[' + exportCount + '][oog]" disabled>' +
+            '</div>' +
+            '</div>' +
+            '<div style="display: inline-block; width: 50%;">' +
+            '<div style="margin-bottom: 5px;">' +
+            '<label style="margin-right: 10px; width: 25px; display: inline-block;">RF</label>' +
+            '<input type="checkbox" value="1" name="quotationDis[' + exportCount + '][rf]" disabled>' +
+            '</div>' +
+            '<div>' +
+            '<label style="margin-right: 10px; width: 25px; display: inline-block;">NOR</label>' +
+            '<input type="checkbox" value="1" name="quotationDis[' + exportCount + '][nor]" disabled>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</td>' +
             '<td style="width:85px;"><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>' +
             '</tr>';
         $('#ofr tbody').append(tr);
@@ -466,6 +497,7 @@
         exportCount++;
         updateEquipmentOptions();
     });
+
 
     // Delegate the remove button event to a static parent element
     $(document).on('click', '.remove', function () {
@@ -508,6 +540,9 @@
         const row = $(this).closest('tr');
         let selectedRequestType = $(this).val();
 
+        // Enable the equipment type select
+        row.find('select[name^="quotationDis"][name$="[equipment_type_id]"]').prop('disabled', false);
+        row.find('input[type="checkbox"]').prop('disabled', false);
         fetchAndPopulateEquipmentOptions(selectedRequestType, row);
 
         handleCheckboxDisabling(row, selectedRequestType);
@@ -590,6 +625,17 @@
     updateEquipmentOptions();
 });
 
+</script>
+
+<script>
+    $('#createForm').submit(function() {
+        $('select').removeAttr('disabled');
+    });
+</script>
+<script>
+    $('#createForm').submit(function() {
+        $('input').removeAttr('disabled');
+    });
 </script>
 @endpush
 
