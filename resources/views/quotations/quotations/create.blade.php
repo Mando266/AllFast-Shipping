@@ -257,11 +257,12 @@
                                     <th>OFR</th>
                                     <th>Free Time</th>
                                     <th>THC Term</th>
-                                    <th>SOC</th>
+                                    {{-- <th>SOC</th>
                                     <th>IMO</th>
                                     <th>OOG</th>
                                     <th>RF</th>
-                                    <th>NOR</th>
+                                    <th>NOR</th> --}}
+                                    <th>Special Equipment</th>
                                     <th>
                                         <a id="adddis"> Add <i class="fas fa-plus"></i></a>
                                     </th>
@@ -304,19 +305,32 @@
                                         </select>
                                     </td>  
                                     <td>
-                                        <input type="checkbox"  value="1" name="quotationDis[0][soc]"> 
-                                    </td>
-                                    <td>
-                                        <input type="checkbox"  value="1" name="quotationDis[0][imo]"> 
-                                    </td>
-                                    <td>
-                                        <input type="checkbox"  value="1" name="quotationDis[0][oog]"> 
-                                    </td>
-                                    <td>
-                                        <input type="checkbox"  value="1" name="quotationDis[0][rf]"> 
-                                    </td>
-                                    <td>
-                                        <input type="checkbox"  value="1" name="quotationDis[0][nor]"> 
+                                        <div class="checkbox-group d-flex flex-row">
+                                            <div style="display: inline-block; width: 50%;" class="mr-3">
+                                                <div style="margin-bottom: 5px;">
+                                                    <label style="margin-right: 10px; width: 25px; display: inline-block;">SOC</label>
+                                                    <input type="checkbox"  value="1" name="quotationDis[0][soc]"> 
+                                                </div>
+                                                <div style="margin-bottom: 5px;">
+                                                    <label style="margin-right: 10px; width: 25px; display: inline-block;">IMO</label>
+                                                    <input type="checkbox" value="1" name="quotationDis[0][imo]">
+                                                </div>
+                                                <div>
+                                                    <label style="margin-right: 10px; width: 25px; display: inline-block;">OOG</label>
+                                                    <input type="checkbox" value="1" name="quotationDis[0][oog]">
+                                                </div>
+                                            </div>
+                                            <div style="display: inline-block; width: 50%;">
+                                                <div style="margin-bottom: 5px;">
+                                                    <label style="margin-right: 10px; width: 25px; display: inline-block;">RF</label>
+                                                    <input type="checkbox" value="1" name="quotationDis[0][rf]">
+                                                </div>
+                                                <div>
+                                                    <label style="margin-right: 10px; width: 25px; display: inline-block;">NOR</label>
+                                                    <input type="checkbox" value="1" name="quotationDis[0][nor]">
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td></td>
                                 </tr>
@@ -448,11 +462,34 @@
                 '<td><input type="text" name="quotationDis[' + exportCount + '][ofr]" class="form-control" autocomplete="off" placeholder="OFR" required></td>' +
                 '<td><input type="text" name="quotationDis[' + exportCount + '][free_time]" class="form-control" autocomplete="off" placeholder="Free Time" required></td>' +
                 '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][thc_payment]" data-size="10" title="{{trans('forms.select')}}" required><option value="pod">POD</option><option value="pol">POL</option></select></td>' +
-                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][soc]" value="1" autocomplete="off"></td>' +
-                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][imo]" value="1" autocomplete="off"></td>' +
-                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][oog]" value="1" autocomplete="off"></td>' +
-                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][rf]" value="1" autocomplete="off"></td>' +
-                '<td><input type="checkbox" name="quotationDis[' + exportCount + '][nor]" value="1" autocomplete="off"></td>' +
+                '<td>' +
+                '<div class="checkbox-group d-flex flex-row">' +
+                '<div style="display: inline-block; width: 50%;" class="mr-3">' +
+                '<div style="margin-bottom: 5px;">' +
+                '<label style="margin-right: 10px; display: inline-block;">SOC</label>' +
+                '<input type="checkbox" value="1" name="quotationDis[' + exportCount + '][soc]">' +
+                '</div>' +
+                '<div style="margin-bottom: 5px;">' +
+                '<label style="margin-right: 10px; display: inline-block;">IMO</label>' +
+                '<input type="checkbox" value="1" name="quotationDis[' + exportCount + '][imo]">' +
+                '</div>' +
+                '<div>' +
+                '<label style="margin-right: 10px; display: inline-block;">OOG</label>' +
+                '<input type="checkbox" value="1" name="quotationDis[' + exportCount + '][oog]">' +
+                '</div>' +
+                '</div>' +
+                '<div style="display: inline-block; width: 50%;">' +
+                '<div style="margin-bottom: 5px;">' +
+                '<label style="margin-right: 10px; width: 25px; display: inline-block;">RF</label>' +
+                '<input type="checkbox" value="1" name="quotationDis[' + exportCount + '][rf]">' +
+                '</div>' +
+                '<div>' +
+                '<label style="margin-right: 10px; width: 25px; display: inline-block;">NOR</label>' +
+                '<input type="checkbox" value="1" name="quotationDis[' + exportCount + '][nor]">' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</td>' +
                 '<td style="width:85px;"><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>' +
                 '</tr>';
             $('#ofr tbody').append(tr);
