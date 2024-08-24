@@ -333,50 +333,19 @@ class InvoiceController extends Controller
         if ($request->has('bldraft_id')) {
             $blId = $request->input('bldraft_id');
             $bldraft = BlDraft::where('id', $blId)->with('blDetails')->first();
-            $qtys = $bldraft->booking->bookingContainerDetails->count();
-            $bookingContainerDetails = optional(optional(optional($bldraft)->booking)->bookingContainerDetails);
-            $containerTypesCount = $bookingContainerDetails ? $bookingContainerDetails->groupBy('containerType.name')->map->count() : collect();
-            $quotationDescs = optional(optional(optional($bldraft)->booking)->quotation->quotationDesc);
-            $ofrs = $quotationDescs ? $quotationDescs->pluck('ofr')->unique() : collect();
-            $groupedOfrs = $quotationDescs ? $quotationDescs->groupBy(function ($desc) {
-                return optional($desc->equipmentsType)->name;
-            }) : collect();
-            $output = '';
+            $totalqty = $bldraft->booking->bookingContainerDetails->count();
 
-            if ($ofrs->count() > 1) {
-                foreach ($containerTypesCount as $containerTypeName => $qty) {
-                    $output =  $qty;
-                    $numericQty = floatval($qty); // Convert qty to numeric
-                    foreach ($groupedOfrs as $equipmentsType => $descs) {
-                        foreach ($descs as $desc) {
-                            $numericOfr = floatval($desc->ofr); // Convert ofr to numeric
-                            $output = $numericQty * $numericOfr;
-                        }
-                    }
-                }
-            }else{
-                $totalQty = optional(optional($bldraft)->booking)->bookingContainerDetails->sum('qty');
-                $ofrs = optional(optional($bldraft)->booking)->quotation->quotationDesc->first();
-                $output =  $totalQty  *  $ofrs->ofr ;
-            }
-            
         } elseif ($request->has('booking_ref')) {
             $blId = $request->input('booking_ref');
             $bldraft = Booking::where('id', $blId)->with('bookingContainerDetails')->first();
-            $qty = $bldraft->bookingContainerDetails->count();
-            $quotationDesc = optional($bldraft->quotation)->quotationDesc ?? collect();
-            if (!$quotationDesc->isEmpty()) {
-                $ofrs = $quotationDesc->pluck('ofr')->all();
-            } else {
-                $ofrs = [];
-            }
+            $totalqty = $bldraft->bookingContainerDetails->count();
         }
 
         $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $cartData = json_decode(request('cart_data_for_invoice'));
         return view('invoice.invoice.create_debit',[
             'cartData' => $cartData ?? null,
-            'qtys'=>$qtys,
+            'totalqty'=>$totalqty,
             'ofrs'=>$ofrs,
             'bldraft'=>$bldraft,
             'voyages'=>$voyages,

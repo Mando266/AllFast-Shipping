@@ -112,7 +112,7 @@
                             </div>
                             <div class="form-group col-md-4">
                                 <label>QTY</label>
-                                <input type="text" class="form-control" placeholder="Qty" name="qty" autocomplete="off" value="{{$qtys}}" style="background-color:#fff" disabled>
+                                <input type="text" class="form-control" placeholder="Qty" name="qty" autocomplete="off" value="{{$totalqty}}" style="background-color:#fff" disabled>
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="Date">Date</label>
