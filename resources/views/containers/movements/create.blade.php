@@ -22,7 +22,7 @@
                             <div class="form-group col-md-4">
                                 <label for="booking_noInput">Booking No</label>
                                 <select class="selectpicker form-control" id="booking_noInput" data-live-search="true" name="booking_no" data-size="10" title="{{trans('forms.select')}}">
-                                    <option value="">Select</option>
+                                      
                                     @foreach ($bookings as $item)
                                         @if(isset($movement))
                                             <option value="{{$item->id}}" {{$item->id == old('booking_no') || $item->id == $movement->booking_no ? 'selected':''}}>{{$item->ref_no}}</option>

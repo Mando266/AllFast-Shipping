@@ -44,7 +44,7 @@ class CompanyDataController extends Controller
 
     public function portsCountry($id)
     {
-        $ports = Ports::where('country_id', $id)->select('name', 'id')->get();
+        $ports = Ports::where('country_id', $id)->where('port_type_id','1')->select('name', 'id')->get();
 
         return Response::json([
             'ports' => $ports,

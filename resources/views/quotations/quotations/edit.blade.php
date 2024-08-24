@@ -18,14 +18,14 @@
                             @csrf
                             @method('put')
                             <div class="form-row">
-                                <div class="form-group col-md-3">
+                                <!-- <div class="form-group col-md-3">
                                     <label>Ref No<span class="text-warning"> * </span></label>
                                     <input type="text" class="form-control" id="ref_no" name="ref_no" placeholder="Ref No" value="{{old('ref_no',$quotation->ref_no)}}" autocomplete="off" required>
                                     @error('ref_no')
                                     <div style="color: red;">{{$message}}</div>
                                     @enderror
-                                </div>
-                                <div class="form-group col-md-3">
+                                </div> -->
+                                <div class="form-group col-md-4">
                                     <label for="quotation_type">Quotation Type <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" data-live-search="true" name="quotation_type" title="{{trans('forms.select')}}">
                                         <option value="full" {{$quotation->quotation_type == "full" ? 'selected':''}}>Full</option>
@@ -35,21 +35,20 @@
                                     <div style="color:red;">{{$message}}</div>
                                     @enderror
                                 </div>
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-4">
                                     <label for="validity_from">Validity From <span class="text-warning"> * </span></label>
                                     <input type="date" class="form-control" id="validity_from" name="validity_from" value="{{old('validity_from', $quotation->validity_from)}}" autocomplete="off" required>
                                     @error('validity_from')
                                     <div style="color:red;">{{$message}}</div>
                                     @enderror
                                 </div>
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-4">
                                     <label for="validity_to">Validity To <span class="text-warning"> * </span></label>
                                     <input type="date" class="form-control" id="validity_to" name="validity_to" value="{{old('validity_to', $quotation->validity_to)}}" autocomplete="off" required>
                                     @error('validity_to')
                                     <div style="color:red;">{{$message}}</div>
                                     @enderror
                                 </div>
-                                <input type="hidden" name="transportation_mode" value="vessel">
                             </div>
 
                             <div class="form-row">
@@ -67,8 +66,7 @@
                                 <div class="form-group col-md-3">
                                     <label for="discharge_agent_id">Export Agent <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="agentDis" data-live-search="true" name="discharge_agent_id" data-size="10" required>
-                                        <option value="">Select...</option>
-                                        @foreach ($agents as $item)
+                                                                                 @foreach ($agents as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('discharge_agent_id', $quotation->discharge_agent_id) ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -90,8 +88,7 @@
                                 <div class="form-group col-md-3">
                                     <label for="agent_id">Import Agent </label>
                                     <select class="selectpicker form-control" id="agentload" data-live-search="true" name="agent_id" data-size="10">
-                                        <option value="">Select...</option>
-                                        @foreach ($agents as $item)
+                                                                                 @foreach ($agents as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('agent_id', $quotation->agent_id) ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -137,8 +134,8 @@
                             </div>
 
                             <div class="form-row">
-                                <div class="form-group col-md-4">
-                                    <label for="customer_id">Shipper Name <span class="text-warning"> * </span></label>
+                                <div class="form-group col-md-6">
+                                    <label for="customer_id">Agreement Party <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="customer_id" data-live-search="true" name="customer_id" data-size="10" title="{{trans('forms.select')}}" required>
                                         @foreach ($customers as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('customer_id', $quotation->customer_id) ? 'selected':''}}>{{$item->name}}</option>
@@ -148,25 +145,14 @@
                                     <div style="color:red;">{{$message}}</div>
                                     @enderror
                                 </div>
-                                <div class="form-group col-md-4">
-                                    <label for="ffw_id">Forwarder Name</label>
+                                <div class="form-group col-md-6">
+                                    <label for="ffw_id">Forwarder</label>
                                     <select class="selectpicker form-control" id="ffw_id" data-live-search="true" name="ffw_id" data-size="10" title="{{trans('forms.select')}}">
                                         @foreach ($ffw as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('ffw_id', $quotation->ffw_id) ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
                                     @error('ffw_id')
-                                    <div style="color:red;">{{$message}}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="customer_consignee_id">Consignee Name</label>
-                                    <select class="selectpicker form-control" id="customer_consignee_id" data-live-search="true" name="customer_consignee_id" data-size="10" title="{{trans('forms.select')}}">
-                                        @foreach ($consignee as $item)
-                                            <option value="{{$item->id}}" {{$item->id == old('customer_consignee_id', $quotation->customer_consignee_id) ? 'selected':''}}>{{$item->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('customer_consignee_id')
                                     <div style="color:red;">{{$message}}</div>
                                     @enderror
                                 </div>
@@ -280,6 +266,14 @@
 
                             <div class="form-row" id="elseWhereSelect" style="display: none;">
                                 <div class="form-group col-md-3">
+                                    <label>Triff kind<span class="text-warning"> * </span></label>
+                                    <select class="selectpicker form-control" id="triff_kind" data-live-search="true" name="tariff_type" data-size="10" title="{{trans('forms.select')}}" autofocus>
+                                        @foreach ($triffs as $item)
+                                            <option value="{{$item->name}}" {{$item->name == old('tariff_type',$quotation->tariff_type) ? 'selected':''}}>{{$item->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3">
                                     <label for="payment_location">Payment Location</label>
                                     <select class="selectpicker form-control" id="payment_location" data-live-search="true" name="payment_location" data-size="10" title="{{trans('forms.select')}}">
                                         @foreach ($paymentLocation as $item)
@@ -291,7 +285,6 @@
                                     @enderror
                                 </div>
                             </div>
-
                             <table id="ofr" class="table table-bordered">
                                 <thead>
                                 <tr>

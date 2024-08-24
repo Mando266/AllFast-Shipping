@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Response;
 class AgentCountry extends Controller
 {
     //
-    public function getAgentCountry($id)
+    public function getAgentCountry($company_id,$id)
     {
-        $agents = Agents::where('country_id',$id)->where('is_active',1)->select('name','id')->get();
+        $agents = Agents::where('company_id',$company_id)->where('country_id',$id)->where('is_active',1)->select('name','id')->get();
         
         return Response::json([
             'agents' => $agents

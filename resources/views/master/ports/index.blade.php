@@ -47,10 +47,7 @@
                                         <th>Name</th>
                                         <th>Code</th>
                                         <th>Pickup / Return Location</th>
-                                        <th>via port</th>
                                         <th>Country</th>
-                                        <th>Terminal</th>
-                                        <!-- <th>Agent</th> -->
                                         <th>Port Type</th>
 
                                         <th class='text-center' style='width:100px;'></th>
@@ -63,10 +60,7 @@
                                             <td>{{$item->name}}</td>
                                             <td>{{$item->code}}</td>
                                             <td>{{$item->pick_up_location}}</td>
-                                            <td>{{$item->via_port}}</td>
                                             <td>{{optional($item->country)->name}}</td>
-                                            <td>{{optional($item->Terminal)->name}}</td>
-                                            <!-- <td>{{optional($item->Agent)->name}}</td> -->
                                             <td>{{{optional($item->PortTypes)->name}}}</td>
 
                                             <td class="text-center">

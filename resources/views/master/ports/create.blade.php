@@ -22,7 +22,7 @@
                             <p class="alert {{ Session::get('alert-class', 'alert-danger') }}">{{ session('alert') }}</p>
                             @endif
                         <div class="form-row">
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label for="nameInput">Name <span class="text-warning"> * </span></label>
                             <input type="text" class="form-control" id="nameInput" name="name" value="{{old('name')}}"
                                  placeholder="Name" autocomplete="off" autofocus required>
@@ -32,7 +32,7 @@
                                 </div>
                                 @enderror
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label for="codeInput">Code <span class="text-warning"> * </span></label>
                                 <input type="text" class="form-control" id="codeInput" name="code" value="{{old('code')}}"
                                     placeholder="Code" autocomplete="off" required>
@@ -42,7 +42,7 @@
                                 </div>
                                 @enderror
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label for="countryInput">{{trans('company.country')}} <span class="text-warning"> * </span></label>
                                 <select class="selectpicker form-control" id="countryInput" data-live-search="true" name="country_id" data-size="10"
                                  title="{{trans('forms.select')}}" required>
@@ -56,20 +56,7 @@
                                 </div>
                                 @enderror
                             </div>
-                        </div>
-  
-                    <div class="form-row">
-                        <div class="form-group col-md-4">
-                                <label for="via_portInput">Via Port</label>
-                                <input type="text" class="form-control" id="via_portInput" name="via_port" value="{{old('via_port')}}"
-                                    placeholder="Via Port" autocomplete="off">
-                                @error('via_port')
-                                <div style="color: red;">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                        <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label for="countryInput">Port Type <span class="text-warning"> * </span></label>
                                 <select class="selectpicker form-control" id="countryInput" data-live-search="true" name="port_type_id" data-size="10"
                                  title="{{trans('forms.select')}}" required>
@@ -83,22 +70,7 @@
                                 </div>
                                 @enderror
                             </div>
-                            <div class="form-group col-md-4">
-                                <label for="terminalInput">Terminal</label>
-                                <select class="selectpicker form-control" id="terminalInput" data-live-search="true" name="terminal_id" data-size="10"
-                                    title="{{trans('forms.select')}}">
-                                    @foreach ($terminals as $item)
-                                        <option value="{{$item->id}}" {{$item->id == old('terminal_id') ? 'selected':''}}>{{$item->name}}</option>
-                                    @endforeach
-                                </select>
-                                @error('terminal_id')
-                                <div style="color: red;">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                        </div>
                     </div>
-
                     <div class="form-row">
                         <div class="form-group col-md-4">
                             <label for="pick_up_locationInput">Pickup / Return Location</label>

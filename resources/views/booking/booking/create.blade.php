@@ -111,8 +111,7 @@
                                 <label for="ffw_id">Forwarder Name</label>
                                 <select class="selectpicker form-control" id="ffw_id" data-live-search="true" name="ffw_id" data-size="10"
                                  title="{{trans('forms.select')}}">
-                                 <option value="">Select....</option>
-                                    @foreach ($ffw as $item)
+                                       @foreach ($ffw as $item)
                                         @if($quotation->customer_id != null)
                                             @if(in_array(6, optional($quotation->customer)->CustomerRoles->pluck('role_id')->toarray()))
                                             <option value="{{$item->id}}" {{$item->id == old('ffw_id',$quotation->customer_id) ? 'selected':'disabled'}}>{{$item->name}} @foreach($item->CustomerRoles as $itemRole) - {{optional($itemRole->role)->name}}@endforeach</option>
@@ -134,7 +133,6 @@
                                 <label for="customer_id">Shipper Name</label>
                                 <select class="selectpicker form-control" id="customer_id" data-live-search="true" name="customer_id" data-size="10"
                                  title="{{trans('forms.select')}}">
-                                 <option value="">Select....</option>
                                     @foreach ($customers as $item)
                                         @if($quotation->customer_id != null)
                                             @if(in_array(1, optional($quotation->customer)->CustomerRoles->pluck('role_id')->toarray()))
@@ -279,8 +277,7 @@
                                 <div class="form-group col-md-4">
                                     <label for="Transhipment">Transhipment Port</label>
                                     <select class="selectpicker form-control" id="transhipment_port" data-live-search="true" name="transhipment_port" data-size="10" title="{{trans('forms.select')}}">
-                                        <option value="">Select...</option>
-                                        @foreach ($ports as $item)
+                                                                                 @foreach ($ports as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('transhipment_port') ? 'selected' : ''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -291,8 +288,7 @@
                                 <div class="form-group col-md-4">
                                     <label for="terminal_id">Discharge Terminal <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="terminal" data-live-search="true" name="terminal_id" data-size="10" title="{{trans('forms.select')}}" required>
-                                        <option value="">Select..</option>
-                                        @foreach ($terminals as $item)
+                                                  @foreach ($terminals as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('terminal_id') ? 'selected' : ''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -303,8 +299,7 @@
                                 <div class="form-group col-md-4">
                                     <label for="voyage_id">Vessel / Voyage <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="voyage_id" data-live-search="true" name="voyage_id" data-size="10" title="{{trans('forms.select')}}" required>
-                                        <option value="">Select..</option>
-                                        @foreach ($voyages as $item)
+                                                  @foreach ($voyages as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('voyage_id') ? 'selected' : ''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
                                         @endforeach
                                     </select>
@@ -346,7 +341,7 @@
                             </div>
                         </div>
                         <div class="form-row">
-                            @if($isDraft)
+                            @if(!$isDraft)
                                 <div class="form-group col-md-3">
                                     <label for="status">Bl Payment<span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" data-live-search="true" name="payment_kind" title="{{trans('forms.select')}}" required>
@@ -354,14 +349,8 @@
                                         <option value="Collect">Collect</option>
                                     </select>
                                 </div>
-                                <div class="form-group col-md-3">
-                                    <label>Import Free Time <span class="text-warning"> * </span></label>
-                                    <input type="text" class="form-control" id="free_time" name="free_time" value="{{old('free_time')}}"
-                                        placeholder="Import Free Time" autocomplete="off">
-                                </div>
                                 @else
                                 <input type="hidden" name="payment_kind" class="form-control" autocomplete="off" value="{{optional($quotation)->payment_kind}}">
-                                <input type="hidden" name="free_time" class="form-control" autocomplete="off" value="{{optional($quotation)->import_detention}}">
                             @endif
                             <div class="form-group col-md-3">
                                 <label for="tariff_service">Tariff Service</label>

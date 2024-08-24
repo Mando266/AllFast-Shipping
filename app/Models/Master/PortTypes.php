@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class PortTypes extends Model implements PermissionSeederContract
 {
-    protected $table = 'port_tyep';
+    protected $table = 'port_types';
     protected $guarded = [];
 
     use PermissionSeederTrait;

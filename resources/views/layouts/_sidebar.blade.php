@@ -360,7 +360,12 @@
                         <ul class="collapse submenu list-unstyled" id="component8" data-parent="#accordionExample">
                                 @permission('Quotation-List')
                                 <li>
-                                    <a href="{{route('quotations.index')}}">Quotations Gates</a>
+                                    <a href="{{route('quotation.import')}}">Import Quotations</a>
+                                </li>
+                                @endpermission
+                                @permission('Quotation-List')
+                                <li>
+                                    <a href="{{route('quotations.index')}}">Export Quotations</a>
                                 </li>
                                 @endpermission
                         </ul>

@@ -36,8 +36,7 @@
                                     <label for="port">Port <span class="text-warning"> *</span></label>
                                     <select class="form-control" id="port" data-live-search="true" name="port_id" data-size="10"
                                             title="{{trans('forms.select')}}" required>
-                                            <option value="">Select...</option>
-                                            @foreach ($ports as $item)
+                                                                                         @foreach ($ports as $item)
                                                 <option value="{{$item->id}}" {{$item->id == old('port_id',$localporttriff->port_id) ? 'selected':''}}>{{$item->name}}</option>
                                             @endforeach
                                     </select>
@@ -51,8 +50,7 @@
                                     <label for="containersTypesInput">Trminal <span class="text-warning"> *</span></label>
                                     <select class="form-control" id="terminal" data-live-search="true" name="terminal_id" data-size="10"
                                     title="{{trans('forms.select')}}" required>
-                                    <option value="">Select...</option>
-                                        @foreach ($terminals as $item)
+                                                                             @foreach ($terminals as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('terminal_id',$localporttriff->terminal_id) ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>

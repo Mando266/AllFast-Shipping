@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Master\PortTypes;
 use Illuminate\Support\Facades\Auth;
 
-class PortTyepsController extends Controller
+class PortTypesController extends Controller
 {
     public function index()
     {

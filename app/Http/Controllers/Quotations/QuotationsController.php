@@ -14,6 +14,7 @@ use App\Models\Master\Ports;
 use App\Models\Quotations\Quotation;
 use App\Models\Quotations\QuotationDes;
 use App\Models\Quotations\QuotationLoad;
+use App\Models\Containers\Triff;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -23,42 +24,75 @@ class QuotationsController extends Controller
     public function index()
     {
         $this->authorize(__FUNCTION__, Quotation::class);
-
-        $quotations = Quotation::filter(new QuotationIndexFilter(request()))->where('company_id', Auth::user()->company_id)->with('quotationDesc')->orderBy('id', 'desc')->paginate(30);
+    
+        return view('quotations.quotations.index', $this->getQuotationsData('Export'));
+    }
+    
+    public function import()
+    {
+    
+        return view('quotations.quotations.import', $this->getQuotationsData('Import'));
+    }
+    
+    private function getQuotationsData($shipmentType)
+    {
+        $quotations = Quotation::filter(new QuotationIndexFilter(request()))
+            ->where('company_id', Auth::user()->company_id)
+            ->where('shipment_type', $shipmentType)
+            ->with('quotationDesc')
+            ->orderBy('id', 'desc')
+            ->paginate(30);
+    
         $exportQuotations = request();
-        $quotation = Quotation::where('company_id', Auth::user()->company_id)->get();
+        $quotation = Quotation::where('company_id', Auth::user()->company_id)
+        ->where('shipment_type', $shipmentType)->get();
         $customers = Customers::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
-        $ports = Ports::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
-
-        return view('quotations.quotations.index', [
+        $ports = Ports::orderBy('id')->get();
+    
+        return [
             'items' => $quotations,
             'exportQuotations' => $exportQuotations,
             'quotation' => $quotation,
             'ports' => $ports,
             'customers' => $customers,
-        ]);
+        ];
     }
-
+    
     public function create()
     {
         $this->authorize(__FUNCTION__, Quotation::class);
-
+    
+        return view('quotations.quotations.create', $this->getQuotationCreateData());
+    }
+    
+    public function importcreate()
+    {
+    
+        return view('quotations.quotations.importcreate', $this->getQuotationCreateData());
+    }
+    
+    private function getQuotationCreateData()
+    {
         $user = Auth::user();
         $company_id = $user->company_id;
-        $agent_id = $user->agent_id;
+        
         $paymentLocation = Ports::orderBy('id')->get();
         $equipment_types = ContainersTypes::orderBy('id')->get();
-        $currency = Currency::where('name','!=','EGP')->orderBy('id')->get();
+        $currency = Currency::where('name', '!=', 'EGP')->orderBy('id')->get();
+        $triffs = Triff::get();
+    
         $customers = Customers::where('company_id', $company_id)
             ->orderBy('id')
             ->with('CustomerRoles.role')
             ->get();    
+            
         $ffw = Customers::where('company_id', $company_id)
             ->whereHas('CustomerRoles', function ($query) {
                 $query->where('role_id', 6);
             })
             ->with('CustomerRoles.role')
             ->get();
+            
         $consignee = Customers::where('company_id', $company_id)
             ->whereHas('CustomerRoles', function ($query) {
                 $query->where('role_id', 2);
@@ -67,37 +101,38 @@ class QuotationsController extends Controller
             ->get();
     
         $country = Country::orderBy('name')->get();
+        
         $principals = Lines::where('company_id', $company_id)
             ->whereHas('types', function ($query) {
                 $query->whereIn('type_id', [5, 7, 9]);
             })
             ->get();
+            
         $operators = Lines::where('company_id', $company_id)
             ->whereHas('types', function ($query) {
                 $query->whereIn('type_id', [4, 2, 8]);
             })
             ->get();
-        $agents = Agents::where('company_id', $company_id)
-            ->where('is_active', 1)
-            ->get();
-
-        return view('quotations.quotations.create', [
+            
+        $agents = [];
+    
+        return [
             'user' => $user,
             'paymentLocation' => $paymentLocation,
             'ports' => [],
             'agents' => $agents,
             'equipment_types' => $equipment_types,
             'currency' => $currency,
+            'triffs' => $triffs,
             'customers' => $customers,
             'ffw' => $ffw,
             'country' => $country,
             'principals' => $principals,
             'operators' => $operators,
             'consignee' => $consignee,
-        ]);
+        ];
     }
     
-
     public function store(Request $request)
     {
         // Validate the request
@@ -125,30 +160,17 @@ class QuotationsController extends Controller
         // Generate reference number
         $refNo = $placeOfAcceptance . $placeOfDelivery . '-' . $customerName . '-' . $validityFrom . '/';
     
-        // Determine ports and shipment type
-        $portOfLoad = Ports::find($request->input('load_port_id'));
-        $portOfDischarge = Ports::find($request->input('discharge_port_id'));
-        $shipment_type = '';
-    
-        if ($portOfLoad->country_id == 61) {
+        $shipment_type = '';    
+        if ($request->input('shipment_type') == 'Export') {
             $shipment_type = 'Export';
         }
-        if ($portOfDischarge->country_id == 61) {
+        if ($request->input('shipment_type') == 'Import') {
             $shipment_type = 'Import';
-        }
-        if ($request->input('transportation_mode') == 'trucker') {
-            $shipment_type = 'trucking';
-        }
-    
+        }    
+        
         $quotations = Quotation::where("customer_id", $request->input('customer_id'))
-            ->where("place_of_acceptence_id", $request->input('place_of_acceptence_id'))
-            ->where("place_of_delivery_id", $request->input('place_of_delivery_id'))
             ->where("load_port_id", $request->input('load_port_id'))
             ->where("discharge_port_id", $request->input('discharge_port_id'))
-            ->where("place_return_id", $request->input('place_return_id'))
-            ->where("equipment_type_id", $request->input('equipment_type_id'))
-            ->where("export_storage", $request->input('export_storage'))
-            ->where("import_storage", $request->input('import_storage'))
             ->where("oog_dimensions", $request->input('oog_dimensions'))
             ->get();
     
@@ -173,23 +195,22 @@ class QuotationsController extends Controller
             'load_port_id' => $request->input('load_port_id'),
             'discharge_port_id' => $request->input('discharge_port_id'),
             'place_return_id' => $request->input('place_return_id'),
-            'export_storage' => $request->input('export_storage'),
-            'import_storage' => $request->input('import_storage'),
             'oog_dimensions' => $request->input('oog_dimensions'),
             'commodity_code' => $request->input('commodity_code'),
             'commodity_des' => $request->input('commodity_des'),
             'pick_up_location' => $request->input('pick_up_location'),
-            'show_import' => $request->input('show_import'),
             'payment_kind' => $request->input('payment_kind'),
             'quotation_type' => $request->input('quotation_type'),
             'transportation_mode' => $request->input('transportation_mode'),
             'status' => "pending",
             'shipment_type' => $shipment_type,
+            'principal_name' => $request->input('principal_name'),
+            'vessel_name' => $request->input('vessel_name'),
             'booking_agency' => $agent_id,
-            'agency_bookingr_ref' => $request->input('agency_bookingr_ref'),
             'operator_frieght_payment' => $request->input('operator_frieght_payment'),
             'payment_location' => $request->input('payment_location'),
             'customer_consignee_id' => $request->input('customer_consignee_id'),
+            'tariff_type' => $request->input('tariff_type'),
         ]);
     
         // Update reference number with the newly created quotation ID
@@ -211,8 +232,9 @@ class QuotationsController extends Controller
                 'rf' => $quotationDis['rf'] ?? 0,
                 'nor' => $quotationDis['nor'] ?? 0,
             ]);
-        }    
-        return redirect()->route('quotations.index')->with('success', trans('Quotation.created'));
+        }  
+        $route = $quotation->shipment_type == "Export" ? 'quotations.index' : 'quotations.import';
+        return redirect()->route($route)->with('success', trans('Quotation.Created'));        
     }
     
     public function show($id)
@@ -232,6 +254,7 @@ class QuotationsController extends Controller
         $container_types = ContainersTypes::orderBy('id')->get();
         $currency = Currency::where('name','!=','EGP')->orderBy('id')->get();
         $customers = Customers::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
+        $triffs = Triff::get();
         $country = Country::orderBy('name')->get();
         $equipment_types = ContainersTypes::orderBy('id')->get();
         $principals = Lines::where('company_id', Auth::user()->company_id)
@@ -271,6 +294,7 @@ class QuotationsController extends Controller
             'equipment_types' => $equipment_types,
             'country' => $country,
             'consignee' => $consignee,
+            'triffs' => $triffs,
         ]);
     }
 
@@ -307,10 +331,7 @@ class QuotationsController extends Controller
             'place_of_delivery_id' => $request->place_of_delivery_id,
             'load_port_id' => $request->load_port_id,
             'discharge_port_id' => $request->discharge_port_id,
-            'equipment_type_id' => $request->equipment_type_id,
             'place_return_id' => $request->place_return_id,
-            'export_storage' => $request->export_storage,
-            'import_storage' => $request->import_storage,
             'commodity_code' => $request->commodity_code,
             'commodity_des' => $request->commodity_des,
             'pick_up_location' => $request->pick_up_location,
@@ -318,17 +339,16 @@ class QuotationsController extends Controller
             'oog_dimensions' => $request->oog_dimensions,
             'payment_kind' => $request->payment_kind,
             'quotation_type' => $request->quotation_type,
-            //'transportation_mode' => $request->transportation_mode,
+            'transportation_mode' => $request->transportation_mode,
             'booking_agency' => $agent_id,
-            'agency_bookingr_ref' => $request->agency_bookingr_ref,
             'operator_frieght_payment' => $request->operator_frieght_payment,
             'payment_location' => $request->payment_location,
-            'customer_consignee_id'=>$request->input('customer_consignee_id'),
+            'tariff_type' => $request->tariff_type,
+            'customer_consignee_id'=>$request->customer_consignee_id,
         ];
         
         // Update the quotation
         $quotation->update($input);
-
         // Handle Remove
         if ($request->filled('removedDesc')) {
         QuotationDes::destroy(explode(',', $request->removedDesc));

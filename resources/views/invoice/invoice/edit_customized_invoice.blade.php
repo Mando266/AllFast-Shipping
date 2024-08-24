@@ -93,8 +93,7 @@
                                 <label for="Date">Booking Ref</label>
                                 <select class="selectpicker form-control" id="booking_ref" data-live-search="true" name="booking_ref" data-size="10"
                                     title="{{trans('forms.select')}}">
-                                    <option value="">Select...</option>
-                                    @foreach($bookings as $booking)
+                                                                         @foreach($bookings as $booking)
                                         <option value="{{$booking->id}}" {{$booking->id == old('booking_ref',$invoice->booking_ref) ? 'selected':''}}>{{$booking->ref_no}}</option>
                                     @endforeach
                                 </select>
@@ -233,8 +232,7 @@
                                 <div class="form-group col-md-3">
                                     <label for="status">Booking Status<span class="text-warning">  * (Required.)</span></label>
                                     <select class="form-control" data-live-search="true" name="booking_status" title="{{trans('forms.select')}}" required>
-                                        <option value="">Select....</option>
-                                        <option value="1" {{ old('booking_status',$invoice->booking_status) == "1" ? 'selected':'' }}>Import</option>
+                                                  <option value="1" {{ old('booking_status',$invoice->booking_status) == "1" ? 'selected':'' }}>Import</option>
                                         <option value="0" {{ old('booking_status',$invoice->booking_status) == "0" ? 'selected':'' }}>Export</option>
                                     </select>
                                 </div>

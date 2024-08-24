@@ -31,8 +31,7 @@
                                 <label for="customer">Customer</label>
                                 <select class="selectpicker form-control" id="customer" data-live-search="true" name="customer_id" data-size="10"
                                  title="{{trans('forms.select')}}">
-                                 <option value="">Select...</option>
-                                    @foreach ($customers as $item)     
+                                                                      @foreach ($customers as $item)     
                                         <option value="{{$item->id}}" {{$item->id == old('customer_id',request()->input('customer_id')) ? 'selected':''}}>{{$item->name}}</option>
                                     @endforeach
                                 </select>
@@ -43,8 +42,7 @@
                             <label for="invoice">Invoice No</label>
                             <select class="selectpicker form-control" id="invoice" data-live-search="true" name="invoice_id" data-size="10"
                              title="{{trans('forms.select')}}" required>
-                            <option value="">Select...</option>
-                            @foreach ($invoiceRef as $item)     
+                                                         @foreach ($invoiceRef as $item)     
                             <option value="{{$item->id}}" {{$item->id == old('invoice_id',request()->input('invoice_id')) ? 'selected':''}}>
                             InvoiceNo: {{$item->invoice_no}} 
                         </option>
