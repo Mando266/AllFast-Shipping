@@ -44,7 +44,7 @@
                                 <label for="Category"> Category <span class="text-warning"> * </span></label>
                                 <select class="selectpicker form-control" id="Category" data-live-search="true" name="category" data-size="10"
                                  title="{{trans('forms.select')}}" Required>
-                                        <option value="General" {{$container_type->category == old('category') ||  $container_type->category == "General"? 'selected':''}}>General</option>
+                                        <option value="Dry" {{$container_type->category == old('category') ||  $container_type->category == "Dry"? 'selected':''}}>Dry</option>
                                         <option value="Reefer" {{$container_type->category == old('category') ||  $container_type->category == "Reefer"? 'selected':''}}>Reefer</option>
                                         <option value="Special Equipment" {{$container_type->category == old('category') ||  $container_type->category == "Special Equipment"? 'selected':''}}>Special Equipment</option>
                                 </select>

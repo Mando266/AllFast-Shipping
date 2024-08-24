@@ -46,7 +46,6 @@ Route::get('master/ports/{id}', [CompanyDataController::class, 'portsCountry']);
 Route::get('master/customers/{id}', [CompanyDataController::class, 'customer']);
 Route::get('master/terminals/{id}', [CompanyDataController::class, 'terminalsPorts']);
 Route::get('master/requesttype/{name}', [CompanyDataController::class, 'requestType']);
-
 Route::get('agent/loadPrice/{id}/{equipment_id?}/{company_id}', [PriceController::class, 'getLoadAgentPrice']);
 Route::get('agent/dischargePrice/{id}/{equipment_id?}/{company_id}', [PriceController::class, 'getDischargeAgentPrice']);
 Route::get('agent/agentCountry/{company_id}/{id}', [AgentCountry::class, 'getAgentCountry']);
@@ -60,6 +59,5 @@ Route::get('storage/triffs/{service}/{company_id}', [StorageContainersController
 Route::get('/get-ports', [PortController::class, 'getPorts'])->name('api.get-ports');
 Route::get('get_invoice_json/{id}','Invoice\InvoiceController@invoiceJson');
 Route::get('validate/demurrage/{companyId}/{portId}/{from}/{to}/{triffType}', [DemurrageController::class, 'checkTriffOverlap']);
-
 Route::get('/blno', [DententionController::class,'getBlnoToBookingNo'])->name('api.blno');
 Route::get('/bl-containers', [DententionController::class,'getBlContainers'])->name('api.blContainers');

@@ -44,7 +44,7 @@
                                 <label for="Category"> Category <span class="text-warning"> * </span></label>
                                 <select class="selectpicker form-control" id="Category" data-live-search="true" name="category" data-size="10"
                                  title="{{trans('forms.select')}}" required>
-                                        <option value="General">General</option>
+                                        <option value="Dry">Dry</option>
                                         <option value="Reefer">Reefer</option>
                                         <option value="Special Equipment">Special Equipment</option>
                                 </select> 

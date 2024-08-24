@@ -227,7 +227,7 @@
                         <div class="form-row">
                                 <div class="form-group col-md-3">
                                     <label>Triff kind<span class="text-warning"> * </span></label>
-                                    <select class="selectpicker form-control" id="triff_kind" data-live-search="true" name="tariff_type" data-size="10" title="{{trans('forms.select')}}" autofocus>
+                                    <select class="selectpicker form-control" id="triff_kind" data-live-search="true" name="tariff_type" data-size="10" title="{{trans('forms.select')}}" required>
                                         @foreach ($triffs as $item)
                                             <option value="{{$item->name}}" {{$item->name == old('tariff_type') ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
@@ -249,6 +249,7 @@
                         <table id="ofr" class="table table-bordered">
                             <thead>
                                 <tr>
+                                    <th>Request Type</th>
                                     <th>Equipment Type</th>
                                     <th>Currency</th>
                                     <th>OFR</th>
@@ -266,6 +267,13 @@
                             </thead>
                             <tbody>
                                 <tr>
+                                    <td id="request">
+                                        <select class="selectpicker form-control" id="requesttype" data-live-search="true" name="quotationDis[0][request_type]" data-size="10" title="{{trans('forms.select')}}" required>
+                                            <option value="Dry">Dry</option>
+                                            <option value="Reefer">Reefer</option>
+                                            <option value="Special Equipment">Special Equipment</option>
+                                        </select>
+                                    </td>
                                     <td id="equpmints">
                                         <select class="selectpicker form-control equipment-type" id="equpmint" data-live-search="true" name="quotationDis[0][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" required>
                                             @foreach ($equipment_types as $item)
@@ -370,6 +378,7 @@
 
         $("#adddis").click(function () {
             var tr = '<tr>' +
+                '<td id="request"><select class="selectpicker form-control" id="requesttype" data-live-search="true" name="quotationDis[0][request_type]" data-size="10" title="{{trans('forms.select')}}" required><option value="Dry">Dry</option><option value="Reefer">Reefer</option><option value="Special Equipment">Special Equipment</option></select></td>' +
                 '<td id="equpmints"><select class="selectpicker form-control equipment-type" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" required>@foreach ($equipment_types as $item)<option value="{{$item->id}}" {{$item->id == old('equipment_type_id') ? 'selected':''}}>{{$item->name}}</option>@endforeach </select></td>' +
                 '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][currency]" data-size="10" title="{{trans('forms.select')}}">@foreach ($currency as $item)<option value="{{$item->name}}" {{ (old('currency') == $item->id || $item->id == 1) ? 'selected' : '' }}>{{$item->name}}</option>@endforeach</select></td>' +
                 '<td><input type="text" name="quotationDis[' + exportCount + '][ofr]" class="form-control" autocomplete="off" placeholder="OFR" required></td>' +

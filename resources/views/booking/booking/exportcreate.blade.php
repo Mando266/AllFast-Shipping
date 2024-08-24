@@ -235,8 +235,7 @@
                                 <label for="voyage_id">Vessel / Voyage <span class="text-warning"> *</span></label>
                                 <select class="selectpicker form-control" id="voyage_id" data-live-search="true" name="voyage_id" data-size="10"
                                  title="{{trans('forms.select')}}" required>
-                                 <option value="">Select..</option>
-                                    @foreach ($voyages as $item)
+                                       @foreach ($voyages as $item)
                                         <option value="{{$item->id}}" {{$item->id == old('voyage_id') ? 'selected':''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
                                     @endforeach
                                 </select>

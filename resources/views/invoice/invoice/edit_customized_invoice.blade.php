@@ -232,8 +232,7 @@
                                 <div class="form-group col-md-3">
                                     <label for="status">Booking Status<span class="text-warning">  * (Required.)</span></label>
                                     <select class="form-control" data-live-search="true" name="booking_status" title="{{trans('forms.select')}}" required>
-                                        <option value="">Select....</option>
-                                        <option value="1" {{ old('booking_status',$invoice->booking_status) == "1" ? 'selected':'' }}>Import</option>
+                                                  <option value="1" {{ old('booking_status',$invoice->booking_status) == "1" ? 'selected':'' }}>Import</option>
                                         <option value="0" {{ old('booking_status',$invoice->booking_status) == "0" ? 'selected':'' }}>Export</option>
                                     </select>
                                 </div>

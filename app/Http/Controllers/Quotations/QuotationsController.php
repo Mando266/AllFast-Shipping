@@ -44,7 +44,8 @@ class QuotationsController extends Controller
             ->paginate(30);
     
         $exportQuotations = request();
-        $quotation = Quotation::where('company_id', Auth::user()->company_id)->get();
+        $quotation = Quotation::where('company_id', Auth::user()->company_id)
+        ->where('shipment_type', $shipmentType)->get();
         $customers = Customers::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
         $ports = Ports::orderBy('id')->get();
     

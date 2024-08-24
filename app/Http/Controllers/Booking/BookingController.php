@@ -901,11 +901,12 @@ class BookingController extends Controller
 
     public function update(Request $request, Booking $booking)
     {
-        // Validate the incoming request
-        $validated = $request->validate([
+        $request->validate([
             'voyage_id' => ['required'],
             'commodity_description' => ['required'],
-            //'bl_kind' => ['required'],  // Ensure 'bl_kind' exists in the request
+            'containerDetails' => ['required'],
+        ], [
+            'containerDetails.required' => 'Container Details Cannot Be Empty',
         ]);
     
         // Fetch related quotation and ETA date
@@ -998,18 +999,17 @@ class BookingController extends Controller
             ]);
     }
 
-
     public function clone($id)
     {
         // Retrieve the original booking to be cloned
-        $originalBooking = Booking::with('bookingContainerDetails')->findOrFail($id);
-    
+        $originalBooking = Booking::findOrFail($id); // Remove 'with' to exclude details
+        
         // Start a transaction to ensure atomicity
         DB::beginTransaction();
         try {
             // Clone the booking
             $newBooking = $originalBooking->replicate(); 
-    
+        
             // Check the shipment type and set the ref_no accordingly
             if ($originalBooking->shipment_type === 'Import') {
                 $newBooking->ref_no = null;
@@ -1018,17 +1018,10 @@ class BookingController extends Controller
             }
             $newBooking->created_at = now(); 
             $newBooking->save(); 
-    
-            // Clone each container detail and assign it to the new booking
-            foreach ($originalBooking->bookingContainerDetails as $detail) {
-                $newDetail = $detail->replicate();
-                $newDetail->booking_id = $newBooking->id; 
-                $newDetail->save();
-            }
-    
+        
             DB::commit();
-    
-            return redirect()->route('booking.index')->with('success', 'Booking cloned successfully');
+        
+            return redirect()->route('booking.index')->with('success', 'Booking cloned successfully without details');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->route('booking.index')->with('error', 'Failed to clone booking: ' . $e->getMessage());
@@ -1044,5 +1037,6 @@ class BookingController extends Controller
     
         return $prefix . str_pad($newNumber, strlen($number), '0', STR_PAD_LEFT);
     }
+    
 
 }
