@@ -251,6 +251,7 @@
                         <table id="ofr" class="table table-bordered">
                             <thead>
                                 <tr>
+                                    <th>Request Type</th>
                                     <th>Equipment Type</th>
                                     <th>Currency</th>
                                     <th>OFR</th>
