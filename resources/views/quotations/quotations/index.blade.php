@@ -170,13 +170,15 @@
                                         <td class="text-center">
                                             <ul class="table-controls">
                                                 @permission('Quotation-Edit')
-                                                    <li>
+                                                @if($item->status == "pending")
+                                                <li>
                                                         <a href="{{route('quotations.edit',['quotation'=>$item->id])}}"
                                                            data-toggle="tooltip" data-placement="top" title=""
                                                            data-original-title="edit">
                                                             <i class="far fa-edit text-success"></i>
                                                         </a>
                                                     </li>
+                                                @endif
                                                 @endpermission
                                                 @permission('Quotation-Show')
                                                 <li>
