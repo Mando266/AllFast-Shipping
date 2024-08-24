@@ -8,7 +8,7 @@
                         <nav class="breadcrumb-two" aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a a href="javascript:void(0);">Quotations</a></li>
-                                <li class="breadcrumb-item  active"><a href="javascript:void(0);">Quotations Gate</a>
+                                <li class="breadcrumb-item  active"><a href="javascript:void(0);">Import Quotations</a>
                                 </li>
                                 <li class="breadcrumb-item"></li>
                             </ol>
@@ -115,6 +115,7 @@
                                     <th>validity to</th>
                                     <th>Equipment Type</th>
                                     <th>Ofr</th>
+                                    <th>free time</th>
                                     <th>place of delivery</th>
                                     <th>load port</th>
                                     <th>discharge port</th>
@@ -146,6 +147,11 @@
                                         <td>
                                             @foreach($item->quotationDesc as $desc)
                                             {{ optional($desc)->ofr }}@if (!$loop->last)<br>@endif
+                                            @endforeach
+                                        </td>
+                                        <td>
+                                            @foreach($item->quotationDesc as $desc)
+                                            {{ optional($desc)->free_time }}@if (!$loop->last)<br>@endif
                                             @endforeach
                                         </td>
                                         <td>{{optional($item->placeOfDelivery)->code}}</td>
