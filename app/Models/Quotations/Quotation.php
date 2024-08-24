@@ -104,6 +104,7 @@ class Quotation extends Model implements PermissionSeederContract
                 // dd($des,$inputs);
                 $des->update([
                     'quotation_id'=>$input['quotation_id'],
+                    'request_type' => $input['request_type'],
                     'ofr' => $input['ofr'],
                     'currency' => $input['currency'],
                     'equipment_type_id' => $input['equipment_type_id'],
@@ -122,6 +123,7 @@ class Quotation extends Model implements PermissionSeederContract
                     'ofr' => $input['ofr'],
                     'currency' => $input['currency'],
                     'equipment_type_id' => $input['equipment_type_id'],
+                    'request_type' => $input['request_type'],
                     'free_time' => $input['free_time'],
                     'thc_payment' => $input['thc_payment'],
                     'soc' => $input['soc'] ?? 0,

@@ -25,6 +25,7 @@
                                     <div style="color: red;">{{$message}}</div>
                                     @enderror
                                 </div> -->
+                                <input type="hidden" class="form-control" id="ref_no" name="ref_no" placeholder="Ref No" value="{{old('ref_no',$quotation->ref_no)}}" autocomplete="off" >
                                 <div class="form-group col-md-4">
                                     <label for="quotation_type">Quotation Type <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" data-live-search="true" name="quotation_type" title="{{trans('forms.select')}}">
@@ -66,7 +67,7 @@
                                 <div class="form-group col-md-3">
                                     <label for="discharge_agent_id">Export Agent <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="agentDis" data-live-search="true" name="discharge_agent_id" data-size="10" required>
-                                                                                 @foreach ($agents as $item)
+                                        @foreach ($agents as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('discharge_agent_id', $quotation->discharge_agent_id) ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -88,7 +89,7 @@
                                 <div class="form-group col-md-3">
                                     <label for="agent_id">Import Agent </label>
                                     <select class="selectpicker form-control" id="agentload" data-live-search="true" name="agent_id" data-size="10">
-                                                                                 @foreach ($agents as $item)
+                                        @foreach ($agents as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('agent_id', $quotation->agent_id) ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -122,17 +123,35 @@
                                     @enderror
                                 </div>
                             </div>
-
+                            @if($quotation->operator_frieght_payment == null && $quotation->shipment_type == 'Export')
                             <div class="form-row" id="additionalSelect" style="display: none;">
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-6">
                                     <label for="operator_frieght_payment">Vessel Operator Freight Payment <span class="text-warning"> * </span></label>
-                                    <select class="selectpicker form-control" data-live-search="true" name="operator_frieght_payment">
+                                    <select class="selectpicker form-control" data-live-search="true" name="operator_frieght_payment" id="operator_frieght_payment">
                                         <option value="agency" {{$quotation->operator_frieght_payment == "agency" ? 'selected':''}}>Agency (prepaid)</option>
                                         <option value="liner" {{$quotation->operator_frieght_payment == "liner" ? 'selected':''}}>Liner (Collect)</option>
                                     </select>
                                 </div>
+                                <div class="form-group col-md-6">
+                                    <label>Slot Rate</label>
+                                    <input type="text" class="form-control" id="slot_rate" name="slot_rate" value="{{old('slot_rate',$quotation->slot_rate)}}" placeholder="Slot Rate" autocomplete="off">
+                                </div>
                             </div>
-
+                            @elseif($quotation->shipment_type == 'Export')
+                            <div class="form-row" id="additionalSelect">
+                                <div class="form-group col-md-6">
+                                    <label for="operator_frieght_payment">Vessel Operator Freight Payment <span class="text-warning"> * </span></label>
+                                    <select class="selectpicker form-control" data-live-search="true" name="operator_frieght_payment" id="operator_frieght_payment">
+                                        <option value="agency" {{$quotation->operator_frieght_payment == "agency" ? 'selected':''}}>Agency (prepaid)</option>
+                                        <option value="liner" {{$quotation->operator_frieght_payment == "liner" ? 'selected':''}}>Liner (Collect)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Slot Rate</label>
+                                    <input type="text" class="form-control" id="slot_rate" name="slot_rate" value="{{old('slot_rate',$quotation->slot_rate)}}" placeholder="Slot Rate" autocomplete="off">
+                                </div>
+                            </div>
+                            @endif
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="customer_id">Agreement Party <span class="text-warning"> * </span></label>
@@ -159,6 +178,19 @@
                             </div>
 
                             <div class="form-row">
+                            @if($quotation->shipment_type == 'Import')
+                                <div class="form-group col-md-4">
+                                    <label for="place_of_delivery_id">Place Of Delivery</label>
+                                    <select class="selectpicker form-control importPort" id="place_of_delivery_id" data-live-search="true" name="place_of_delivery_id" data-size="10" title="{{trans('forms.select')}}">
+                                        @foreach ($ports as $item)
+                                            <option value="{{$item->id}}" {{$item->id == old('place_of_delivery_id', $quotation->place_of_delivery_id) ? 'selected':''}}>{{$item->name}}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('place_of_delivery_id')
+                                    <div style="color:red;">{{$message}}</div>
+                                    @enderror
+                                </div>
+                            @else
                                 <div class="form-group col-md-4">
                                     <label for="place_of_acceptence_id">Place Of Acceptance</label>
                                     <select class="selectpicker form-control port" id="place_of_acceptence_id" data-live-search="true" name="place_of_acceptence_id" data-size="10" title="{{trans('forms.select')}}">
@@ -170,6 +202,7 @@
                                     <div style="color:red;">{{$message}}</div>
                                     @enderror
                                 </div>
+                            @endif
                                 <div class="form-group col-md-4">
                                     <label for="load_port_id">Load Port <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control port" id="load_port_id" data-live-search="true" name="load_port_id" data-size="10" title="{{trans('forms.select')}}" required>
@@ -178,31 +211,6 @@
                                         @endforeach
                                     </select>
                                     @error('load_port_id')
-                                    <div style="color:red;">{{$message}}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="pick_up_location">Pick Up Location</label>
-                                    <select class="selectpicker form-control port" id="pick_up_location" data-live-search="true" name="pick_up_location" data-size="10" title="{{trans('forms.select')}}">
-                                        @foreach ($ports as $item)
-                                            <option value="{{$item->id}}" {{$item->id == old('pick_up_location', $quotation->pick_up_location) ? 'selected':''}}>{{$item->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('pick_up_location')
-                                    <div style="color:red;">{{$message}}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="form-row">
-                                <div class="form-group col-md-4">
-                                    <label for="place_of_delivery_id">Place Of Delivery</label>
-                                    <select class="selectpicker form-control importPort" id="place_of_delivery_id" data-live-search="true" name="place_of_delivery_id" data-size="10" title="{{trans('forms.select')}}">
-                                        @foreach ($ports as $item)
-                                            <option value="{{$item->id}}" {{$item->id == old('place_of_delivery_id', $quotation->place_of_delivery_id) ? 'selected':''}}>{{$item->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('place_of_delivery_id')
                                     <div style="color:red;">{{$message}}</div>
                                     @enderror
                                 </div>
@@ -217,18 +225,8 @@
                                     <div style="color:red;">{{$message}}</div>
                                     @enderror
                                 </div>
-                                <div class="form-group col-md-4">
-                                    <label for="place_return_id">Place Of Return</label>
-                                    <select class="selectpicker form-control importPort" id="place_return_id" data-live-search="true" name="place_return_id" data-size="10" title="{{trans('forms.select')}}">
-                                        @foreach ($ports as $item)
-                                            <option value="{{$item->id}}" {{$item->id == old('place_return_id', $quotation->place_return_id) ? 'selected':''}}>{{$item->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('place_return_id')
-                                    <div style="color:red;">{{$message}}</div>
-                                    @enderror
-                                </div>
                             </div>
+
                             <div class="form-row">
                                 <div class="form-group col-md-3">
                                     <label for="oog_dimensions">HAZ / Reefer/ OOG Details</label>
@@ -288,6 +286,7 @@
                             <table id="ofr" class="table table-bordered">
                                 <thead>
                                 <tr>
+                                    <th>Request Type</th>
                                     <th>Equipment Type</th>
                                     <th>Currency</th>
                                     <th>OFR</th>
@@ -307,6 +306,13 @@
                                 @foreach($quotation->quotationDesc as $key => $desc)
                                     <tr id="quotationTriffDischargeRow">
                                         <input type="hidden" value="{{ $desc->id }}" name="quotationDis[{{ $key }}][id]">
+                                        <td>
+                                            <select class="selectpicker form-control" data-live-search="true" name="quotationDis[{{$key}}][request_type]" title="{{trans('forms.select')}}" required>
+                                                <option value="Dry" {{$desc->request_type == "Dry" ? 'selected':''}}>Dry</option>
+                                                <option value="Reefer" {{$desc->request_type == "Reefer" ? 'selected':''}}>Reefer</option>
+                                                <option value="Special Equipment" {{$desc->request_type == "Special Equipment" ? 'selected':''}}>Special Equipment</option>
+                                            </select>
+                                        </td>  
                                         <td>
                                             <select class="selectpicker form-control equipment-type" id="equipments_type" data-live-search="true" name="quotationDis[{{ $key }}][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}">
                                                 @foreach ($equipment_types as $item)
@@ -379,6 +385,24 @@
 @endsection
 @push('scripts')
 <script>
+    $('#vessel_name').change(function () {
+        if ($('#Principal').val() !== $('#vessel_name').val()) {
+            $('#additionalSelect').show();
+            $('#operator_frieght_payment').attr('required', true); // Make the select required
+        } else {
+            $('#additionalSelect').hide();
+        }
+    });
+
+    $('#operator_frieght_payment').change(function () {
+        if ($(this).val() === 'agency') {
+            $('#slot_rate').attr('required', true).closest('.form-group').show();
+        } else if ($(this).val() === 'liner') {
+            $('#slot_rate').attr('required', false).val('').closest('.form-group').hide();
+        }
+    });
+</script>
+<script>
   $(document).ready(function () {
     // Initialize selectpicker
     $('.selectpicker').selectpicker();
@@ -389,15 +413,6 @@
             $('#elseWhereSelect').show();
         } else {
             $('#elseWhereSelect').hide();
-        }
-    });
-
-    // Handle changes for the vessel_name select element
-    $('#vessel_name').change(function () {
-        if ($('#Principal').val() !== $('#vessel_name').val()) {
-            $('#additionalSelect').show();
-        } else {
-            $('#additionalSelect').hide();
         }
     });
 
@@ -433,6 +448,7 @@
 
     $("#adddis").click(function () {
         var tr = '<tr>' +
+            '<td><select class="selectpicker form-control" id="requesttype" data-live-search="true" name="quotationDis[0][request_type]" data-size="10" title="{{trans('forms.select')}}" required><option value="Dry">Dry</option><option value="Reefer">Reefer</option><option value="Special Equipment">Special Equipment</option></select></td>' +
             '<td id="equpmints"><select class="selectpicker form-control equipment-type" data-live-search="true" name="quotationDis[' + exportCount + '][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" required>@foreach ($equipment_types as $item)<option value="{{$item->id}}" {{$item->id == old('equipment_type_id') ? 'selected':''}}>{{$item->name}}</option>@endforeach </select></td>' +
             '<td><select class="selectpicker form-control" data-live-search="true" name="quotationDis[' + exportCount + '][currency]" data-size="10" title="{{trans('forms.select')}}">@foreach ($currency as $item)<option value="{{$item->name}}" {{ (old('currency') == $item->id || $item->id == 1) ? 'selected' : '' }}>{{$item->name}}</option>@endforeach</select></td>' +
             '<td><input type="text" name="quotationDis[' + exportCount + '][ofr]" class="form-control" autocomplete="off" placeholder="OFR" required></td>' +
