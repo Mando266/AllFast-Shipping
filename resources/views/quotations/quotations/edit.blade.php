@@ -486,6 +486,55 @@
         row.remove();
         updateEquipmentOptions();
     });
+    // Function to fetch and update equipment options based on request type
+    function fetchAndPopulateEquipmentOptions(requestType, row) {
+        $.get(`/api/master/requesttype/${requestType}`).then(function (data) {
+            let equipmentTypes = data.request_Type || '';
+            let options = `<option value=''>Select...</option>`;
+            for (let i = 0; i < equipmentTypes.length; i++) {
+                options += `<option value='${equipmentTypes[i].id}'>${equipmentTypes[i].name}</option>`;
+            }
+            row.find('select[name^="quotationDis"][name$="[equipment_type_id]"]').html(options).selectpicker('refresh');
+
+            // Reapply equipment options filtering after updating options
+            updateEquipmentOptions();
+        }).fail(function (xhr, status, error) {
+            console.error('Error fetching equipment types:', status, error);
+        });
+    }
+
+    // Handle changes in request type for dynamically added rows
+    $(document).on('change', 'select[name^="quotationDis"][name$="[request_type]"]', function () {
+        const row = $(this).closest('tr');
+        let selectedRequestType = $(this).val();
+
+        fetchAndPopulateEquipmentOptions(selectedRequestType, row);
+
+        handleCheckboxDisabling(row, selectedRequestType);
+    });
+
+    // Function to disable/enable checkboxes based on request type
+    function handleCheckboxDisabling(row, requestType) {
+        const checkboxes = {
+            oog: row.find('input[name^="quotationDis"][name$="[oog]"]'),
+            rf: row.find('input[name^="quotationDis"][name$="[rf]"]'),
+            nor: row.find('input[name^="quotationDis"][name$="[nor]"]')
+        };
+
+        // Enable and uncheck all checkboxes
+        Object.values(checkboxes).forEach(checkbox => checkbox.prop('disabled', false).prop('checked', false));
+
+        // Disable specific checkboxes based on the request type
+        const disableActions = {
+            'Dry': ['oog', 'rf', 'nor'],
+            'Reefer': ['oog'],
+            'Special Equipment': ['nor', 'rf']
+        };
+
+        if (disableActions[requestType]) {
+            disableActions[requestType].forEach(type => checkboxes[type].prop('disabled', true));
+        }
+    }
 
     // Update equipment options to avoid duplicates
     function updateEquipmentOptions() {

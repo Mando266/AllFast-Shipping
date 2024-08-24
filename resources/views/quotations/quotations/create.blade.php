@@ -359,6 +359,52 @@
     $(document).ready(function () {
         $('.selectpicker').selectpicker();
 
+           // Event delegation for dynamically added rows
+    $(document).on('change', 'select[name^="quotationDis"][name$="[request_type]"]', function () {
+        const row = $(this).closest('tr');
+        let selectedRequestType = $(this).val();
+
+        // Make an AJAX request to get the equipment types based on the selected request type
+        $.get(`/api/master/requesttype/${selectedRequestType}`).then(function (data) {
+            let equipmentTypes = data.request_Type || '';
+            let options = `<option value=''>Select...</option>`;
+            
+            for (let i = 0; i < equipmentTypes.length; i++) {
+                options += `<option value='${equipmentTypes[i].id}'>${equipmentTypes[i].name}</option>`;
+            }
+            
+            row.find('select[name^="quotationDis"][name$="[equipment_type_id]"]').html(options).selectpicker('refresh');
+            updateEquipmentOptions();
+
+        }).fail(function (xhr, status, error) {
+            console.error('Error fetching equipment types:', status, error);
+        });
+
+        // Handle disabling checkboxes based on request type
+        handleCheckboxDisabling(row, selectedRequestType);
+    });
+
+    function handleCheckboxDisabling(row, requestType) {
+        const checkboxes = {
+            oog: row.find('input[name^="quotationDis"][name$="[oog]"]'),
+            rf: row.find('input[name^="quotationDis"][name$="[rf]"]'),
+            nor: row.find('input[name^="quotationDis"][name$="[nor]"]')
+        };
+
+        // Enable and uncheck all checkboxes
+        Object.values(checkboxes).forEach(checkbox => checkbox.prop('disabled', false).prop('checked', false));
+
+        // Disable specific checkboxes based on the request type
+        const disableActions = {
+            'Dry': ['oog', 'rf', 'nor'],
+            'Reefer': ['oog'],
+            'Special Equipment': ['nor', 'rf']
+        };
+
+        if (disableActions[requestType]) {
+            disableActions[requestType].forEach(type => checkboxes[type].prop('disabled', true));
+        }
+    }
         $('#payment_kind').change(function () {
             if ($(this).val() === 'else_where') {
                 $('#elseWhereSelect').show();
