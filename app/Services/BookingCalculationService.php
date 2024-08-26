@@ -262,9 +262,9 @@ class BookingCalculationService
     {
         $fromDate = Carbon::parse($payload['from_date'])->startOfDay();
         $toDate = Carbon::parse($payload['to_date'])->endOfDay();
-        $movement_id= isset($payload['is_storage'])? 4 : 6 ;
+        // $movement_id= isset($payload['is_storage'])? 4 : 6 ;
         return Movements::select('booking_no')
-                ->where('movement_id', $movement_id)
+                // ->where('movement_id', $movement_id)
                 ->where('container_id', $containerId)
                 ->where('company_id', Auth::user()->company_id)
                 ->whereBetween('movement_date', [$fromDate, $toDate])

@@ -76,8 +76,8 @@ class DententionCalculationPeriodController extends Controller
 
     private function getMovementIds()
     {
-        // $codes = ['RSTR','RCVC'];
-        $codes = ['RCVC'];
+        $codes = ['RSTR','RCVC'];
+        // $codes = ['RCVC'];
         return ContainersMovement::where('code', $codes)->pluck('id')->toarray();
     }
         
