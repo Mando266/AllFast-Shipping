@@ -235,8 +235,7 @@
                                 <label for="voyage_id">Vessel / Voyage <span class="text-warning"> *</span></label>
                                 <select class="selectpicker form-control" id="voyage_id" data-live-search="true" name="voyage_id" data-size="10"
                                  title="{{trans('forms.select')}}" required>
-                                 <option value="">Select..</option>
-                                    @foreach ($voyages as $item)
+                                       @foreach ($voyages as $item)
                                         <option value="{{$item->id}}" {{$item->id == old('voyage_id') ? 'selected':''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
                                     @endforeach
                                 </select>
@@ -251,8 +250,7 @@
                                 <label for="Transhipment">Transhipment Port</label>
                                 <select class="selectpicker form-control" id="transhipment_port" data-live-search="true" name="transhipment_port" data-size="10"
                                  title="{{trans('forms.select')}}">
-                                 <option value="">Select...</option>
-                                    @foreach ($ports as $item)
+                                                                      @foreach ($ports as $item)
                                         <option value="{{$item->id}}" {{$item->id == old('transhipment_port') ? 'selected':''}}>{{$item->name}}</option>
                                     @endforeach
                                 </select>
@@ -280,8 +278,7 @@
                                 <label for="pick_up_location">Pick Up Location</label>
                                 <select class="selectpicker form-control" id="pick_up_location" data-live-search="true" name="pick_up_location" data-size="10"
                                  title="{{trans('forms.select')}}">
-                                 <option value="">Select...</option>
-                                    @foreach ($ports as $item)
+                                                                      @foreach ($ports as $item)
                                         <option value="{{$item->id}}" {{$item->id == old('pick_up_location',$quotation->pick_up_location) ? 'selected':''}}>{{$item->name}}</option>
                                     @endforeach
                                 </select>
@@ -295,8 +292,7 @@
                                 <label for="place_return_id">Place Of Return</label>
                                 <select class="selectpicker form-control" id="place_return_id" data-live-search="true" name="place_return_id" data-size="10"
                                  title="{{trans('forms.select')}}">
-                                 <option value="">Select...</option>
-                                    @foreach ($ports as $item)
+                                                                      @foreach ($ports as $item)
                                         <option value="{{$item->id}}" {{$item->id == old('place_return_id',$quotation->place_return_id) ? 'selected':''}}>{{$item->name}}</option>
                                     @endforeach
                                 </select>

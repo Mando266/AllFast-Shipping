@@ -43,8 +43,7 @@
                                 <td class="terminal">
                                   <select class="form-control" id="terminal" data-live-search="true" name="voyageport[0][terminal_name]" data-size="10"
                                           title="{{trans('forms.select')}}">
-                                          <option value="">Select...</option>
-                                          @foreach ($terminals as $item)
+                                                                                     @foreach ($terminals as $item)
                                               <option value="{{$item->id}}" {{$item->id == old('terminal_name') ? 'selected':''}}>{{$item->name}} {{$item->code}}</option>
                                           @endforeach
                                   </select>
@@ -85,8 +84,8 @@
      var counter  = 1;
         $("#add").click(function(){
                 var tr = '<tr>'+
-            '<td class="ports"><select class="form-control port" id="port" data-live-search="true" name="voyageport['+counter+'][port_from_name]" data-size="10"><option value="">Select...</option>@foreach ($ports as $item)<option value="{{$item->id}}" {{$item->id == old('port_from_name') ? 'selected':''}}>{{$item->name}}</option>@endforeach</select></td>'+
-            '<td class="terminal"><select class="form-control" id="terminal" data-live-search="true" name="voyageport['+counter+'][terminal_name]" data-size="10"><option value="">Select...</option>@foreach ($terminals as $item)<option value="{{$item->id}}" {{$item->id == old('terminal_name') ? 'selected':''}}>{{$item->name}} {{$item->code}}</option>@endforeach</select></td>'+
+            '<td class="ports"><select class="form-control port" id="port" data-live-search="true" name="voyageport['+counter+'][port_from_name]" data-size="10">  @foreach ($ports as $item)<option value="{{$item->id}}" {{$item->id == old('port_from_name') ? 'selected':''}}>{{$item->name}}</option>@endforeach</select></td>'+
+            '<td class="terminal"><select class="form-control" id="terminal" data-live-search="true" name="voyageport['+counter+'][terminal_name]" data-size="10">  @foreach ($terminals as $item)<option value="{{$item->id}}" {{$item->id == old('terminal_name') ? 'selected':''}}>{{$item->name}} {{$item->code}}</option>@endforeach</select></td>'+
             '<td><input type="text" name="voyageport['+counter+'][road_no]" class="form-control" autocomplete="off"></td>'+
             '<td><input type="date" name="voyageport['+counter+'][eta]" class="form-control"></td>'+
             '<td><input type="date" name="voyageport['+counter+'][etd]" class="form-control"></td>'+

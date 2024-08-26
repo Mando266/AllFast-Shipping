@@ -94,6 +94,10 @@ Route::group(['middleware' => 'auth'], function () {
             'DetentionController@showTriffSelectWithBlno'
         )->name('detention.showTriffSelectWithBlno');
         Route::post('detention', 'DetentionController@showDetention')->name('detention.showDetention');
+
+        Route::get('/fetch-booking-details', 'MovementController@fetchBookingDetails')->name('booking.fetchDetails');
+        Route::get('/fetch-voyage-port-details', [MovementController::class, 'fetchVoyagePortDetails'])->name('fetchVoyagePortDetails');
+
     });
 
     /*Excel import export*/
@@ -136,6 +140,10 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('{quotation}/approve', [QuotationsController::class, 'approve'])->name('quotation.approve');
         Route::get('{quotation}/reject', [QuotationsController::class, 'reject'])->name('quotation.reject');
         Route::resource('localporttriff', 'LocalPortTriffController');
+        Route::get('import', [QuotationsController::class, 'import'])->name('quotation.import');
+
+        Route::get('importcreate', [QuotationsController::class, 'importcreate'])
+        ->name('quotation.importcreate');
         Route::get('localporttriffdetailes/{id}', [LocalPortTriffDetailesController::class, 'destroy'])->name(
             'LocalPortTriffDetailes.destroy'
         );
@@ -156,10 +164,7 @@ Route::group(['middleware' => 'auth'], function () {
         ->name('booking.selectExportQuotation');
         Route::get('exportcreate', [BookingController::class, 'exportcreate'])
         ->name('booking.exportcreate');
-
-        Route::get('export', [BookingController::class, 'export'])
-        ->name('booking.export');
-
+        Route::get('export', [BookingController::class, 'export'])->name('booking.export');
         Route::get('selectGateOut/{booking}', [BookingController::class, 'selectGateOut'])
             ->name('booking.selectGateOut');
         Route::get('showShippingOrder/{booking}', [BookingController::class, 'showShippingOrder'])
@@ -186,6 +191,8 @@ Route::group(['middleware' => 'auth'], function () {
             ->name('importBooking');
         Route::get('{booking}/temperatureDiscrepancy', [BookingController::class, 'temperatureDiscrepancy'])
             ->name('temperature-discrepancy');
+        Route::get('{booking}/clone', [BookingController::class, 'clone'])
+        ->name('booking.clone');
     });
     /*
     |-------------------------------------------
@@ -199,6 +206,9 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('serviceManifest/{bldraft}/{xml?}', [BlDraftController::class, 'serviceManifest'])->name(
             'bldraft.serviceManifest'
         );
+        Route::post('incrementPrintCount/{id}', [BlDraftController::class, 'incrementPrintCount'])->name('bldraft.incrementPrintCount');
+        Route::get('print-counter', [BlDraftController::class, 'printCounter'])->name('bldraft.printcounter');
+        Route::post('bldraft/update-print-counter', [BlDraftController::class, 'updatePrintCounter'])->name('bldraft.updatePrintCounter');
         Route::get('showCstar/{bldraft}', [BlDraftController::class, 'showCstar'])->name('bldraft.showCstar');
         Route::get('pdf', [PDFController::class, 'showPDF'])->name('bldraft.showPDF');
         Route::get('winpdf', [WinPDFController::class, 'showWinPDF'])->name('bldraft.showWinPDF');

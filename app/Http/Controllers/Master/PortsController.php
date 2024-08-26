@@ -9,7 +9,6 @@ use App\Models\Master\Country;
 use App\Models\Master\PortTypes;
 use App\Models\Master\Ports;
 use App\Models\Master\Terminals;
-use App\Models\Master\Agents;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
@@ -35,11 +34,9 @@ class PortsController extends Controller
         $user = Auth::user();
         $countries = Country::orderBy('name')->get();
         $port_types = PortTypes::orderBy('name')->get();
-        $terminals = Terminals::orderBy('name')->get();
         return view('master.ports.create',[
             'countries'=>$countries,
             'port_types'=>$port_types,
-            'terminals'=>$terminals,
         ]); 
     }
 
@@ -63,7 +60,6 @@ class PortsController extends Controller
         }
 
         $ports = Ports::create($request->except('_token'));
-        $ports->agent_id = $user->agent_id;
         $ports->save();
         
         return redirect()->route('ports.index')->with('success',trans('port.created')); 
@@ -74,12 +70,10 @@ class PortsController extends Controller
         $this->authorize(__FUNCTION__,Ports::class);
         $countries = Country::orderBy('name')->get();
         $port_types = PortTypes::orderBy('name')->get();
-        $terminals = Terminals::orderBy('name')->get();
         return view('master.ports.show',[
             'port'=>$port,
             'countries'=>$countries,
             'port_types'=>$port_types,
-            'terminals'=>$terminals,
         ]);
     }
 
@@ -89,12 +83,10 @@ class PortsController extends Controller
         $user = Auth::user();
         $countries = Country::orderBy('name')->get();
         $port_types = PortTypes::orderBy('name')->get();
-        $terminals = Terminals::orderBy('name')->get();
         return view('master.ports.edit',[
             'port'=>$port,
             'countries'=>$countries,
             'port_types'=>$port_types,
-            'terminals'=>$terminals,
         ]); 
     }
 

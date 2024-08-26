@@ -23,7 +23,7 @@
                                 <p class="alert {{ Session::get('alert-class', 'alert-danger') }}">{{ session('alert') }}</p>
                             @endif
                         <div class="form-row">
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label for="nameInput">Name <span class="text-warning"> * </span></label>
                             <input type="text" class="form-control" id="nameInput" name="name" value="{{old('name',$port->name)}}"
                                  placeholder="Name" autocomplete="off" autofocus required>
@@ -33,7 +33,7 @@
                                 </div>
                                 @enderror
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label for="CodeInput">Code <span class="text-warning"> * </span></label>
                                 <input type="text" class="form-control" id="CodeInput" name="code" value="{{old('code',$port->code)}}"
                                     placeholder="Code" autocomplete="off" required>
@@ -43,7 +43,7 @@
                                 </div>
                                 @enderror
                             </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label for="countryInput">{{trans('company.country')}} <span class="text-warning"> * </span></label>
                                 <select class="selectpicker form-control" id="countryInput" data-live-search="true" data-size="10"
                                 name="country_id" title="{{trans('forms.select')}}" required>
@@ -57,20 +57,7 @@
                                 </div>
                                 @enderror
                             </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label for="via_portInput">Via Port</label>
-                                <input type="text" class="form-control" id="via_portInput" name="via_port" value="{{old('via_port',$port->via_port)}}"
-                                    placeholder="Via Port" autocomplete="off">
-                                @error('via_port')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label for="portInput">Port Type <span class="text-warning"> * </span></label>
                                 <select class="selectpicker form-control" id="portInput" data-live-search="true" data-size="10"
                                 name="port_type_id" title="{{trans('forms.select')}}" required>
@@ -79,20 +66,6 @@
                                     @endforeach
                                 </select>
                                 @error('port_type_id')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="terminalInput">Terminal</label>
-                                <select class="selectpicker form-control" id="terminalInput" data-live-search="true" name="terminal_id" data-size="10"
-                                    title="{{trans('forms.select')}}">
-                                    @foreach ($terminals as $item)
-                                        <option value="{{$item->id}}" {{$item->id == old('terminal_id',$port->terminal_id) ? 'selected':''}}>{{$item->name}}</option>
-                                    @endforeach
-                                </select>
-                                @error('terminal_id')
                                 <div class="invalid-feedback">
                                     {{$message}}
                                 </div>
@@ -128,8 +101,6 @@
                                 <a href="{{route('ports.index')}}" class="btn btn-danger mt-3">{{trans('forms.cancel')}}</a>
                             </div>
                        </div>
-
-
                     </form>
                 </div>
             </div>

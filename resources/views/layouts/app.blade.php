@@ -239,21 +239,63 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             'use strict';
-            var form = document.getElementById('createForm');
+            const form = document.getElementById('createForm');
+
+            function validateSelectpicker(selectpicker) {
+                const button = selectpicker.parentElement.querySelector('.dropdown-toggle');
+                const searchBox = selectpicker.parentElement.querySelector('.bs-searchbox input');
+                const dropdownItems = selectpicker.parentElement.querySelectorAll('.dropdown-item .check-mark');
+                const isValid = selectpicker.value && selectpicker.value.trim() !== '';
+
+                button.style.border = isValid ? '1px solid green' : '1px solid red';
+                button.style.boxShadow = 'none';
+
+                if (searchBox) {
+                    searchBox.style.border = isValid ? '1px solid green' : '1px solid red';
+                    searchBox.style.boxShadow = 'none';
+                }
+
+                selectpicker.style.borderColor = '';
+                selectpicker.style.backgroundImage = 'none';
+                selectpicker.style.boxShadow = 'none';
+
+                if (isValid) {
+                    dropdownItems.forEach(item => item.style.display = 'none');
+                }
+            }
+
+            form.querySelectorAll('.selectpicker[required]').forEach(selectpicker => {
+                selectpicker.addEventListener('change', () => validateSelectpicker(selectpicker));
+            });
+
             form.addEventListener('submit', function (event) {
-                if (form.checkValidity() === false) {
+                let isValid = true;
+                form.querySelectorAll('.selectpicker[required]').forEach(selectpicker => {
+                    if (!selectpicker.value || selectpicker.value.trim() === '') {
+                        isValid = false;
+                    }
+                    validateSelectpicker(selectpicker);
+                });
+
+                if (!isValid) {
                     event.preventDefault();
-                    event.stopPropagation();
                 }
 
                 form.classList.add('was-validated');
             });
 
-            // Initialize selectpicker after the document is fully loaded
             $('.selectpicker').selectpicker();
         });
     </script>
-
+    <script>
+        $(document).ready(function() {
+            $('.selectpicker').each(function() {
+                    $(this).prepend('<option value="">{{ trans("forms.select") }}</option>');
+                
+                $(this).selectpicker('refresh'); // Refresh the selectpicker to include the new option
+            });
+        });
+    </script>
     <script src="{{asset('assets/js/custom.js')}}"></script>
     <!-- END GLOBAL MANDATORY SCRIPTS -->
     <!-- BEGIN PAGE LEVEL PLUGINS/CUSTOM SCRIPTS -->

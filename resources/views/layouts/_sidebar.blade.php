@@ -363,7 +363,12 @@
                         <ul class="collapse submenu list-unstyled" id="component8" data-parent="#accordionExample">
                                 @permission('Quotation-List')
                                 <li>
-                                    <a href="{{route('quotations.index')}}">Quotations Gates</a>
+                                    <a href="{{route('quotation.import')}}">Import Quotations</a>
+                                </li>
+                                @endpermission
+                                @permission('Quotation-List')
+                                <li>
+                                    <a href="{{route('quotations.index')}}">Export Quotations</a>
                                 </li>
                                 @endpermission
                         </ul>
@@ -401,6 +406,11 @@
                                 @permission('BlDraft-List')
                                 <li>
                                     <a href="{{route('bldraft.index')}}"> Bl Gates </a>
+                                </li>
+                                @endpermission
+                                @permission('BlDraft-List')
+                                <li>
+                                    <a href="{{route('bldraft.printcounter')}}"> Bl Prints Counter </a>
                                 </li>
                                 @endpermission
 

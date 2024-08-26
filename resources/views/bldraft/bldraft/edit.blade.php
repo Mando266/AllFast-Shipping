@@ -345,7 +345,7 @@
                                 <td>
                                   <select class="selectpicker form-control" id="containerDetailsID" data-live-search="true" name="" data-size="10"
                                           title="{{trans('forms.select')}}" disabled>
-                                          <option value="">Select</option>
+                                            
                                           @foreach ($oldbookingcontainers as $item)
                                               <option value="{{$item->id}}" {{$item->id == old('container_id',$blDetail->container_id) ? 'selected':'disabled'}}>{{$item->code}}</option>
                                           @endforeach

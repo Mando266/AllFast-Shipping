@@ -116,17 +116,14 @@
                 <table class="col-md-12 tableStyle">
                     <tbody>
                         <tr>
-                            <td class="tableStyle">Place of Acceptance : &nbsp; <span>{{optional($quotation->placeOfAcceptence)->name}}</span></td>
-                            <td class="tableStyle">Place of Delivery : &nbsp; <span>{{optional($quotation->placeOfDelivery)->name}}</span></td>
-                        </tr>
-                        <tr>
                             <td class="tableStyle">Load Port : &nbsp; <span>{{optional($quotation->loadPort)->name}}</span></td>
                             <td class="tableStyle"> Discharge Port : &nbsp; <span>{{optional($quotation->dischargePort)->name}}</span></td>
-                        </tr>
-                        <tr>
-                        <td class="tableStyle">Pick Up Location : &nbsp; <span>{{optional($quotation->pickUpLocation)->name}}</span></td>
-                            <td class="tableStyle">Place of Return  : &nbsp; <span>{{optional($quotation->placeOfReturn)->name}}</span></span></td>
-                        </tr>
+                            @if($quotation->shipment_type == 'Export')
+                            <td class="tableStyle">Place of Acceptance : &nbsp; <span>{{optional($quotation->placeOfAcceptence)->name}}</span></td>
+                            @else
+                            <td class="tableStyle">Place of Delivery : &nbsp; <span>{{optional($quotation->placeOfDelivery)->name}}</span></td>
+                            @endif
+                        </tr>        
                     </tbody>
                 </table>
                 <table class="col-md-12 tableStyle">
@@ -155,27 +152,6 @@
                         </tr>
                     </tbody>
                 </table>
-                <table class="col-md-12 tableStyle">
-                    <thead>
-                        <tr>
-                            <th style="padding: .75rem;" class="thstyle" colspan="4">Additional Free Days</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="tableStyle">Export Free Time</td>
-                            <td class="tableStyle">{{$quotation->export_detention}}</td>
-                            <!-- <td class="tableStyle">Import Free Time</td>
-                            <td class="tableStyle">{{$quotation->import_detention}}</td> -->
-                        </tr>
-                        <tr>
-                            <!-- <td class="tableStyle">Export Storage</td>
-                            <td class="tableStyle">{{$quotation->export_storage}}</td> -->
-                            <td class="tableStyle">Import Free Time</td>
-                            <td class="tableStyle">{{$quotation->import_detention}}</td>
-                        </tr>
-                    </tbody>
-                </table>
 
                 <table class="col-md-12 tableStyle">
                     <thead class="tableStyle">
@@ -183,6 +159,7 @@
                             <th class="col-md-2 thstyle">EQUIPMENT TYPE	</th>
                             <th class="col-md-2 thstyle">Currency</th>
                             <th class="col-md-2 thstyle">Customer Rate</th>
+                            <th class="col-md-2 thstyle">Free Time</th>
                         </tr>
                     </thead>
                     <tbody class="tableStyle">
@@ -191,7 +168,7 @@
                             <td class="tableStyle">{{optional($item->equipmentsType)->name}} </td>
                             <td class="tableStyle">{{ $item->currency }}</td>
                             <td class="tableStyle">{{ $item->ofr}}</td>
-
+                            <td class="tableStyle">{{ $item->free_time}}</td>
                         </tr>
                         @endforeach
                     </tbody>

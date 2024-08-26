@@ -19,31 +19,58 @@
                 <form id="createForm" action="{{route('movements.store')}}" method="POST">
                         @csrf
                         <div class="form-row">
-                            <div class="form-group col-md-12">
-                                <label for="ContainerInput">Container Number <span class="text-warning"> * (Required.) </span></label>
-                                <select class="selectpicker form-control" id="ContainerInput" data-live-search="true" name="movement[][container_id]" data-size="10"
-                                 title="{{trans('forms.select')}}"  multiple="multiple" required>
-                                 @if(isset($containers))
-                                    @foreach ($containers as $item)
-                                        <option value="{{$item->id}}" data-code="{{$item->container_type_id}}" {{$item->id == old('container_id') ? 'selected':''}}>{{$item->code}}</option>
+                            <div class="form-group col-md-4">
+                                <label for="booking_noInput">Booking No</label>
+                                <select class="selectpicker form-control" id="booking_noInput" data-live-search="true" name="booking_no" data-size="10" title="{{trans('forms.select')}}">
+                                      
+                                    @foreach ($bookings as $item)
+                                        @if(isset($movement))
+                                            <option value="{{$item->id}}" {{$item->id == old('booking_no') || $item->id == $movement->booking_no ? 'selected':''}}>{{$item->ref_no}}</option>
+                                        @else
+                                            <option value="{{$item->id}}" {{$item->id == old('booking_no') ? 'selected':''}}>{{$item->ref_no}}</option>
+                                        @endif
                                     @endforeach
-                                    <input type="hidden" id="containersTypesInput" class="form-control" name="container_type_id" placeholder="Container Type" autocomplete="off" value="{{request()->input('container_type_id')}}">
-                                @else
-                                    <option value="{{$container->id}}" selected data-code="{{$container->container_type_id}}" {{$container->id == old('container_id') ? 'selected':''}}>{{$container->code}}</option>
-                                    <input type="hidden" id="containersTypesInput" class="form-control" name="container_type_id" placeholder="Container Type" autocomplete="off" value={{$container_type}}>
-                                @endif
                                 </select>
+                                @error('booking_no')
+                                    <div class="invalid-feedback">
+                                        {{$message}}
+                                    </div>
+                                @enderror
+                            </div>
+                            
+                            <div class="form-group col-md-4">
+                                <label for="voyage">Voyage No</label>
+                                <input type="text" class="form-control" id="voyage" readonly>
+                                <input type="hidden" id="voyage_id" name="voyage_id">
+                            </div>
+                            
+                            <div class="form-group col-md-4">
+                                <label for="vessel_id">Vessel Name</label>
+                                <input type="text" class="form-control" id="vessel_name" readonly>
+                                <input type="hidden" id="vessel_id" name="vessel_id">
+                            </div>                            
+                                    
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="ContainerInput">Container Number <span class="text-warning"> * (Required.) </span></label>
+                            <select class="selectpicker form-control" id="ContainerInput" data-live-search="true" name="movement[][container_id]" data-size="10"
+                                title="{{trans('forms.select')}}" multiple="multiple" required>
+                                <!-- Options will be populated by JavaScript -->
+                            </select>
+                            <input type="hidden" id="containersTypesInput" class="form-control" name="container_type_id" placeholder="Container Type" autocomplete="off">
                                 @error('container_id')
                                 <div class ="invalid-feedback">
                                     {{$message}}
                                 </div>
                                 @enderror
-                            </div>
+                            </div>                      
                         </div>
                         
                         <div class="form-row">
                             <div class="form-group col-md-4">
-                                <label for="containersMovementsInput">Movement <span class="text-warning"> * (Required.) </span></label>
+                                <label for="containersMovementsInput">Movement Type <span class="text-warning"> * (Required.) </span></label>
                                 <select class="selectpicker form-control" id="containersMovementsInput" data-live-search="true" name="movement_id" data-size="10"
                                  title="{{trans('forms.select')}}">
                                     @foreach ($containersMovements as $item)
@@ -58,14 +85,14 @@
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="movement_dateInput">Movement Date <span class="text-warning"> * (Required.) </span></label>
-                                <input type="datetime-local" class="form-control" id="movement_dateInput" name="movement_date" value="{{old('movement_date')}}"
-                                     autocomplete="off" >
+                                <input type="datetime-local" class="form-control" id="movement_dateInput" name="movement_date" value="{{old('movement_date')}}" 
+                                        autocomplete="off" >
                                 @error('movement_date')
                                 <div class="invalid-feedback">
                                     {{$message}}
                                 </div>
                                 @enderror
-                            </div> 
+                            </div>                           
                             <div class="form-group col-md-4">
                                 <label for="portlocationInput">Activity Location <span class="text-warning"> * (Required.) </span></label>
                                 <select class="selectpicker form-control" id="portlocationInput" data-live-search="true" name="port_location_id" data-size="10"
@@ -84,137 +111,29 @@
                         
                         <div class="form-row">
                             <div class="form-group col-md-4">
-                                <label for="portofloadInput">Port Of Load</label>
-                                <select class="selectpicker form-control" id="portofloadInput" data-live-search="true" name="pol_id" data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                    @foreach ($ports as $item)
-                                        @if(isset($movement))
-                                        <option value="{{$item->id}}" {{$item->id == old('pol_id') || $item->id == $movement->pol_id ? 'selected':''}}>{{$item->code}}</option>
-                                        @else
-                                        <option value="{{$item->id}}" {{$item->id == old('pol_id') ? 'selected':''}}>{{$item->code}}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                @error('pol_id')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="portofloadInput">Port Of Discharge</label>
-                                <select class="selectpicker form-control" id="portofloadInput" data-live-search="true" name="pod_id" data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                    @foreach ($ports as $item)
-                                        @if(isset($movement))
-                                        <option value="{{$item->id}}" {{$item->id == old('pod_id') || $item->id == $movement->pod_id ? 'selected':''}}>{{$item->code}}</option>
-                                        @else
-                                        <option value="{{$item->id}}" {{$item->id == old('pod_id') ? 'selected':''}}>{{$item->code}}</option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                @error('pod_id')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            @if(isset($movement))
-                            <div class="form-group col-md-4">
-                                <label for="vessel_id">Vessel Name</label>
-                                <select class="selectpicker form-control" id="vessel_id" name="vessel_id" data-live-search="true"  data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                    @foreach ($vessels as $item)
-                                        <option value="{{$item->id}}" {{$item->id == old('vessel_id') || $item->id == $movement->vessel_id ? 'selected':''}}>{{$item->name}}</option>
-                                    @endforeach
-                                </select>
-                                @error('vessel_id')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            @else
-                            <div class="form-group col-md-4">
-                                <label for="vessel_id">Vessel Name</label>
-                                <select class="selectpicker form-control" id="vessel_id" name="vessel_id"  data-live-search="true"  data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                    @foreach ($vessels as $item)
-                                        <option value="{{$item->id}}" {{$item->id == old('vessel_id') ? 'selected':''}}>{{$item->name}}</option>
-                                    @endforeach
-                                </select>
-                                @error('vessel_id')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            @endif
+                                <label for="portofload">Port Of Load</label>
+                                <input type="text" class="form-control" id="portofload" readonly>
+                                <input type="hidden" id="pol_id" name="pol_id">
                         </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group col-md-4">
-                            <label for="">Voyage No</label>
-                                <select class="selectpicker form-control" id="voyage" data-live-search="true" name="voyage_id" data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                 <option value="">Select</option>
-                                    @foreach ($voyages as $item)
-                                        @if(isset($movement))
-                                        <option value="{{$item->id}}" {{$item->id == old('voyage_id') || $item->voyage_no == $movement->voyage_id ? 'selected':''}}>{{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
-                                        @else
-                                        <option value="{{$item->id}}" {{$item->id == old('voyage_id') ? 'selected':''}}>{{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>    
-                                        @endif
-                                    @endforeach
-                                </select>
-                                @error('voyage_id')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
+                        <div class="form-group col-md-4">
+                            <label for="portofdischarge">Port Of Discharge</label>
+                            <input type="text" class="form-control" id="portofdischarge" readonly>
+                            <input type="hidden" id="pod_id" name="pod_id">
+                        </div>
+                                                  
+                        <div class="form-group col-md-4">
+                            <label for="TransshipmentInput">Transshipment Port </label>
+                            <select class="selectpicker form-control" id="TransshipmentInput" data-live-search="true" name="transshipment_port_id" data-size="10"
+                            title="{{trans('forms.select')}}">
+                                @foreach ($ports as $item)
+                                    <option value="{{$item->name}}" {{$item->name == old('transshipment_port_id') ? 'selected':''}}>{{$item->code}} - {{$item->name}}</option>
+                                @endforeach
+                            </select>
+                            @error('transshipment_port_id')
+                            <div class="invalid-feedback">
+                                {{$message}}
                             </div>
-                            <!-- <div class="form-group col-md-4">
-                                <label for="voyage_idInput">Voyage No</label>
-                                <input type="text" class="form-control" id="voyage_idInput" name="voyage_id" value="{{old('voyage_id')}}"
-                                    placeholder="Voyage No" autocomplete="off">
-                                @error('voyage_id')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div> -->
-                            <div class="form-group col-md-4">
-                                <label for="booking_noInput">Booking No</label>
-                                <select class="selectpicker form-control" id="booking_noInput" data-live-search="true" name="booking_no" data-size="10"
-                                 title="{{trans('forms.select')}}">
-                                 <option value="">Select</option>
-                                    @foreach ($bookings as $item)
-                                        @if(isset($movement))
-                                        <option value="{{$item->id}}" {{$item->id == old('booking_no') || $item->id == $movement->booking_no ? 'selected':''}}>{{$item->ref_no}}</option>
-                                        @else
-                                        <option value="{{$item->id}}" {{$item->id == old('booking_no') ? 'selected':''}}>{{$item->ref_no}}</option>    
-                                        @endif
-                                    @endforeach
-                                </select>
-                                
-                                @error('booking_no')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="TransshipmentInput">Transshipment Port </label>
-                                <select class="selectpicker form-control" id="TransshipmentInput" data-live-search="true" name="transshipment_port_id" data-size="10"
-                                title="{{trans('forms.select')}}">
-                                    @foreach ($ports as $item)
-                                        <option value="{{$item->name}}" {{$item->name == old('transshipment_port_id') ? 'selected':''}}>{{$item->code}} - {{$item->name}}</option>
-                                    @endforeach
-                                </select>
-                                @error('transshipment_port_id')
-                                <div class="invalid-feedback">
-                                    {{$message}}
-                                </div>
-                                @enderror
+                            @enderror
                             </div>
                         </div>
                         <div class="form-row">
@@ -269,6 +188,8 @@
                                 @enderror
                             </div>
                         </div>
+                       
+                        <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="billInput">Bill Of Lading</label>
                                 @if(isset($movement))
@@ -284,8 +205,6 @@
                                 </div>
                                 @enderror
                             </div>
-                        </div>
-                        <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="RemarkesInput">Remarkes</label>
                                 @if(isset($movement))
@@ -302,7 +221,7 @@
                                 @enderror
                             </div>
                         </div>
-
+                    </div>
                        <div class="row">
                             <div class="col-md-12 text-center">
                                 <button type="submit" id="submit" class="btn btn-primary mt-3">{{trans('forms.create')}}</button>
@@ -370,6 +289,137 @@ document.getElementById('submit').onclick = function() {
     }
     // alert(selected);
 }
+
+let eta = '';
+let etd = '';
+
+$(document).ready(function(){
+    // Booking Number Change Handling
+    $('#booking_noInput').on('change', function() {
+        var bookingNo = $(this).val();
+
+        if (bookingNo) {
+            $.ajax({
+                url: '{{ route("booking.fetchDetails") }}',
+                type: 'GET',
+                data: { booking_no: bookingNo },
+                success: function(response) {
+                    console.log(response); // Log the entire response for debugging
+                    if(response.success) {
+                        var voyageNo = response.data.voyage_no || '';
+                        var legName = response.data.leg_name || '';
+                        var vesselName = response.data.vessel_name || '';
+                        var voyageId = response.data.voyage_id || '';
+                        var vesselId = response.data.vessel_id || '';
+                        var loadPortCode = response.data.load_port_code || '';
+                        var loadPortId = response.data.load_port_id || '';
+                        var dischargePortCode = response.data.discharge_port_code || '';
+                        var dischargePortId = response.data.discharge_port_id || '';
+                        var containers = response.data.containers || [];
+
+                        // Set the voyage_no and leg_name in the text input
+                        $('#voyage').val(voyageNo + ' - ' + legName);
+                        // Set the hidden input for voyage_id
+                        $('#voyage_id').val(voyageId);
+                        // Set the vessel_name in the text input
+                        $('#vessel_name').val(vesselName);
+                        // Set the hidden input for vessel_id
+                        $('#vessel_id').val(vesselId);
+
+                        // Set the Port of Load in the text input
+                        $('#portofload').val(loadPortCode);
+                        // Set the hidden input for pol_id
+                        $('#pol_id').val(loadPortId);
+
+                        // Set the Port of Discharge in the text input
+                        $('#portofdischarge').val(dischargePortCode);
+                        // Set the hidden input for pod_id
+                        $('#pod_id').val(dischargePortId);
+
+                        // Populate the ContainerInput dropdown
+                        var containerOptions = containers.map(function(container) {
+                            return `<option value="${container.id}" data-code="${container.container_type_id}">${container.code}</option>`;
+                        });
+                        $('#ContainerInput').html(containerOptions.join(''));
+                        $('#ContainerInput').selectpicker('refresh');
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error);
+                    alert('An error occurred while fetching details.');
+                }
+            });
+        } else {
+            // Clear the fields if no booking is selected
+            $('#voyage').val('');
+            $('#voyage_id').val('');
+            $('#vessel_name').val('');
+            $('#vessel_id').val('');
+            $('#portofload').val('');
+            $('#pol_id').val('');
+            $('#portofdischarge').val('');
+            $('#pod_id').val('');
+            $('#ContainerInput').html('');
+            $('#ContainerInput').selectpicker('refresh');
+        }
+    });
+
+    // Movement Type Change Handling
+    $('#containersMovementsInput').on('change', function() {
+        var movementType = $(this).val();
+        var voyageId = $('#voyage_id').val();
+        var portId;
+
+        if (movementType == 'discharge full' || movementType == 'loaded full') {
+            if (movementType == 'discharge full') {
+                portId = $('#pod_id').val();
+            } else {
+                portId = $('#pol_id').val();
+            }
+
+            $.ajax({
+                url: '{{ route("fetchVoyagePortDetails") }}',
+                type: 'GET',
+                data: { voyage_id: voyageId, port_id: portId },
+                success: function(response) {
+                    console.log(response); // Log the entire response for debugging
+                    if(response.success) {
+                        eta = response.data.eta || '';
+                        etd = response.data.etd || '';
+                        console.log("ETA:", eta); // Log ETA
+                        console.log("ETD:", etd); // Log ETD
+                        $('#movement_dateInput').attr('min', eta);
+                        $('#movement_dateInput').attr('max', etd);
+                    } else {
+                        console.log("Error:", response.message);
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error);
+                    alert('An error occurred while fetching voyage port details.');
+                }
+            });
+        } else {
+            $('#movement_dateInput').removeAttr('min');
+            $('#movement_dateInput').removeAttr('max');
+        }
+    });
+
+    // Submit Button Handling
+    document.getElementById('submit').onclick = function(event) {
+        var selectedDate = new Date($('#movement_dateInput').val());
+        var etaDate = new Date(eta);
+        var etdDate = new Date(etd);
+
+        if (eta && etd && (selectedDate < etaDate || selectedDate > etdDate)) {
+            alert('Movement date must be between ETA and ETD.');
+            event.preventDefault(); // Prevent form submission
+        }
+    };
+});
 </script>
 
 @endpush

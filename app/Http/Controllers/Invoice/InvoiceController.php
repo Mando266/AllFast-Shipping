@@ -41,7 +41,8 @@ class InvoiceController extends Controller
         $voyages    = Voyages::where('company_id',Auth::user()->company_id)->get();
         $customers  = Customers::where('company_id',Auth::user()->company_id)->get();
         $etd = VoyagePorts::get();
-
+        $invoice_item = ChargesDesc::orderBy('id')->get();
+        
         return view('invoice.invoice.index',[
             'invoices'=>$invoices,
             'invoiceRef'=>$invoiceRef,
@@ -49,7 +50,7 @@ class InvoiceController extends Controller
             'customers'=>$customers,
             'voyages'=>$voyages,
             'etd'=>$etd,
-
+            'invoice_item'=>$invoice_item,
         ]);
     }
 
@@ -81,7 +82,7 @@ class InvoiceController extends Controller
     {
         $companyId = Auth::user()->company_id;
         $customers = Customers::where('company_id', $companyId)->get();
-        $charges = ChargesDesc::where('type','!=','1')->orderBy('id')->get();
+        $charges = ChargesDesc::orderBy('id')->get();
         $voyages = Voyages::with('vessel')->where('company_id', $companyId)->get();
     
         $blId = null;
@@ -153,7 +154,7 @@ class InvoiceController extends Controller
                 'customer' => ['required'],
                 'customer_id' => ['required'],
             ]);
-
+    if(request()->input('add_egp') == 'USD'){
         $totalAmount = 0;
         foreach($request->input('invoiceChargeDesc',[])  as $desc){
             $totalAmount += $desc['total'];
@@ -161,7 +162,7 @@ class InvoiceController extends Controller
         if($totalAmount == 0){
             return redirect()->back()->with('error','Invoice Total Amount Can not be Equal Zero')->withInput($request->input());
         }
-      
+    }
             $invoice = Invoice::create([
                 'booking_ref'=>$request->booking_ref ?? null,
                 'bldraft_id'=>$request->bldraft_id ?? null,
@@ -188,11 +189,11 @@ class InvoiceController extends Controller
                     'invoice_id'=>$invoice->id,
                     'charge_description'=>$chargeDesc['charge_description'],
                     'size_small'=>$chargeDesc['size_small'],
-                    'total_amount'=>$chargeDesc['total'],
+                    'total_amount'=>$chargeDesc['total'] ?? null,
                     'total_egy'=>$chargeDesc['egy_amount'],
                     'enabled'=>$chargeDesc['enabled'],
                     'add_vat'=>$chargeDesc['add_vat'],
-                    'usd_vat'=>$chargeDesc['usd_vat'],
+                    'usd_vat'=>$chargeDesc['usd_vat'] ?? null,
                     'egp_vat'=>$chargeDesc['egp_vat'],
                 ]);
             }
@@ -268,11 +269,7 @@ class InvoiceController extends Controller
                 return redirect()->back()->with('error', 'Invoice Total Amount cannot be zero')->withInput($request->input());
             }
         }
-    
-        if ($request->invoice_status == 'confirm' && $request->add_egp == 'true') {
-            return redirect()->back()->with('error', 'You must choose EGP or USD in Confirmed Invoice')->withInput($request->input());
-        }
-    
+  
         if ($invoice->invoice_status == 'ready_confirm' && $request->invoice_status == 'confirm') {
             $setting = Setting::find(1);
     
@@ -331,36 +328,28 @@ class InvoiceController extends Controller
     public function create(Request $request)
     {
         $this->authorize(__FUNCTION__,Invoice::class);
-        $ofr = null;
+        $ofrs = null;
         $charges = ChargesDesc::where('type','0')->orderBy('id')->get();
         if ($request->has('bldraft_id')) {
             $blId = $request->input('bldraft_id');
             $bldraft = BlDraft::where('id', $blId)->with('blDetails')->first();
-            $qty = $bldraft->blDetails->count();
-            $ofrs = $bldraft->booking->quotation->quotationDesc->pluck('ofr')->all();
-            //dd($ofrs);
+            $totalqty = $bldraft->booking->bookingContainerDetails->count();
+
         } elseif ($request->has('booking_ref')) {
             $blId = $request->input('booking_ref');
             $bldraft = Booking::where('id', $blId)->with('bookingContainerDetails')->first();
-            $qty = $bldraft->bookingContainerDetails->count();
-            $quotationDesc = optional($bldraft->quotation)->quotationDesc ?? collect();
-            if (!$quotationDesc->isEmpty()) {
-                $ofrs = $quotationDesc->pluck('ofr')->all();
-            } else {
-                $ofrs = [];
-            }
+            $totalqty = $bldraft->bookingContainerDetails->count();
         }
 
         $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $cartData = json_decode(request('cart_data_for_invoice'));
         return view('invoice.invoice.create_debit',[
             'cartData' => $cartData ?? null,
-            'qty'=>$qty,
+            'totalqty'=>$totalqty,
             'ofrs'=>$ofrs,
             'bldraft'=>$bldraft,
             'voyages'=>$voyages,
             'charges' => $charges,
-
         ]);
     }
 

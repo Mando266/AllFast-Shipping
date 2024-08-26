@@ -23,8 +23,7 @@
                             <label for="booking">Booking No <span class="text-warning"> * (Required.) </span> </label>
                             <select class="selectpicker form-control" id="booking" data-live-search="true" name="booking_id" data-size="10"
                                 title="{{trans('forms.select')}}" required>
-                                <option value="">Select...</option>
-                                @foreach ($booking as $item)
+                                                                 @foreach ($booking as $item)
                                     <option value="{{$item->id}}" {{$item->id == old('booking_id') ? 'selected':''}}>{{$item->ref_no}}</option>
                                 @endforeach
                             </select>
@@ -39,8 +38,7 @@
                             <label for="booking">Trucker <span class="text-warning"> * (Required.) </span></label>
                             <select class="selectpicker form-control" id="booking" data-live-search="true" name="trucker_id" data-size="10"
                                 title="{{trans('forms.select')}}" required>
-                                <option value="">Select...</option>
-                                @foreach ($truckers as $item)
+                                                                 @foreach ($truckers as $item)
                                     <option value="{{$item->id}}" {{$item->id == old('trucker_id') ? 'selected':''}}>{{$item->company_name}}</option>
                                 @endforeach
                             </select>
