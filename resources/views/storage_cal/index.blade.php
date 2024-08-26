@@ -130,6 +130,9 @@
                                             </tr>
                                             </thead>
                                             <tbody>
+                                            @if($calculation['containers'])
+                                                <input type="hidden" id="periods" value="{{$calculation['containers'][0]['periods']}}">
+                                            @endif
                                             @foreach($calculation['containers'] as $item)
                                                 <tr>
                                                     <td class="col-md-2 text-center">{{$item['container_no']}} {{$item['container_type']}}</td>
@@ -355,6 +358,7 @@
                         formData += '&booking_ref=' + encodeURIComponent($('#booking_no').val());
                         formData += '&grandTotal=' + encodeURIComponent(grandTotal);
                         formData += '&periods=' + encodeURIComponent(periods);
+                        formData += '&add_egp=' + encodeURIComponent('USD');
                         window.location.href = "{{ route('storage-invoice') }}?" + formData;
                 });
 

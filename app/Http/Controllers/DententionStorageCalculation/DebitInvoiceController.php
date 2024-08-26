@@ -21,7 +21,7 @@ class DebitInvoiceController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $charges = ChargesDesc::where('type','0')->orderBy('id')->get();
+        $charges = ChargesDesc::orderBy('id')->get();
         $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
         $qty = $bldraft->bookingContainerDetails->count();
         $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
