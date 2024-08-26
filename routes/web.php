@@ -18,7 +18,8 @@ use App\Http\Controllers\PortChargeInvoiceController;
 use App\Http\Controllers\Trucker\TruckerGateController;
 use App\Http\Controllers\Quotations\QuotationsController;
 use App\Http\Controllers\Quotations\LocalPortTriffDetailesController;
-use App\Http\Controllers\DententionStorageCalculation\CalculationPeriodController;
+use App\Http\Controllers\DententionStorageCalculation\DententionCalculationPeriodController;
+use App\Http\Controllers\DententionStorageCalculation\StorageCalculationPeriodController;
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', 'HomeController@index')->name('home');
@@ -263,10 +264,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::prefix('dentention-storage-calculation')->namespace('DententionStorageCalculation')->group(function () {
         Route::resource('dententions', 'DententionController');
         Route::resource('storage', 'StorageController');
-        Route::resource('calculation-period','CalculationPeriodController');
+        Route::resource('calculation-dentention-period','DententionCalculationPeriodController');
+        Route::resource('calculation-storage-period','StorageCalculationPeriodController');
         Route::get('debit-invoice',DebitInvoiceController::class)->name('debit-invoice');
+        Route::get('storage-invoice',StorageInvoiceController::class)->name('storage-invoice');
     });
-    Route::get('export_calculation_period',[CalculationPeriodController::class,'export'])->name('export_calculation_period');
+    Route::get('export_dentention_calculation',[DententionCalculationPeriodController::class,'export'])->name('export_dentention_calculation');
+    Route::get('export_storage_calculation',[StorageCalculationPeriodController::class,'export'])->name('export_storage_calculation');
     Route::prefix('lessor')->namespace('Master')->group(function () {
         Route::resource('seller', 'LessorSellerController');
     });

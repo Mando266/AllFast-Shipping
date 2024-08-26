@@ -8,7 +8,8 @@
                         <nav class="breadcrumb-two" aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a a href="">{{ trans('menu.storage') }}</a></li>
-                                <li class="breadcrumb-item active"><a href="javascript:void(0);">{{ trans('menu.storage_cal') }}</a>
+                                <li class="breadcrumb-item active"><a href="javascript:void(0);">{{ trans('menu.dentention_cal') }}</a>
+
                                 </li>
                                 <li class="breadcrumb-item"></li>
                             </ol>

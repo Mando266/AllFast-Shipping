@@ -24,7 +24,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                             <span> </span>
                         </div>
-                        <form action="{{route('storage.store')}}" method="POST">
+                        <form id="invoiceForm"  action="{{route('storage.store')}}" method="POST">
                             @csrf
 
                             @php
@@ -170,12 +170,17 @@
                                                 <td class="col-md-2" style="border-right-style: hidden;"></td>
                                                 <td class="col-md-2" style="border-right-style: hidden;"></td>
                                                 <td class="col-md-2"></td>
-                                                <td class="col-md-2 text-center">
+                                                <td class="col-md-2 text-center" id="grandTotal">
+
                                                     {{$calculation['grandTotal']}}
                                                 </td>
                                             </tr>
                                             </tfoot>
                                         </table>
+                                        <div class="col-md-12 text-right">
+                                            <button type="submit" class="btn btn-warning mt-3" id="create_invoive">{{ trans('home.c_invoice') }}</button>
+                                        </div>
+
 
                             @endisset
                         </form>
@@ -321,7 +326,7 @@
                     $('#from_code').trigger('change');
                 });
             </script>
-                      <script>
+            <script>
                     $('#port').change(function () {
                         var selectedValue = $(this).val();
                         if (selectedValue.length > 1 && selectedValue.includes('all')) {
@@ -339,5 +344,21 @@
                         $('#port').selectpicker('refresh');
                     });
             </script>
+            <script>
+                $('#create_invoive').click(function(e) {
+                    e.preventDefault();
+                    let formData = $('#invoiceForm').serialize();
+                    let grandTotalText = $('#grandTotal').text();
+                    let grandTotal = grandTotalText.match(/\d+/);
+                        grandTotal = grandTotal ? parseInt(grandTotal[0], 10) : 0;
+                    let periods = $('#periods').val();
+                        formData += '&booking_ref=' + encodeURIComponent($('#booking_no').val());
+                        formData += '&grandTotal=' + encodeURIComponent(grandTotal);
+                        formData += '&periods=' + encodeURIComponent(periods);
+                        window.location.href = "{{ route('storage-invoice') }}?" + formData;
+                });
+
+            </script>
+
 
         @endpush

@@ -32,10 +32,10 @@ class DetentionCalculationPeriodExport extends AbstractExport
                 $item['from'],
                 $item['to'],
                 $item['daysCount'],
-                $item['freeTime'],
+                "{$item['freeTime']}",
                 "$DM_days",
                 implode("", $days_slabs),
-                "{$item['total']}",
+                "{$item['total']}"
             ];
         });
     }
