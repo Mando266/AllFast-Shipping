@@ -18,14 +18,14 @@ use App\Models\Master\ContainersMovement;
 use App\Services\BookingCalculationService;
 use App\Exports\DetentionCalculationPeriodExport;
 
-class CalculationPeriodController extends Controller
+class StorageCalculationPeriodController extends Controller
 {
   
     private BookingCalculationService $service;
 
     public function __construct(BookingCalculationService $service)
     {
-    $this->service = $service;
+        $this->service = $service;
     }
     /**
     * Display a listing of the resource.
@@ -34,7 +34,7 @@ class CalculationPeriodController extends Controller
     */
     public function index()
     {
-        return view('dentention.export');
+        return view('storage_cal.export');
 
     }
 
@@ -50,12 +50,13 @@ class CalculationPeriodController extends Controller
         $toDate = Carbon::parse($request->to_date)->endOfDay();
         $containerIds = $this->getContainerIds($fromDate, $toDate);
         if (empty($containerIds)) {
-           return back()->with('error', "No RCVC Movement for in this Period $fromDate to $toDate");
+           return back()->with('error', "No LODF Movement for in this Period $fromDate to $toDate");
         }
         $containers = Containers::with('booking')->whereIn('id', $containerIds)->get();
         $payload['from_date'] =$request->from_date;
         $payload['to_date'] =$request->to_date;
         $payload['apply_first_day']=1;
+        $payload['is_storage']=1;
         $calculation = $this->service->containersCalculation( $containers,$payload);
         if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
             return $calculation;
@@ -65,17 +66,24 @@ class CalculationPeriodController extends Controller
 
     private function getContainerIds($fromDate, $toDate)
     {
+        $movementIds=$this->getMovementIds();
         return Movements::select('container_id')
-            ->where('movement_id', 6)
+            ->whereIn('movement_id', $movementIds)
             ->where('company_id', Auth::user()->company_id)
             ->whereBetween('movement_date', [$fromDate, $toDate])
             ->distinct('container_id')
             ->pluck('container_id',)->toArray();
     }
 
+    private function getMovementIds()
+    {
+        $codes = ['LODF'];
+        return ContainersMovement::where('code', $codes)->pluck('id')->toarray();
+    }
+    
     private function downloadExcel($calculation)
     {
-        $filename = 'CalculationPeriod_' . now()->timestamp . '.xls';
+        $filename = 'ExportStorage_' . now()->timestamp . '.xls';
         return Excel::download(new DetentionCalculationPeriodExport($calculation), $filename,\Maatwebsite\Excel\Excel::XLS);
     }
 
