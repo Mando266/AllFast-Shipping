@@ -563,4 +563,15 @@
         });
     });
 </script>
+
+<script>
+    $('#createForm').submit(function() {
+        $('select').removeAttr('disabled');
+    });
+</script>
+<script>
+    $('#createForm').submit(function() {
+        $('input').removeAttr('disabled');
+    });
+</script>
 @endpush
