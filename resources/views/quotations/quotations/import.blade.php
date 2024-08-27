@@ -18,7 +18,7 @@
                                 @permission('Quotation-Create')
                                 <a href="{{route('quotation.importcreate')}}" class="btn btn-primary">New Quotation</a>
                                 @endpermission
-                                <button id="export-current" class="btn btn-warning" type="button">Export</button>
+                                <button id="import-current" class="btn btn-warning" type="button">Export</button>
                             </div>
                         </div>
                     </div>
@@ -278,16 +278,16 @@
                 });
         });
         const searchForm = $("#search-form");
-        $('#export-current').click(() => {
+        $('#import-current').click(() => {
             searchForm.attr('method', 'post');
-            searchForm.attr('action', '{{ route('export.quotation') }}');
+            searchForm.attr('action', '{{ route('quotation.import') }}');
             searchForm.find('input[name="_token"]').prop('disabled', false);
 
             searchForm.submit();
         });
         $('#search-btn').click(() => {
             searchForm.attr('method', 'get');
-            searchForm.attr('action', '{{ route('quotations.index') }}');
+            searchForm.attr('action', '{{ route('quotation.import') }}');
 
             searchForm.submit();
         });
