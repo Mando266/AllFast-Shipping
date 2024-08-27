@@ -8,7 +8,7 @@
                         <nav class="breadcrumb-two" aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a a href="">{{ trans('menu.calculation_period') }}</a></li>
-                                <li class="breadcrumb-item active"><a href="javascript:void(0);">{{ trans('menu.exp_dentention_cal') }}</a>
+                                <li class="breadcrumb-item active"><a href="javascript:void(0);">{{ trans('menu.exp_storage_cal') }}</a>
                                 </li>
                                 <li class="breadcrumb-item"></li>
                             </ol>
@@ -24,8 +24,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
                             <span> </span>
                         </div>
-                        <form action="{{route('export_dentention_calculation')}}">
-
+                        <form action="{{route('export_storage_calculation')}}">
                             @csrf
                             <div class="form-row">
                                 <div class="form-group col-md-4">
