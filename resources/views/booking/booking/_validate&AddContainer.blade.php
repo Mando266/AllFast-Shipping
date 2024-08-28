@@ -152,15 +152,22 @@ $(document).ready(function() {
     function addContainerRow() {
         var newRow = `
             <tr>
+                @if(request()->input('quotation_id') == "0")
+                <td id="request">
+                    <select class="selectpicker form-control request-type" id="requesttype_${containerIndex}" data-live-search="true" name="quotationDis[${containerIndex}][request_type]" data-size="10" title="{{trans('forms.select')}}" required>
+                        <option value="Dry">Dry</option>
+                        <option value="Reefer">Reefer</option>
+                        <option value="Special Equipment">Special Equipment</option>
+                    </select>
+                </td>
+                @endif
                 <td>
                     <input type="text" style="width: 155px;" name="containerDetails[${containerIndex}][container_number]" class="form-control container-number" placeholder="Container No" autocomplete="off" required>
                     <input type="hidden" name="containerDetails[${containerIndex}][container_id]" class="container-id" >
                 </td>
                 <td class="container_type">
-                    <select class="selectpicker form-control" name="containerDetails[${containerIndex}][container_type]" data-live-search="true" data-size="10" title="Select" required>
-                        @foreach ($equipmentTypes as $item)
-                            <option value="{{ $item->id }}">{{ $item->name }}</option>
-                        @endforeach
+                    <select class="selectpicker form-control equipment-type" name="containerDetails[${containerIndex}][container_type]" data-live-search="true" title="Select" required disabled>
+                        <!-- Options will be dynamically populated based on request type -->
                     </select>
                 </td>
                 <td><input type="text" name="containerDetails[${containerIndex}][qty]" class="form-control qty" placeholder="QTY" value = '1' disabled required></td>
@@ -171,13 +178,43 @@ $(document).ready(function() {
                         @endforeach
                     </select>
                 </td>
-                <td><input type="text" name="containerDetails[${containerIndex}][seal_no]" class="form-control" placeholder="Seal No"></td>
+                <td><input type="text" name="containerDetails[${containerIndex}][seal_no]" class="form-control" placeholder="Seal No" autocomplete="off"></td>
                 <td><input type="text" name="containerDetails[${containerIndex}][haz]" class="form-control" placeholder="HAZ / REEFER/ OOG DETAILS / HAZ APPROVAL REF"></td>
                 <td><input type="text" name="containerDetails[${containerIndex}][packs]" class="form-control" autocomplete="off" placeholder="Packs" required></td>
                 <td><input type="text" name="containerDetails[${containerIndex}][pack_type]" class="form-control" autocomplete="off" placeholder="Packs Type" required></td>
                 <td><input type="text" name="containerDetails[${containerIndex}][descripion]" class="form-control input" autocomplete="off" placeholder="Commodity Des"></td>  
                 <td><input type="text" name="containerDetails[${containerIndex}][weight]" class="form-control" placeholder="Gross Weight" required></td>
                 <td><input type="text" name="containerDetails[${containerIndex}][net_weight]" class="form-control" autocomplete="off" placeholder="Net Weight"></td>
+                @if(request()->input('quotation_id') == "0")
+                <td>
+                    <div class="checkbox-group d-flex flex-row">
+                        <div style="display: inline-block; width: 50%;" class="mr-3">
+                            <div style="margin-bottom: 5px;">
+                                <label style="margin-right: 10px; width: 25px; display: inline-block;">SOC</label>
+                                <input type="checkbox" id="soc" name="quotationDis[${containerIndex}][soc]" value="1">
+                            </div>
+                            <div style="margin-bottom: 5px;">
+                                <label style="margin-right: 10px; width: 25px; display: inline-block;">IMO</label>
+                                <input type="checkbox" value="1" name="quotationDis[${containerIndex}][imo]">
+                            </div>
+                            <div>
+                                <label style="margin-right: 10px; width: 25px; display: inline-block;">OOG</label>
+                                <input type="checkbox" value="1" name="quotationDis[${containerIndex}][oog]">
+                            </div>
+                        </div>
+                        <div style="display: inline-block; width: 50%;">
+                            <div style="margin-bottom: 5px;">
+                                <label style="margin-right: 10px; width: 25px; display: inline-block;">RF</label>
+                                <input type="checkbox" value="1" name="quotationDis[${containerIndex}][rf]">
+                            </div>
+                            <div>
+                                <label style="margin-right: 10px; width: 25px; display: inline-block;">NOR</label>
+                                <input type="checkbox" value="1" name="quotationDis[${containerIndex}][nor]">
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                @endif
                 <td><button type="button" class="btn btn-danger removeRow"><i class="fa fa-trash"></i></button></td>
             </tr>`;
         $('#containerDetails tbody').append(newRow);
@@ -194,6 +231,57 @@ $(document).ready(function() {
     $(document).on('click', '.removeRow', function() {
         $(this).closest('tr').remove();
     });
+
+    // Event delegation for dynamically added rows
+    $(document).on('change', 'select[name^="quotationDis"][name$="[request_type]"]', function () {
+        const row = $(this).closest('tr');
+        let selectedRequestType = $(this).val();
+
+        // Make an AJAX request to get the equipment types based on the selected request type
+        $.get(`/api/master/requesttype/${selectedRequestType}`).then(function (data) {
+            let equipmentTypes = data.request_Type || '';
+            let options = `<option value=''>Select...</option>`;
+            
+            for (let i = 0; i < equipmentTypes.length; i++) {
+                options += `<option value='${equipmentTypes[i].id}'>${equipmentTypes[i].name}</option>`;
+            }
+            
+            row.find('select[name^="containerDetails"][name$="[container_type]"]').html(options).prop('disabled', false).selectpicker('refresh');
+            updateEquipmentOptions();
+
+        }).fail(function (xhr, status, error) {
+            console.error('Error fetching equipment types:', status, error);
+        });
+
+        // Handle disabling checkboxes based on request type
+        handleCheckboxDisabling(row, selectedRequestType);
+    });
+
+    // Function to disable/enable checkboxes based on request type
+    function handleCheckboxDisabling(row, requestType) {
+        const checkboxes = {
+            oog: row.find('input[name^="quotationDis"][name$="[oog]"]'),
+            rf: row.find('input[name^="quotationDis"][name$="[rf]"]'),
+            nor: row.find('input[name^="quotationDis"][name$="[nor]"]')
+        };
+
+        // Enable and uncheck all checkboxes initially
+        Object.values(checkboxes).forEach(checkbox => {
+            checkbox.prop('disabled', false);
+            checkbox.prop('checked', false);
+        });
+
+        // Disable specific checkboxes based on the request type
+        const disableActions = {
+            'Dry': ['oog', 'rf', 'nor'],
+            'Reefer': ['oog'],
+            'Special Equipment': ['nor', 'rf']
+        };
+
+        if (disableActions[requestType]) {
+            disableActions[requestType].forEach(type => checkboxes[type].prop('disabled', true));
+        }
+    }
 
     // Use event delegation to handle validation for dynamic rows
     $(document).on('input', '.container-number', function(e) {

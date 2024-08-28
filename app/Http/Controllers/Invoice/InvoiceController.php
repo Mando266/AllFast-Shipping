@@ -330,19 +330,51 @@ class InvoiceController extends Controller
         $this->authorize(__FUNCTION__,Invoice::class);
         $ofrs = null;
         $charges = ChargesDesc::where('type','0')->orderBy('id')->get();
+        $containerDetails = [];
         if ($request->has('bldraft_id')) {
             $blId = $request->input('bldraft_id');
-            $bldraft = BlDraft::where('id', $blId)->with('blDetails')->first();
+            $bldraft = BlDraft::where('id', $blId)->with(['blDetails', 'booking.quotation.quotationDesc'])->first();
             $totalqty = $bldraft->booking->bookingContainerDetails->count();
 
+            // Assuming similar logic is needed for bldraft_id as for booking_ref
+            $containerDetails = $bldraft->booking->bookingContainerDetails
+                ->groupBy('container_type')
+                ->map(function ($group) use ($bldraft) {
+                    // Retrieve the matching QuotationDes entry
+                    $quotationDesc = $bldraft->booking->quotation->quotationDesc
+                        ->where('equipment_type_id', $group->first()->container_type)
+                        ->first();
+                    return [
+                        'type' => $group->first()->containerType->name,
+                        'qty' => $group->sum('qty'),
+                        'amount' => $quotationDesc ? $quotationDesc->ofr : 0,
+                    ];
+                });
         } elseif ($request->has('booking_ref')) {
             $blId = $request->input('booking_ref');
-            $bldraft = Booking::where('id', $blId)->with('bookingContainerDetails')->first();
-            $totalqty = $bldraft->bookingContainerDetails->count();
-        }
+            $bldraft = Booking::where('id', $blId)->with(['bookingContainerDetails', 'quotation.quotationDesc'])->first();
+            $containerDetails = $bldraft->bookingContainerDetails
+            ->groupBy('container_type')
+            ->map(function ($group) use ($bldraft) {
+                // Retrieve the matching QuotationDes entry
+                $quotationDesc = $bldraft->quotation->quotationDesc
+                    ->where('equipment_type_id', $group->first()->container_type)
+                    ->first();
+        
+                return [
+                    'type' => $group->first()->containerType->name,
+                    'qty' => $group->sum('qty'),
+                    'amount' => $quotationDesc ? $quotationDesc->ofr : 0, // Use OFR from QuotationDes or default to 0
+                ];
+            });
+        
+        $totalqty = $containerDetails->sum('qty');
+        } 
 
         $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $cartData = json_decode(request('cart_data_for_invoice'));
+
+        // Pass the data to your view
         return view('invoice.invoice.create_debit',[
             'cartData' => $cartData ?? null,
             'totalqty'=>$totalqty,
@@ -350,6 +382,7 @@ class InvoiceController extends Controller
             'bldraft'=>$bldraft,
             'voyages'=>$voyages,
             'charges' => $charges,
+            'containerDetails' => $containerDetails, // Pass the grouped container details
         ]);
     }
 
