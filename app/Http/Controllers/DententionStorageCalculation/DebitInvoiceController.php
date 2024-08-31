@@ -23,7 +23,7 @@ class DebitInvoiceController extends Controller
     {
         $charges = ChargesDesc::orderBy('id')->get();
         $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
-        $qty = $bldraft->bookingContainerDetails->count();
+        $totalqty = $bldraft->bookingContainerDetails->count();
         $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         
         $containerDetails = [];
@@ -33,7 +33,7 @@ class DebitInvoiceController extends Controller
             }                
         return view('invoice.invoice.create_debit',[
             'notes' => $containerDetails ?? null,
-            'qty'=>$qty,
+            'totalqty'=>$totalqty,
             'detentionAmount'=>$request->grandTotal,
             'bldraft'=>$bldraft,
             'voyages'=>$voyages,

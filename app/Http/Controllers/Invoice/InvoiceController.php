@@ -230,7 +230,7 @@ class InvoiceController extends Controller
             $bldraft = BlDraft::where('id', $blId)->with('blDetails')->first();
             $qty = $bldraft->blDetails->count();
         } elseif ($invoice->booking_ref != 0) {
-            $blId = $request->input('booking_ref');
+            $blId = $invoice->booking_ref;
             $bldraft = Booking::where('id', $blId)->with('bookingContainerDetails')->first();
             $qty = $bldraft->bookingContainerDetails->count();
         }
@@ -360,7 +360,6 @@ class InvoiceController extends Controller
                 $quotationDesc = $bldraft->quotation->quotationDesc
                     ->where('equipment_type_id', $group->first()->container_type)
                     ->first();
-        
                 return [
                     'type' => $group->first()->containerType->name,
                     'qty' => $group->sum('qty'),
@@ -433,6 +432,8 @@ class InvoiceController extends Controller
                     'charge_description'=>$chargeDesc['charge_description'],
                     'size_small'=>$chargeDesc['size_small'],
                     'total_amount'=>$chargeDesc['total_amount'],
+                    'qty'=>$chargeDesc['qty'],
+                    'container_type'=>$chargeDesc['container_type'],
                 ]);
             }
 

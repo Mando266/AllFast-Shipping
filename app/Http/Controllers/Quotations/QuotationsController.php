@@ -236,7 +236,7 @@ class QuotationsController extends Controller
                 'nor' => $quotationDis['nor'] ?? 0,
             ]);
         }  
-        $route = $quotation->shipment_type == "Export" ? 'quotations.index' : 'quotations.import';
+        $route = $quotation->shipment_type == "Export" ? 'quotations.index' : 'quotation.import';
         return redirect()->route($route)->with('success', trans('Quotation.Created'));        
     }
     
@@ -359,7 +359,7 @@ class QuotationsController extends Controller
         }
 
         $quotation->createOrUpdateDesc($request->quotationDis);
-        $route = $quotation->shipment_type == "Export" ? 'quotations.index' : 'quotations.import';
+        $route = $quotation->shipment_type == "Export" ? 'quotations.index' : 'quotation.import';
         return redirect()->route($route)->with('success', trans('Quotation.Updated.Success'));        
     }
 
