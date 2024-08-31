@@ -332,7 +332,6 @@ class InvoiceController extends Controller
         $containerDetails = [];
         $charges = ChargesDesc::where('type','0')->orderBy('id')->get();
         if(request('bldraft_id') == "customize"){
-            $charges = ChargesDesc::where('type','0')->orderBy('id')->get();
             $cons = Customers::where('company_id',Auth::user()->company_id)->whereHas('CustomerRoles', function ($query) {
                 return $query->where('role_id', 2);
             })->with('CustomerRoles.role')->get();
@@ -349,6 +348,7 @@ class InvoiceController extends Controller
                 'voyages'=>$voyages,
                 'ports'=>$ports,
                 'bookings'=>$bookings,
+                'charges'=>$charges,
             ]);
 
         }elseif ($request->has('bldraft_id')) {
