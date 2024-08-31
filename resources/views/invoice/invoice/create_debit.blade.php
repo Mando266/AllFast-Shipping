@@ -25,7 +25,7 @@
                             @endif 
                            <div class="form-group col-md-6">
                                 <label for="customer">Customer<span class="text-warning"> *</span></label> 
-                                <select class="selectpicker form-control" name="customer_id" id="customer" data-live-search="true" data-size="10" title="{{trans('forms.select')}}">
+                                <select class="selectpicker form-control" name="customer_id" id="customer" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" required>
                                     @if($bldraft != null && request()->has('booking_ref'))
                                         @if(optional($bldraft->consignee)->name != null)
                                             <option value="{{optional($bldraft)->customer_consignee_id}}">{{ optional($bldraft->consignee)->name }}
@@ -137,8 +137,10 @@
                             <thead>
                                 <tr>
                                     <th class="text-center">Charge Description</th>
+                                    @if(!isset($detentionAmount))
                                     <th class="text-center">Container Type</th>
                                     <th class="text-center">Qty</th>
+                                    @endif
                                     <th class="text-center">Amount</th>
                                     <th class="text-center">Total Amount</th>
                                 </tr>
@@ -154,8 +156,9 @@
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" value="{{$detentionAmount  / $qty}} " placeholder="Weight" autocomplete="off" disabled style="background-color: white;"></td>
+                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" value="{{$detentionAmount  / $totalqty}} " placeholder="Weight" autocomplete="off" disabled style="background-color: white;"></td>
                                         <td><input type="text" class="form-control" id="ofr" name="invoiceChargeDesc[0][total_amount]" value="{{$detentionAmount}}" placeholder="Ofr" autocomplete="off" disabled style="background-color: white;"></td>
+                                        <td style="display: none;"><input type="hidden" class="form-control" name="invoiceChargeDesc[0][qty]" value="{{ $totalqty }}"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_amount" name="invoiceChargeDesc[0][egy_amount]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount" name="invoiceChargeDesc[0][total_egy]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount_vat" name="invoiceChargeDesc[0][egp_vat]"></td>
@@ -164,7 +167,7 @@
                                     @foreach($containerDetails as $index => $detail)
                                     <tr>
                                         <td>
-                                            <select class="selectpicker form-control" name="invoiceChargeDesc[{{ $index }}][charge_description]" data-live-search="true" data-size="10" title="{{trans('forms.select')}}">
+                                            <select class="selectpicker form-control" name="invoiceChargeDesc[{{ $index }}][charge_description]" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" required>
                                                 @foreach ($charges as $item)
                                                     <option value="{{ $item->name }}" {{ $item->name == old('charge_description') ? 'selected':'' }}>{{ $item->name }}</option>
                                                 @endforeach
