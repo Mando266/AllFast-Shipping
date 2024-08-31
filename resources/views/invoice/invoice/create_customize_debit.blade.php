@@ -23,17 +23,11 @@
                                 <label for="customer">Customer<span class="text-warning"> * (Required.) </span></label>
                                 <select class="selectpicker form-control" name="customer_id" id="customer" data-live-search="true" data-size="10"
                                  title="{{trans('forms.select')}}" required>
-                                        @foreach($ffws as $ffw)
-                                            <option value="{{$ffw->id}}">{{ $ffw->name }} Forwarder</option>
+                                        @foreach($cons as $cons)
+                                            <option value="{{$cons->id}}">{{ $cons->name }} Consignee</option>
                                         @endforeach
                                         @foreach($shippers as $shipper)
                                             <option value="{{$shipper->id}}">{{ $shipper->name }} Shipper</option>
-                                        @endforeach
-                                        @foreach($suppliers as $supplier)
-                                            <option value="{{$supplier->id}}">{{ $supplier->name }} Supplier</option>
-                                        @endforeach
-                                        @foreach($notify as $notifys)
-                                            <option value="{{$notifys->id}}">{{ $notifys->name }} Notify</option>
                                         @endforeach
                                 </select>
                                 @error('customer_id')
