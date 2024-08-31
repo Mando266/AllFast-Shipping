@@ -375,14 +375,17 @@ class InvoiceController extends Controller
             $containerDetails = $bldraft->bookingContainerDetails
             ->groupBy('container_type')
             ->map(function ($group) use ($bldraft) {
-                // Retrieve the matching QuotationDes entry
-                $quotationDesc = $bldraft->quotation->quotationDesc
-                    ->where('equipment_type_id', $group->first()->container_type)
-                    ->first();
+                // Check if the quotation and quotationDesc are available
+                $quotationDesc =$bldraft->quotation 
+                    ? $bldraft->quotation->quotationDesc
+                        ->where('equipment_type_id', $group->first()->container_type)
+                        ->first()
+                    : null;
+                    
                 return [
-                    'type' => $group->first()->containerType->name,
-                    'qty' => $group->sum('qty'),
-                    'amount' => $quotationDesc ? $quotationDesc->ofr : 0, // Use OFR from QuotationDes or default to 0
+                    'type'   => $group->first()->containerType->name,
+                    'qty'    => $group->sum('qty'),
+                    'amount' => $quotationDesc ? $quotationDesc->ofr : null, 
                 ];
             });
         
