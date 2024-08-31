@@ -177,7 +177,11 @@
                                         <td><input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][qty]" value="{{ $detail['qty'] }}" readonly></td>
                                 
                                         <!-- OFR Value from QuotationDes -->
-                                        <td><input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][size_small]" value="{{ $detail['amount'] }}" placeholder="Amount" autocomplete="off" readonly></td>           
+                                        <td>
+                                            <input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][size_small]" value="{{ $detail['amount'] }}" placeholder="Amount" autocomplete="off" 
+                                                   {{ $detail['amount'] != null ? 'readonly' : '' }}>
+                                        </td>
+                                        
                                         <td><input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][total_amount]" value="" placeholder="Total Amount" autocomplete="off"></td>
                             
                                         <td style="display: none;"><input type="hidden" class="form-control" name="invoiceChargeDesc[{{ $index }}][egy_amount]"></td>
