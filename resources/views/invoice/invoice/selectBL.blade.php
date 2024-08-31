@@ -22,6 +22,7 @@
                             <label for="Bldraft">Bill Of Lading No <span class="text-warning"> * </span></label>
                             <select class="selectpicker form-control" id="Bldraft" data-live-search="true" name="booking_ref" data-size="10"
                                     title="{{trans('forms.select')}}" required>
+                                <option value="customize" >Customized Debit</option>
                                 <optgroup label="Import BL">
                                     @foreach ($booking as $item)
                                         <option value="{{$item->id}}" {{$item->id == old('booking_ref',request()->input('booking_ref')) ? 'selected':''}}>{{$item->ref_no}}</option>

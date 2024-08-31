@@ -331,7 +331,26 @@ class InvoiceController extends Controller
         $ofrs = null;
         $charges = ChargesDesc::where('type','0')->orderBy('id')->get();
         $containerDetails = [];
-        if ($request->has('bldraft_id')) {
+        if(request('bldraft_id') == "customize"){
+            $cons = Customers::where('company_id',Auth::user()->company_id)->whereHas('CustomerRoles', function ($query) {
+                return $query->where('role_id', 2);
+            })->with('CustomerRoles.role')->get();
+            $shippers = Customers::where('company_id',Auth::user()->company_id)->whereHas('CustomerRoles', function ($query) {
+                return $query->where('role_id', 1);
+            })->with('CustomerRoles.role')->get();
+            $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
+            $ports = Ports::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
+            $bookings  = Booking::orderBy('id','desc')->where('company_id',Auth::user()->company_id)->get();
+
+            return view('invoice.invoice.create_customize_debit',[
+                'shippers'=>$shippers,
+                'cons'=>$cons,
+                'voyages'=>$voyages,
+                'ports'=>$ports,
+                'bookings'=>$bookings,
+            ]);
+
+        }elseif ($request->has('bldraft_id')) {
             $blId = $request->input('bldraft_id');
             $bldraft = BlDraft::where('id', $blId)->with(['blDetails', 'booking.quotation.quotationDesc'])->first();
             $totalqty = $bldraft->booking->bookingContainerDetails->count();
