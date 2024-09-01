@@ -408,6 +408,40 @@ class InvoiceController extends Controller
         ]);
     }
 
+    public function getBookingDetails($booking_ref)
+    {
+        $booking = Booking::with([
+            'customer', 
+            'forwarder', 
+            'consignee', 
+            'customerNotify', 
+            'loadPort', 
+            'dischargePort', 
+            'voyage', 
+            'equipmentsType'
+        ])->where('id', $booking_ref)->first();
+
+        if (!$booking) {
+            return response()->json(['error' => 'Booking not found'], 404);
+        }
+
+        // Calculate the total quantity based on the equipment type
+        $totalQty = $booking->bookingContainerDetails->sum('qty');
+
+        return response()->json([
+            'customer_id' => $booking->customer_id,
+            'customer_name' => $booking->customer ? $booking->customer->name : null,
+            'load_port_id' => $booking->load_port_id,
+            'load_port_name' => $booking->loadPort ? $booking->loadPort->name : null,
+            'discharge_port_id' => $booking->discharge_port_id,
+            'discharge_port_name' => $booking->dischargePort ? $booking->dischargePort->name : null,
+            'voyage_id' => $booking->voyage_id,
+            'voyage_name' => $booking->voyage ? $booking->voyage->voyage_no : null,
+            'total_qty' => $totalQty,
+        ]);
+    }
+
+
     public function store(Request $request)
     {
         $this->authorize(__FUNCTION__,Invoice::class);

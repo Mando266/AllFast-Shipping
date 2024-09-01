@@ -250,6 +250,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('refund', 'RefundController');
         Route::resource('creditNote', 'CreditController');
         Route::get('get_invoice_json/{invoice}', 'InvoiceController@invoiceJson')->name('invoice.get_invoice_json');
+        Route::get('getBookingDetails/{booking_ref}', [InvoiceController::class, 'getBookingDetails'])->name('invoice.getBookingDetails');
     });
     /*
     |-------------------------------------------
