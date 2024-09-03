@@ -425,12 +425,18 @@ class InvoiceController extends Controller
             return response()->json(['error' => 'Booking not found'], 404);
         }
 
+        $customerId = $booking->shipment_type === 'Import' 
+        ? $booking->customer_consignee_id 
+        : $booking->customer_id;
+
         // Calculate the total quantity based on the equipment type
         $totalQty = $booking->bookingContainerDetails->sum('qty');
 
         return response()->json([
-            'customer_id' => $booking->customer_id,
-            'customer_name' => $booking->customer ? $booking->customer->name : null,
+            'customer_id' => $customerId,
+            'customer_name' => $booking->shipment_type === 'Export' 
+                ? ($booking->consignee ? $booking->consignee->name : null) 
+                : ($booking->customer ? $booking->customer->name : null),
             'load_port_id' => $booking->load_port_id,
             'load_port_name' => $booking->loadPort ? $booking->loadPort->name : null,
             'discharge_port_id' => $booking->discharge_port_id,

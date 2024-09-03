@@ -140,7 +140,7 @@
                                 <thead>
                                     <tr>
                                         <th class="text-center">Charge Description</th>
-                                        <th class="text-center">Rate</th>
+                                        <th class="text-center">Amount</th>
                                         <th class="text-center">Multiply QTY</th>
                                         <th class="text-center">Total</th>
                                         <th class="text-center"><a id="add"> Add <i class="fas fa-plus"></i></a></th>
