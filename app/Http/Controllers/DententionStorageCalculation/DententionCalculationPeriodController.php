@@ -78,7 +78,7 @@ class DententionCalculationPeriodController extends Controller
     {
         $codes = ['RSTR','RCVC'];
         // $codes = ['RCVC'];
-        return ContainersMovement::where('code', $codes)->pluck('id')->toarray();
+        return ContainersMovement::whereIn('code', $codes)->pluck('id')->toarray();
     }
         
     private function downloadExcel($calculation)
