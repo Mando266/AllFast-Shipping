@@ -27,6 +27,21 @@
                         <form action="{{route('export_storage_calculation')}}">
                             @csrf
                             <div class="form-row">
+                                 <div class="form-group col-md-5">
+                                     <label for="booking_type">{{trans('menu.booking_type')}}</label>
+                                     <select class="selectpicker form-control" data-live-search="true" name="booking_type" title="{{trans('forms.select')}}" required>
+                                         <option value="full">{{ trans('menu.full') }}</option>
+                                         <option value="empty">{{ trans('menu.empty') }}</option>
+                                     </select>
+                                 </div>
+                                 <div class="form-group col-md-5">
+                                     <label for="shipment_type">{{trans('menu.shipment_type')}}</label>
+                                     <select class="selectpicker form-control" data-live-search="true" name="shipment_type" title="{{trans('forms.select')}}" required>
+                                         <option value="Export">{{ trans('menu.export') }}</option>
+                                         <option value="Import">{{ trans('menu.import') }}</option>
+                                     </select>
+                                 </div>
+
                                 <div class="form-group col-md-4">
                                     <label>From Date</label>
                                     <input type="date" name="from_date" class="form-control" value="{{old('from_date')}}" required>

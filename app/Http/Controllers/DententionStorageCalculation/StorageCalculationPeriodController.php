@@ -46,11 +46,9 @@ class StorageCalculationPeriodController extends Controller
     */
     public function export(Request $request)
     {
-        $fromDate = Carbon::parse($request->from_date)->startOfDay();
-        $toDate = Carbon::parse($request->to_date)->endOfDay();
-        $containerIds = $this->getContainerIds($fromDate, $toDate);
+        $containerIds = $this->getContainerIds($request);
         if (empty($containerIds)) {
-           return back()->with('error', "No LODF Movement for in this Period $fromDate to $toDate");
+           return back()->with('error', "No LODF Movement for in this Period $request->from_date to $request->to_date");
         }
         $containers = Containers::with('booking')->whereIn('id', $containerIds)->get();
         $payload['from_date'] =$request->from_date;
@@ -64,10 +62,21 @@ class StorageCalculationPeriodController extends Controller
         return $this->downloadExcel($calculation);
     }
 
-    private function getContainerIds($fromDate, $toDate)
+    private function getContainerIds(Request $request)
     {
+                $fromDate = Carbon::parse($request->from_date)->startOfDay();
+                $toDate = Carbon::parse($request->to_date)->endOfDay();
         $movementIds=$this->getMovementIds();
         return Movements::select('container_id')
+            ->whereHas('booking', function ($query) use ($request) {
+                $query->whereIn('shipment_type', ['Export', 'Import']);
+                if ($request->booking_type) {
+                    $query->where('booking_type',$request->booking_type);
+                }
+                if ($request->shipment_type) {
+                    $query->where('shipment_type', $request->shipment_type);
+                }
+            })
             ->whereIn('movement_id', $movementIds)
             ->where('company_id', Auth::user()->company_id)
             ->whereBetween('movement_date', [$fromDate, $toDate])
@@ -77,7 +86,8 @@ class StorageCalculationPeriodController extends Controller
 
     private function getMovementIds()
     {
-        $codes = ['LODF'];
+        // $codes = 'LODF':'SNTC';
+        $codes = 'LODF';
         return ContainersMovement::where('code', $codes)->pluck('id')->toarray();
     }
     
