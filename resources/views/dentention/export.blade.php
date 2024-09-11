@@ -28,14 +28,14 @@
 
                             @csrf
                             <div class="form-row">
-                                <div class="form-group col-md-5">
+                                <div class="form-group col-md-3">
                                     <label for="booking_type">{{trans('menu.booking_type')}}</label>
                                     <select class="selectpicker form-control" data-live-search="true" name="booking_type" title="{{trans('forms.select')}}" required>
                                         <option value="full">{{ trans('menu.full') }}</option>
                                         <option value="empty">{{ trans('menu.empty') }}</option>
                                     </select>
                                 </div>
-                                <div class="form-group col-md-5">
+                                <div class="form-group col-md-3">
                                     <label for="shipment_type">{{trans('menu.shipment_type')}}</label>
                                     <select class="selectpicker form-control" data-live-search="true" name="shipment_type" title="{{trans('forms.select')}}" required>
                                         <option value="Export">{{ trans('menu.export') }}</option>
@@ -43,19 +43,20 @@
                                     </select>
                                 </div>
 
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-3">
                                     <label>From Date</label>
                                     <input type="date" name="from_date" class="form-control" value="{{old('from_date')}}" required>
 
                                 </div>
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-3">
                                     <label>Till Date</label>
                                     <input  type="date" name="to_date" class="form-control" value="{{old('to_date')}}" required>
                                 </div>
-                                <div class="col-md-2 mt-4 text-right">
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-12 text-center">
                                     <button type="submit" class="btn btn-warning mt-3" >Export</button>
                                 </div>
-
                             </div>
                         </form>
                     </div>
