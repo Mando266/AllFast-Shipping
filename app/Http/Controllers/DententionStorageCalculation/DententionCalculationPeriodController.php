@@ -15,15 +15,15 @@ use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\DententionRequest;
 use App\Models\Master\ContainersMovement;
-use App\Services\BookingCalculationService;
+use App\Services\DetentionExportCalculationService;
 use App\Exports\DetentionCalculationPeriodExport;
 
 class DententionCalculationPeriodController extends Controller
 {
   
-    private BookingCalculationService $service;
+    private DetentionExportCalculationService $service;
 
-    public function __construct(BookingCalculationService $service)
+    public function __construct(DetentionExportCalculationService $service)
     {
     $this->service = $service;
     }
@@ -46,15 +46,21 @@ class DententionCalculationPeriodController extends Controller
     */
     public function export(Request $request)
     {
-
         $containerIds = $this->getContainerIds($request);
+        
         if (empty($containerIds)) {
-           return back()->with('error', "No RCVC Movement for in this Period $request->from_date to $request->to_date");
+            $codes = implode('/',$this->getCodes($request->to_code));
+            return back()->with('error', "No $codes Movement for in this Period $request->from_date to $request->to_date");
         }
         $containers = Containers::with('booking')->whereIn('id', $containerIds)->get();
-        $payload['from_date'] =$request->from_date;
-        $payload['to_date'] =$request->to_date;
-        $payload['apply_first_day']=1;
+        $payload=[
+            'from_code'=>$request->from_code,
+            'to_code'=>$request->to_code,
+            'from_date'=>$request->from_date,
+            'to_date'=>$request->to_date,
+            'shipment_type'=>$request->shipment_type,
+            'apply_first_day'=>1
+        ];
         $calculation = $this->service->containersCalculation( $containers,$payload);
         if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
             return $calculation;
@@ -66,7 +72,7 @@ class DententionCalculationPeriodController extends Controller
     {
         $fromDate = Carbon::parse($request->from_date)->startOfDay();
         $toDate = Carbon::parse($request->to_date)->endOfDay();
-        $movementIds=$this->getMovementIds();
+        $movementIds=$this->getMovementIds($request->to_code);
         return Movements::select('container_id')
             ->whereHas('booking', function ($query) use ($request) {
                  $query->whereIn('shipment_type', ['Export', 'Import']);
@@ -84,10 +90,13 @@ class DententionCalculationPeriodController extends Controller
             ->pluck('container_id',)->toArray();
     }
 
-    private function getMovementIds()
+    private function getCodes($codes)
     {
-        $codes = ['RSTR','RCVC'];
-        // $codes = ['RCVC'];
+        return (in_array('ALL', $codes)) ? ['RSTR','RCVC'] : $codes;
+    }
+    private function getMovementIds($codes)
+    {
+        $codes = $this->getCodes($codes);
         return ContainersMovement::whereIn('code', $codes)->pluck('id')->toarray();
     }
         
