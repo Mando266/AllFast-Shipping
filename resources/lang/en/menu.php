@@ -9,6 +9,7 @@ return array (
   'empty' => 'Empty',
   'export' => 'Export',
   'import' => 'Import',
+  'transhipment' => 'Transhipment',
   'dentention_cal' => 'Dentention Calculation',
   'exp_dentention_cal' => 'Export Dentention',
   'storage_cal' => 'Storage Calculation',
