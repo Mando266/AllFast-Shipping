@@ -13,7 +13,7 @@ use App\Models\Master\ContainersTypes;
 use App\Models\Master\ContainersMovement;
 use Illuminate\Database\Eloquent\Builder;
 
-class DetentionExportCalculationService extends BookingCalculationService
+class StorageExportCalculationService extends BookingCalculationService
 {
 
   
@@ -29,7 +29,7 @@ class DetentionExportCalculationService extends BookingCalculationService
         $containerCalc = collect();
         foreach ($containers as $container) {
             $booking_no=$this->getBookingNoMovement($payload,$container->id)->booking_no;
-            $movementId=$this->getBookingNoStartMovement($payload,$booking_no);
+            $movementId=$this->getBookingNoStartMovement($payload);
             $payload['booking_no']=$booking_no;
             $demurrage = $this->getDemurrageTriff($booking_no, isset($payload['is_storage']));
             if ($demurrage instanceof \Illuminate\Http\RedirectResponse) {
@@ -212,14 +212,9 @@ class DetentionExportCalculationService extends BookingCalculationService
 
     }
 
-    private function getBookingNoStartMovement(array $payload,$booking_no)
+    private function getBookingNoStartMovement(array $payload)
     {
-        $code='DCHF';
-        $booking = $this->getBooking($booking_no);
-        if (!$booking) { return null; }
-        if ($payload['shipment_type'] == 'Export') {
-            $code = 'RSVS';
-        }
+        $code=$payload['from_code'];
         return ContainersMovement::where('code', $code)->first()->id;
     }
     
@@ -227,8 +222,7 @@ class DetentionExportCalculationService extends BookingCalculationService
     {
         $fromDate = Carbon::parse($payload['from_date'])->startOfDay();
         $toDate = Carbon::parse($payload['to_date'])->endOfDay();
-        $codes=($payload['shipment_type'] == 'Import')? ['RSTR','RCVC'] :['LODF'];
-        $movement_id= $this->getMovementIds($codes);
+        $movement_id= $this->getMovementIds($payload['to_code']);
         return Movements::select('booking_no')
                 ->whereIn('movement_id', $movement_id)
                 ->where('container_id', $containerId)
@@ -304,7 +298,7 @@ class DetentionExportCalculationService extends BookingCalculationService
      */
     private function getMovementCompletedIds()
     {
-        $codes = ['RCVC', 'LODF','RSTR'];
+        $codes = ['TRFE','LODT','LODF','LODE','SNTS'];
         return $this->getMovementIds($codes);
     }
     
