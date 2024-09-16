@@ -201,7 +201,7 @@
     @push('scripts')
         <script>
             $('#shipment_type').change(function (e) {
-                let targetTextFromCode = 'RSVS';
+                let targetTextFromCode = 'RCVS';
                 let targetTextToCode = ['LODF'];
                 let from_code = $('#from_code');
                 let to_code = $('#to_code');
