@@ -54,7 +54,7 @@
                                     id="shipment_type" title="{{ trans('forms.select') }}" required>
                                     <option value="Export">{{ trans('menu.export') }}</option>
                                     <option value="Import">{{ trans('menu.import') }}</option>
-                                    <option value="Trucking">{{ trans('menu.transhipment') }}
+                                    {{-- <option value="Trucking">{{ trans('menu.transhipment') }} --}}
                                     </option>
                                 </select>
                             </div>
@@ -214,7 +214,7 @@
                 let shipment_type = $('#shipment_type').val();
                 if (shipment_type == 'Export') {
                     $("#from_code option").filter(function () {
-                        return $(this).text() === 'RSVS';
+                        return $(this).text() === 'RCVS';
                     }).prop('selected', true);
 
                     $("#to_code option").filter(function () {

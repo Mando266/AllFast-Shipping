@@ -218,7 +218,7 @@ class DetentionExportCalculationService extends BookingCalculationService
         $booking = $this->getBooking($booking_no);
         if (!$booking) { return null; }
         if ($payload['shipment_type'] == 'Export') {
-            $code = 'RSVS';
+            $code = 'RCVS';
         }
         return ContainersMovement::where('code', $code)->first()->id;
     }
