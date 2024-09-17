@@ -114,7 +114,7 @@ class BookingCalculationService
             $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
             if (!$slab) {
                 $containersType = ContainersTypes::find($container->container_type_id);
-                return back()->with('error', "There is No slabs to {$containersType->name}");
+                return back()->with('error', "There is No slabs to {$containersType->name} in port ".optional($demurrage->ports)->name);
             }
 
             foreach (optional($slab)->periods as $period) {
