@@ -79,7 +79,7 @@ class DetentionExportCalculationService extends BookingCalculationService
             $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
             if (!$slab) {
                 $containersType = ContainersTypes::find($container->container_type_id);
-                return back()->with('error', "There is No slabs to {$containersType->name}");
+                return back()->with('error', "There is No slabs to {$containersType->name} in port ".optional($demurrage->ports)->name);
             }
 
             foreach (optional($slab)->periods as $period) {
@@ -218,7 +218,7 @@ class DetentionExportCalculationService extends BookingCalculationService
         $booking = $this->getBooking($booking_no);
         if (!$booking) { return null; }
         if ($payload['shipment_type'] == 'Export') {
-            $code = 'RSVS';
+            $code = 'RCVS';
         }
         return ContainersMovement::where('code', $code)->first()->id;
     }
