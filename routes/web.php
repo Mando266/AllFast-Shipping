@@ -193,6 +193,8 @@ Route::group(['middleware' => 'auth'], function () {
             ->name('temperature-discrepancy');
         Route::get('{booking}/clone', [BookingController::class, 'clone'])
         ->name('booking.clone');
+
+        Route::post('incrementPrintCount/{id}', [BookingController::class, 'incrementPrintCount']);
     });
     /*
     |-------------------------------------------

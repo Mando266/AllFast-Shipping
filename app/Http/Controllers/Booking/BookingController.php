@@ -510,6 +510,19 @@ class BookingController extends Controller
             'voyagePort' => $voyagePort,
         ]);
     }
+    
+    public function incrementPrintCount($id)
+    {
+        $booking = Booking::find($id);
+        
+        if ($booking) {
+            $booking->increment('print_count');
+            return response()->json(['success' => true]);
+        }
+        
+        return response()->json(['success' => false], 404);
+    }
+
 
     public function arrivalNotification($id)
     {
