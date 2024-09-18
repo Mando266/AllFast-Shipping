@@ -13,58 +13,23 @@ use App\Models\Master\ContainersTypes;
 use App\Models\Master\ContainersMovement;
 use Illuminate\Database\Eloquent\Builder;
 
-class BookingCalculationService
+class DetentionExportCalculationService extends BookingCalculationService
 {
 
-    public function booking(array $columns = ['*'], array $relations = []): Builder
-    {
-        return Booking::select($columns)
-            ->where('booking_type', 'full')
-            ->with($relations)
-            ->orderBy('id', 'desc');
-
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  array  $payload
-     * @return \Illuminate\Http\Response
-     */
-    public function create(array $payload)
-    {
-        if (in_array('all', $payload['container_ids'])) {
-            $mov = Movements::where('booking_no', $payload['booking_no'])->where('company_id', Auth::user()->company_id)
-                ->distinct()->get()->pluck('container_id')->toarray();
-            $containers = Containers::whereIn('id', $mov)->get();
-            $calculation = $this->containersCalculation($containers,$payload );
-        } else {
-            $containers = Containers::whereIn('id', $payload['container_ids'])->get();
-            $calculation = $this->containersCalculation($containers,$payload);
-        }
-        if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
-            return $calculation;
-        }
-
-        return $calculation;
-    }
-
+  
     public function containersCalculation($containers,array $payload =[])
     {
         $movementCompletedIds = $this->getMovementCompletedIds();
-        $movementDCHFId = $this->getDCHFMovementId();
-        $main_movementId = isset($payload['from']) ? $payload['from'] : null;
         $applyDays = 0;
         $applyDays += isset($payload['apply_first_day']) ? 1 : 0;
         $applyDays -= isset($payload['apply_last_day']) ? 1 : 0;
-        $main_booking_no = !isset($payload['from_date']) ? $payload['booking_no'] : null;
         $grandTotal = 0;
         $status = 'in_completed';
         $to_date=isset($payload['to_date'])?Carbon::parse($payload['to_date'])->endOfDay():null;
         $containerCalc = collect();
         foreach ($containers as $container) {
-            $booking_no=$main_booking_no??$this->getBookingNoMovement($payload,$container->id)->booking_no;
-            $movementId=$main_movementId??$this->getBookingNoStartMovement($payload,$booking_no);
+            $booking_no=$this->getBookingNoMovement($payload,$container->id)->booking_no;
+            $movementId=$this->getBookingNoStartMovement($payload,$booking_no);
             $payload['booking_no']=$booking_no;
             $demurrage = $this->getDemurrageTriff($booking_no, isset($payload['is_storage']));
             if ($demurrage instanceof \Illuminate\Http\RedirectResponse) {
@@ -252,7 +217,7 @@ class BookingCalculationService
         $code='DCHF';
         $booking = $this->getBooking($booking_no);
         if (!$booking) { return null; }
-        if (isset($payload['is_storage']) && $booking->shipment_type == 'Export') {
+        if ($payload['shipment_type'] == 'Export') {
             $code = 'RCVS';
         }
         return ContainersMovement::where('code', $code)->first()->id;
@@ -262,15 +227,16 @@ class BookingCalculationService
     {
         $fromDate = Carbon::parse($payload['from_date'])->startOfDay();
         $toDate = Carbon::parse($payload['to_date'])->endOfDay();
-        $movement_id= isset($payload['is_storage'])? 4 : 6 ;
-
+        $codes=($payload['shipment_type'] == 'Import')? ['RSTR','RCVC'] :['LODF'];
+        $movement_id= $this->getMovementIds($codes);
         return Movements::select('booking_no')
-                ->where('movement_id', $movement_id)
+                ->whereIn('movement_id', $movement_id)
                 ->where('container_id', $containerId)
                 ->where('company_id', Auth::user()->company_id)
                 ->whereBetween('movement_date', [$fromDate, $toDate])
                 ->latest('movement_date')->first();
     }
+    
     private function getLastMovement(array $payload,$containerId)
     {
         return  Movements::where('container_id', $containerId)
@@ -332,23 +298,19 @@ class BookingCalculationService
     }
 
     /**
-     * Get the ID of the DCHF movement.
-     *
-     * @return int|null
-     */
-    private function getDCHFMovementId()
-    {
-        return ContainersMovement::where('code', 'DCHF')->first()->id ?? null;
-    }
-    /**
      * Get the ID of the RCVC movement.
      *
      * @return int|null
      */
     private function getMovementCompletedIds()
     {
-        $codes = ['RCVC', 'LODF'];
-        return ContainersMovement::whereIn('code', $codes)->pluck('id')->toarray();
+        $codes = ['RCVC', 'LODF','RSTR'];
+        return $this->getMovementIds($codes);
+    }
+    
+    private function getMovementIds($codes)
+    {
+        return ContainersMovement::whereIn('code', $codes)->pluck('id')->toarray();        
     }
 
     /**

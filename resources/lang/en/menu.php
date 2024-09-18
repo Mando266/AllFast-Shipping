@@ -3,6 +3,13 @@
 return array (
   'dentention' => 'Dentention',
   'storage' => 'Storage',
+  'booking_type' => 'Booking Type',
+  'shipment_type' => 'Shipment Type',
+  'full' => 'Full',
+  'empty' => 'Empty',
+  'export' => 'Export',
+  'import' => 'Import',
+  'transhipment' => 'Transhipment',
   'dentention_cal' => 'Dentention Calculation',
   'exp_dentention_cal' => 'Export Dentention',
   'storage_cal' => 'Storage Calculation',
