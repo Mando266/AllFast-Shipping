@@ -224,10 +224,13 @@ class BookingCalculationService
 
             $grandTotal = $grandTotal + $containerTotal;
             $tempCollection = collect([
+                'container_id' => $container->id,
+                'booking_id' => $booking_no,
                 'container_no' => $container->code,
                 'bl_no' => $startMovement->bl_no,
                 'status' => trans("home.$status"),
                 'container_type' => $container->containersTypes->name,
+                'container_type_id' => $container->container_type_id,
                 'from' => $startMovementDate,
                 'to' => $endMovementDate?? today(),
                 'from_code' => optional(optional($startMovement)->movementcode)->code,

@@ -25,8 +25,8 @@ class DebitInvoiceController extends Controller
         $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
         $qty = $bldraft->bookingContainerDetails->count();
         $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
-        
         $containerDetails = [];
+        $selectedCode=40;
         foreach (json_decode($request->periods,true) as $item) {
                 $formattedString = str_pad($item['name'], 12) . ' ' . $item['days'] . ' Days ' . $item['total'];
                 $containerDetails[] = $formattedString;
@@ -38,6 +38,8 @@ class DebitInvoiceController extends Controller
             'bldraft'=>$bldraft,
             'voyages'=>$voyages,
             'charges' => $charges,
+            'selectedCode' => $selectedCode,
+            'bookingDetails'=>$request->calculation,
         ]);
     }
 

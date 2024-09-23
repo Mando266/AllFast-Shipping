@@ -10,4 +10,5 @@ return array (
   'add_last' => 'Execute Last Day',
   'no_movement' => 'No Next Move',
   'c_invoice' => 'Create Invoive',
+  'extention' => 'Create Extention',
 );

@@ -161,7 +161,7 @@
                                         <td>
                                             <select class="selectpicker form-control" id="Charge Description" data-live-search="true" name="invoiceChargeDesc[0][charge_description]" data-size="10" title="{{trans('forms.select')}}" required>
                                                 @foreach ($charges as $item)
-                                                    <option value="{{$item->name}}" {{($item->name == old($item->charge_description)|| $item->code =='EG-560161093-ID')  ? 'selected':''}}>{{$item->name}}</option>
+                                                    <option value="{{$item->name}}" {{($item->name == old($item->charge_description)|| $item->id ==$selectedCode??0)  ? 'selected':''}}>{{$item->name}}</option>
 
                                                 @endforeach
                                             </select>
@@ -171,10 +171,15 @@
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_amount" name="invoiceChargeDesc[0][egy_amount]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount" name="invoiceChargeDesc[0][total_egy]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount_vat" name="invoiceChargeDesc[0][egp_vat]"></td>
+                                        
+                                        
+                                        
+                                        
                                     </tr>
-                                @endif
-                            </tbody>
-                        </table>
+                                    @endif
+                                </tbody>
+                            </table>
+                            <input type="hidden" class="form-control" name="bookingDetails" value="{{ $bookingDetails??[] }}"></td>
                         <div class="row">
                             <div class="col-md-12 text-center">
                                 <button type="submit" class="btn btn-primary mt-3">{{trans('forms.create')}}</button>

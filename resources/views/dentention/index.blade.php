@@ -135,6 +135,7 @@
                                             </thead>
                                             <tbody>
                                             @if($calculation['containers'])
+                                                <input type="hidden" id="calculation" value="{{$calculation['containers']}}">
                                                 <input type="hidden" id="periods" value="{{$calculation['containers'][0]['periods']}}">
                                             @endif
                                             @foreach($calculation['containers'] as $item)
@@ -184,6 +185,7 @@
                                             </tfoot>
                                         </table>
                                         <div class="col-md-12 text-right">
+                                            <button type="submit" class="btn btn-warning mt-3" id="create_extention">{{ trans('home.extention') }}</button>
                                             <button type="submit" class="btn btn-warning mt-3" id="create_invoive">{{ trans('home.c_invoice') }}</button>
                                         </div>
 
@@ -290,8 +292,6 @@
 
             <script>
                 let company_id = "{{auth()->user()->company_id}}";
-                
-
                 let selectedCodes = '{{ implode(',',$input['container_ids'] ??[]) }}'
                 selectedCodes = selectedCodes.split(',').filter(item => item !== '')
                 $(function() {
@@ -346,18 +346,24 @@
             <script>
                 $('#create_invoive').click(function (e) {
                     e.preventDefault();
-                    
                     let formData = $('#invoiceForm').serialize();
                     let grandTotalText = $('#grandTotal').text();
                     let grandTotal = grandTotalText.match(/\d+/);
                         grandTotal = grandTotal ? parseInt(grandTotal[0], 10) : 0;
                     let periods = $('#periods').val();
+                    let calculation = $('#calculation').val();
                         formData += '&booking_ref=' + encodeURIComponent($('#booking_no').val());
                         formData += '&grandTotal=' + encodeURIComponent(grandTotal);
                         formData += '&periods=' + encodeURIComponent(periods);
-
+                        formData += '&calculation=' + encodeURIComponent(calculation);
                         window.location.href = "{{ route('debit-invoice') }}?" + formData;
+                });
 
+                $('#create_extention').click(function (e) {
+                    e.preventDefault();
+                    let calculation = $('#calculation').val();
+                    formData = 'data=' + encodeURIComponent(calculation);
+                    window.location.href = "{{ route('extention-dententions') }}?" + formData;
                 });
             </script>
 
