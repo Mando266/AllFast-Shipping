@@ -382,14 +382,12 @@ class InvoiceController extends Controller
                 'notes'=>$request->notes,
                 'customize_exchange_rate'=>$request->customize_exchange_rate, 
             ]);
-                        $bookingDetails = json_decode($request->bookingDetails, true);
-                        foreach ($bookingDetails as &$array) {
-                        unset($array['periods'], $array['status']);
-                        $array['invoice_id'] = $invoice->id;
-                        }
-            
+            $bookingDetails = json_decode($request->bookingDetails, true);
+            foreach ($bookingDetails as &$array) {
+                unset($array['periods'], $array['status']);
+                $array['invoice_id'] = $invoice->id;
+            }    
             InvoiceBooking::insert($bookingDetails);
-        
             $setting = Setting::find(1);
     
             $invoice_no = 'DRAFTD';

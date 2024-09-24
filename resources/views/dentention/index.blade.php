@@ -361,8 +361,10 @@
 
                 $('#create_extention').click(function (e) {
                     e.preventDefault();
+                    let formData = $('#invoiceForm').serialize();
                     let calculation = $('#calculation').val();
-                    formData = 'data=' + encodeURIComponent(calculation);
+                    
+                    formData += '&data=' + encodeURIComponent(calculation);
                     window.location.href = "{{ route('extention-dententions') }}?" + formData;
                 });
             </script>

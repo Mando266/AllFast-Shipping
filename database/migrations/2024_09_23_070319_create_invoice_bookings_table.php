@@ -26,7 +26,7 @@ class CreateInvoiceBookingsTable extends Migration
             $table->date('to')->nullable();
             $table->string('from_code','255')->nullable();
             $table->string('to_code','255')->nullable();
-            $table->decimal('total', 8, 4, true)->default(0);
+            $table->decimal('total', 10, 4)->default(0);
             $table->unsignedInteger('daysCount')->define(0);
             $table->unsignedInteger('freeTime')->define(0);
             $table->timestamps();

@@ -27,10 +27,18 @@ class DebitInvoiceController extends Controller
         $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $containerDetails = [];
         $selectedCode=40;
-        foreach (json_decode($request->periods,true) as $item) {
-                $formattedString = str_pad($item['name'], 12) . ' ' . $item['days'] . ' Days ' . $item['total'];
-                $containerDetails[] = $formattedString;
-            }                
+        // foreach (json_decode($request->periods,true) as $item) {
+        //         $formattedString = str_pad($item['name'], 12) . ' ' . $item['days'] . ' Days ' . $item['total'];
+        //         $containerDetails[] = $formattedString;
+        //     }
+        foreach (json_decode($request->calculation,true) as $container) {
+            $containerDetails []= 'Container No: ' .str_pad($container['container_no'], 12)
+            .' To Code: ' .$container['to_code']
+            .' daysCount: ' .$container['daysCount']
+            .' freeTime: ' .$container['freeTime']
+            .' Total: ' .$container['total']
+                    ;
+            }
         return view('invoice.invoice.create_debit',[
             'notes' => $containerDetails ?? null,
             'qty'=>$qty,
