@@ -53,6 +53,7 @@ class BookingCalculationService
     {
         $movementCompletedIds = $this->getMovementCompletedIds();
         $movementDCHFId = $this->getDCHFMovementId();
+        
         $main_movementId = isset($payload['from']) ? $payload['from'] : null;
         $applyDays = 0;
         $applyDays += isset($payload['apply_first_day']) ? 1 : 0;

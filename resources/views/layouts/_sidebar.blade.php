@@ -342,6 +342,7 @@
                                     <a href="{{route('calculation-dentention-period.index')}}"> {{ trans('menu.exp_dentention_cal') }} </a>
                                 </li>
                                 <li>
+                                    {{-- <a href="{{route('calculation-storage-period.index')}}"> {{ trans('menu.exp_storage_cal') }} </a> --}}
                                     <a href="{{route('calculation-storage-period.index')}}"> {{ trans('menu.exp_storage_cal') }} </a>
                                 </li>
                                 @endif
