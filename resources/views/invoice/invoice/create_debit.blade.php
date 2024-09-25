@@ -151,7 +151,7 @@
                                         <td>
                                             <select class="selectpicker form-control" id="Charge Description" data-live-search="true" name="invoiceChargeDesc[0][charge_description]" data-size="10" title="{{trans('forms.select')}}" required>
                                                 @foreach ($charges as $item)
-                                                    <option value="{{$item->name}}" {{($item->name == old($item->charge_description)|| $item->code =='EG-560161093-ID')  ? 'selected':''}}>{{$item->name}}</option>
+                                                    <option value="{{$item->name}}" {{($item->name == old($item->charge_description)|| $item->id ==$selectedCode??0)  ? 'selected':''}}>{{$item->name}}</option>
 
                                                 @endforeach
                                             </select>
@@ -162,35 +162,37 @@
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_amount" name="invoiceChargeDesc[0][egy_amount]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount" name="invoiceChargeDesc[0][total_egy]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount_vat" name="invoiceChargeDesc[0][egp_vat]"></td>
+                                        
                                     </tr>
                                     @else
-                                    @foreach($containerDetails as $index => $detail)
-                                    <tr>
-                                        <td>
-                                            <select class="selectpicker form-control" name="invoiceChargeDesc[{{ $index }}][charge_description]" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" required>
-                                                @foreach ($charges as $item)
-                                                    <option value="{{ $item->name }}" {{ $item->name == old('charge_description') ? 'selected':'' }}>{{ $item->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </td> 
-                                        <td><input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][container_type]" value="{{ $detail['type'] }}" readonly></td>
-                                        <td><input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][qty]" value="{{ $detail['qty'] }}" readonly></td>
+                                        @foreach($containerDetails as $index => $detail)
+                                        <tr>
+                                            <td>
+                                                <select class="selectpicker form-control" name="invoiceChargeDesc[{{ $index }}][charge_description]" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" required>
+                                                    @foreach ($charges as $item)
+                                                        <option value="{{ $item->name }}" {{ $item->name == old('charge_description') ? 'selected':'' }}>{{ $item->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td> 
+                                            <td><input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][container_type]" value="{{ $detail['type'] }}" readonly></td>
+                                            <td><input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][qty]" value="{{ $detail['qty'] }}" readonly></td>
+                                    
+                                            <!-- OFR Value from QuotationDes -->
+                                            <td>
+                                                <input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][size_small]" value="{{ $detail['amount'] }}" placeholder="Amount" autocomplete="off" 
+                                                    {{ $detail['amount'] != null ? 'readonly' : '' }}>
+                                            </td>
+                                            
+                                            <td><input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][total_amount]" value="" placeholder="Total Amount" autocomplete="off"></td>
                                 
-                                        <!-- OFR Value from QuotationDes -->
-                                        <td>
-                                            <input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][size_small]" value="{{ $detail['amount'] }}" placeholder="Amount" autocomplete="off" 
-                                                   {{ $detail['amount'] != null ? 'readonly' : '' }}>
-                                        </td>
-                                        
-                                        <td><input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][total_amount]" value="" placeholder="Total Amount" autocomplete="off"></td>
-                            
-                                        <td style="display: none;"><input type="hidden" class="form-control" name="invoiceChargeDesc[{{ $index }}][egy_amount]"></td>
-                                        <td style="display: none;"><input type="hidden" class="form-control" name="invoiceChargeDesc[{{ $index }}][total_egy]"></td>
-                                        <td style="display: none;"><input type="hidden" class="form-control" name="invoiceChargeDesc[{{ $index }}][egp_vat]"></td>
-                                    </tr>
-                                @endforeach
-                                @endif
+                                            <td style="display: none;"><input type="hidden" class="form-control" name="invoiceChargeDesc[{{ $index }}][egy_amount]"></td>
+                                            <td style="display: none;"><input type="hidden" class="form-control" name="invoiceChargeDesc[{{ $index }}][total_egy]"></td>
+                                            <td style="display: none;"><input type="hidden" class="form-control" name="invoiceChargeDesc[{{ $index }}][egp_vat]"></td>
+                                        </tr>
+                                        @endforeach
+                                    @endif
                             </tbody>
+                            <input type="hidden" class="form-control" name="bookingDetails" value="{{ $bookingDetails??[] }}"></td>
                         </table>
                         <div class="row">
                             <div class="col-md-12 text-center">

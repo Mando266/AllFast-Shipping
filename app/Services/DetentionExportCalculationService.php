@@ -76,7 +76,12 @@ class DetentionExportCalculationService extends BookingCalculationService
             $daysCount = $daysCount + $applyDays;
             $tempDaysCount = $daysCount;
             $diffBetweenDates = 0;
-            $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
+                        $container_type_id=$container->container_type_id;
+                        $container_type_id=$this->isReeferBooking($booking_no)?
+                        $this->getDryContainerTypeId($container->container_type_id)
+                        :$container->container_type_id;
+                        
+                        $slab = $demurrage->slabs()->firstWhere('container_type_id', $container_type_id);
             if (!$slab) {
                 $containersType = ContainersTypes::find($container->container_type_id);
                 return back()->with('error', "There is No slabs to {$containersType->name} in port ".optional($demurrage->ports)->name);

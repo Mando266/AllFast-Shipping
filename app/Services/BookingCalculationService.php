@@ -72,6 +72,7 @@ class BookingCalculationService
             }
             $periodCalc = collect();
             $containerTotal = 0;
+
             $freeTime = isset($payload['is_storage']) ? 0 : $this->getBookingFreeTime($booking_no,$container);
             $free_time = $freeTime ?? 0;
             $startMovement = $this->getStartMovement($container->id, $movementId, $booking_no);
@@ -111,7 +112,12 @@ class BookingCalculationService
             $daysCount = $daysCount + $applyDays;
             $tempDaysCount = $daysCount;
             $diffBetweenDates = 0;
-            $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
+            
+            $container_type_id=$container->container_type_id;
+            $container_type_id=$this->isReeferBooking($booking_no)?
+            $this->getDryContainerTypeId($container->container_type_id)
+            :$container->container_type_id;
+            $slab = $demurrage->slabs()->firstWhere('container_type_id', $container_type_id);
             if (!$slab) {
                 $containersType = ContainersTypes::find($container->container_type_id);
                 return back()->with('error', "There is No slabs to {$containersType->name} in port ".optional($demurrage->ports)->name);
@@ -224,10 +230,13 @@ class BookingCalculationService
 
             $grandTotal = $grandTotal + $containerTotal;
             $tempCollection = collect([
+                'container_id' => $container->id,
+                'booking_id' => $booking_no,
                 'container_no' => $container->code,
                 'bl_no' => $startMovement->bl_no,
                 'status' => trans("home.$status"),
                 'container_type' => $container->containersTypes->name,
+                'container_type_id' => $container->container_type_id,
                 'from' => $startMovementDate,
                 'to' => $endMovementDate?? today(),
                 'from_code' => optional(optional($startMovement)->movementcode)->code,
@@ -379,6 +388,26 @@ class BookingCalculationService
 
     }
 
+    public function getDryContainerTypeId($container_type_id)
+    {
+        $containersTypeCode = ContainersTypes::find($container_type_id)->code;
+        $containers_code=[
+            'RH'=>'HC',
+            'FR'=>'HC',
+            'TK'=>'DV',
+        ];
+        return ContainersTypes::where('code', $containers_code[$container_type_id])->first()->id;
+    }
+    public function isReeferBooking($booking_no)
+    {
+        $booking = $this->getBooking($booking_no);
+        if (!$booking) {
+            return null;
+        }
+        $quotation=optional(optional($booking->quotation)->quotationDesc)->first();
+        return ($quotation->nor && $quotation->request_type == 'Reefer');
+    }
+    
     private function getBookingFreeTime($booking_no,Containers $container)
     {
         $booking = $this->getBooking($booking_no);
