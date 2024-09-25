@@ -18,37 +18,6 @@
                     <form id="createForm" action="{{route('invoice.store')}}" method="POST" enctype="multipart/form-data">
                             @csrf
                         <div class="form-row">
-                            <input type="hidden" name="bldraft_id" value="{{request()->input('bldraft_id')}}">
-                                <div class="form-group col-md-6">
-                                <label for="customer">Customer<span class="text-warning"> * (Required.) </span></label>
-                                <select class="selectpicker form-control" name="customer_id" id="customer" data-live-search="true" data-size="10"
-                                 title="{{trans('forms.select')}}" required>
-                                        @foreach($ffws as $ffw)
-                                            <option value="{{$ffw->id}}">{{ $ffw->name }} Forwarder</option>
-                                        @endforeach
-                                        @foreach($shippers as $shipper)
-                                            <option value="{{$shipper->id}}">{{ $shipper->name }} Shipper</option>
-                                        @endforeach
-                                        @foreach($suppliers as $supplier)
-                                            <option value="{{$supplier->id}}">{{ $supplier->name }} Supplier</option>
-                                        @endforeach
-                                        @foreach($notify as $notifys)
-                                            <option value="{{$notifys->id}}">{{ $notifys->name }} Notify</option>
-                                        @endforeach
-                                </select>
-                                @error('customer_id')
-                                <div style="color: red;">
-                                    {{$message}}
-                                </div>
-                                @enderror
-                            </div> 
-                            <div class="form-group col-md-6">
-                                <label for="customer_id">Customer Name</label>
-                                    <input type="text" id="notifiy" class="form-control"  name="customer"
-                                    placeholder="Customer Name" autocomplete="off" required>
-                            </div> 
-                        </div>
-                        <div class="form-row">
                             <div class="form-group col-md-3" >
                                 <label for="Date">Booking Ref</label>
                                     <select class="selectpicker form-control" id="booking_ref" data-live-search="true" name="booking_ref" data-size="10"
@@ -65,22 +34,20 @@
                             </div> 
                             <div class="form-group col-md-3" >
                                 <label>Load Port</label>
-                                <select class="selectpicker form-control" id="load_port" data-live-search="true" name="load_port" data-size="10"
-                                title="{{trans('forms.select')}}" >
+                                <select class="selectpicker form-control" id="load_port" name="load_port" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" readonly>
                                     @foreach($ports as $port)
-                                    <option value="{{$port->id}}" {{$port->id == old('load_port') ? 'selected':''}}>{{$port->name}}</option>
+                                        <option value="{{$port->id}}" {{$port->id == old('load_port') ? 'selected':''}}>{{$port->name}}</option>
                                     @endforeach
-                                    </select>
+                                </select>
                                 @error('load_port')
                                 <div style="color: red;">
                                     {{$message}}
                                 </div>
                                 @enderror
-                            </div> 
-                            <div class="form-group col-md-3" >
+                            </div>
+                            <div class="form-group col-md-3">
                                 <label>Discharge Port</label>
-                                <select class="selectpicker form-control" id="discharge_port" data-live-search="true" name="discharge_port" data-size="10"
-                                    title="{{trans('forms.select')}}">
+                                <select class="selectpicker form-control" id="discharge_port" name="discharge_port" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" readonly>
                                     @foreach($ports as $port)
                                         <option value="{{$port->id}}" {{$port->id == old('discharge_port') ? 'selected':''}}>{{$port->name}}</option>
                                     @endforeach
@@ -90,20 +57,46 @@
                                     {{$message}}
                                 </div>
                                 @enderror
-                            </div> 
+                            </div>
                             <div class="form-group col-md-3">
                                 <label for="voyage_id">Vessel / Voyage </label>
-                                <select class="selectpicker form-control" id="voyage_id" name="voyage_id" data-live-search="true" data-size="10"
-                                    title="{{trans('forms.select')}}">
+                                <select class="selectpicker form-control" id="voyage_id" name="voyage_id" data-live-search="true" data-size="10" title="{{ trans('forms.select') }}" readonly>
                                     @foreach ($voyages as $item)
-                                        <option value="{{$item->id}}" {{$item->id == old('voyage_id') ? 'selected':''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
+                                        <option value="{{ $item->id }}" {{ $item->id == old('voyage_id') ? 'selected' : '' }}>
+                                            {{ $item->vessel->name }} / {{ $item->voyage_no }} - {{ optional($item->leg)->name }}
+                                        </option>
                                     @endforeach
-                                        </select>
-                                    @error('voyage_id')
+                                </select>
+                                @error('voyage_id')
+                                <div style="color: red;">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </div> 
+                        </div>                           
+                        <div class="form-row">
+                            <input type="hidden" name="bldraft_id" value="{{request()->input('bldraft_id')}}">
+                                <div class="form-group col-md-6">
+                                    <label for="customer">Customer<span class="text-warning"> * (Required.) </span></label>
+                                    <select class="selectpicker form-control" name="customer_id" id="customer" data-live-search="true" data-size="10"
+                                    title="{{trans('forms.select')}}" required>
+                                            @foreach($cons as $cons)
+                                                <option value="{{$cons->id}}">{{ $cons->name }} Consignee</option>
+                                            @endforeach
+                                            @foreach($shippers as $shipper)
+                                                <option value="{{$shipper->id}}">{{ $shipper->name }} Shipper</option>
+                                            @endforeach
+                                    </select>
+                                    @error('customer_id')
                                     <div style="color: red;">
                                         {{$message}}
                                     </div>
                                     @enderror
+                                </div> 
+                            <div class="form-group col-md-6">
+                                <label for="customer_id">Customer Name</label>
+                                    <input type="text" id="notifiy" class="form-control"  name="customer"
+                                    placeholder="Customer Name" autocomplete="off" required>
                             </div>
                         </div> 
                             <div class="form-row">
@@ -129,7 +122,7 @@
                                 </div>
                                 <div class="form-group col-md-3" >
                                     <label>QTY<span class="text-warning"> *</span></label>
-                                        <input type="text" class="form-control" placeholder="Qty" name="qty" autocomplete="off" style="background-color:#fff" value="1" required>
+                                    <input type="text" class="form-control" name="qty" autocomplete="off" value="{{ old('qty', 1) }}">
                                 </div>
                                 <div class="form-group col-md-3" >
                                     <label>Exchange Rate</label>
@@ -147,7 +140,7 @@
                                 <thead>
                                     <tr>
                                         <th class="text-center">Charge Description</th>
-                                        <th class="text-center">Rate</th>
+                                        <th class="text-center">Amount</th>
                                         <th class="text-center">Multiply QTY</th>
                                         <th class="text-center">Total</th>
                                         <th class="text-center"><a id="add"> Add <i class="fas fa-plus"></i></a></th>
@@ -247,6 +240,42 @@
           $('#selectpickers').selectpicker();
 
         });
+
+        $('#booking_ref').on('change', function() {
+            var bookingRef = $(this).val();
+            if (bookingRef) {
+                $.ajax({
+                    url: '/invoice/getBookingDetails/' + bookingRef,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data) {
+                            // Update customer dropdown and name
+                            $('#customer').val(data.customer_id).trigger('change');
+                            $('#notifiy').val(data.customer_name);
+
+                            // Update load port, discharge port, and voyage, and disable them
+                            $('#load_port').val(data.load_port_id).trigger('change').prop('disabled', true).selectpicker('refresh');
+                            $('#discharge_port').val(data.discharge_port_id).trigger('change').prop('disabled', true).selectpicker('refresh');
+                            $('#voyage_id').val(data.voyage_id).trigger('change').prop('disabled', true).selectpicker('refresh');
+
+                            // Update total quantity and disable it
+                            $('input[name="qty"]').val(data.total_qty).prop('disabled', true);
+                        } else {
+                            alert('No data found for the selected booking.');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while retrieving booking details.');
+                    }
+                });
+            }
+        });
+
+        // Before submitting the form, enable the disabled fields so they are included in the form submission
+        $('#createForm').on('submit', function() {
+            $('#load_port, #discharge_port, #voyage_id, input[name="qty"]').prop('disabled', false);
+        });
     }); 
     </script>
 
@@ -279,5 +308,6 @@
         });
 
         calculateAmounts();
+
     </script>
 @endpush

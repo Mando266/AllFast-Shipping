@@ -363,8 +363,9 @@
                     e.preventDefault();
                     let formData = $('#invoiceForm').serialize();
                     let calculation = $('#calculation').val();
-                    
                     formData += '&data=' + encodeURIComponent(calculation);
+                    formData += '&booking_ref=' + encodeURIComponent($('#booking_no').val());
+
                     window.location.href = "{{ route('extention-dententions') }}?" + formData;
                 });
             </script>

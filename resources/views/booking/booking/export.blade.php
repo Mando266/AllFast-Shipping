@@ -8,7 +8,7 @@
                         <nav class="breadcrumb-two" aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a a href="javascript:void(0);">Booking</a></li>
-                                <li class="breadcrumb-item  active"><a href="javascript:void(0);">Import Booking</a></li>
+                                <li class="breadcrumb-item  active"><a href="javascript:void(0);">Export Booking</a></li>
                                 <li class="breadcrumb-item"></li>
                             </ol>
                         </nav>
@@ -464,7 +464,7 @@
         });
         $('#search-btn').click(() => {
             searchForm.attr('method', 'get');
-            searchForm.attr('action', '{{ route('booking.index') }}');
+            searchForm.attr('action', '{{ route('booking.export') }}');
 
             searchForm.submit();
         });

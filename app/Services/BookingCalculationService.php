@@ -114,9 +114,9 @@ class BookingCalculationService
             $diffBetweenDates = 0;
             
             $container_type_id=$container->container_type_id;
-            // $container_type_id=$this->isReeferBooking($booking_no)?
-            // $this->getDryContainerTypeId($container->container_type_id)
-            // :$container->container_type_id;
+            $container_type_id=$this->isReeferBooking($booking_no)?
+            $this->getDryContainerTypeId($container->container_type_id)
+            :$container->container_type_id;
             $slab = $demurrage->slabs()->firstWhere('container_type_id', $container_type_id);
             if (!$slab) {
                 $containersType = ContainersTypes::find($container->container_type_id);
@@ -388,7 +388,7 @@ class BookingCalculationService
 
     }
 
-    private function getDryContainerTypeId($container_type_id)
+    public function getDryContainerTypeId($container_type_id)
     {
         $containersTypeCode = ContainersTypes::find($container_type_id)->code;
         $containers_code=[
@@ -398,7 +398,7 @@ class BookingCalculationService
         ];
         return ContainersTypes::where('code', $containers_code[$container_type_id])->first()->id;
     }
-    private function isReeferBooking($booking_no)
+    public function isReeferBooking($booking_no)
     {
         $booking = $this->getBooking($booking_no);
         if (!$booking) {

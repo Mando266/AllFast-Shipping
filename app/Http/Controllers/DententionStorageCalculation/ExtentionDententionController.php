@@ -10,6 +10,7 @@ use App\Models\Voyages\Voyages;
 use App\Models\Invoice\ChargesDesc;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Invoice\InvoiceBooking;
 
 class ExtentionDententionController extends Controller
 {
@@ -56,10 +57,10 @@ class ExtentionDententionController extends Controller
                     .' prevTotal: '     .$prevTotal
                     .' remain: '        .$rem ;
             $grandTotal+=$rem;
-        }        
+        }  
         return view('invoice.invoice.create_debit',[
                 'notes' => $note ?? null,
-                'qty'=>count($containers),
+                'totalqty'=>count($containers),
                 'detentionAmount'=>$grandTotal,
                 'bldraft'=>$bldraft,
                 'voyages'=>$voyages,

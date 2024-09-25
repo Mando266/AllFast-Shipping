@@ -25,7 +25,7 @@
                             @endif 
                            <div class="form-group col-md-6">
                                 <label for="customer">Customer<span class="text-warning"> *</span></label> 
-                                <select class="selectpicker form-control" name="customer_id" id="customer" data-live-search="true" data-size="10" title="{{trans('forms.select')}}">
+                                <select class="selectpicker form-control" name="customer_id" id="customer" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" required>
                                     @if($bldraft != null && request()->has('booking_ref'))
                                         @if(optional($bldraft->consignee)->name != null)
                                             <option value="{{optional($bldraft)->customer_consignee_id}}">{{ optional($bldraft->consignee)->name }}
@@ -112,17 +112,19 @@
                             </div>
                             <div class="form-group col-md-4">
                                 <label>QTY</label>
-                                <input type="text" class="form-control" placeholder="Qty" name="qty" autocomplete="off" value="{{$qty}}" style="background-color:#fff" disabled>
+                                <input type="text" class="form-control" placeholder="Qty" name="qty" autocomplete="off" value="{{$totalqty}}" style="background-color:#fff" disabled>
 
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="Date">Date</label>
                                 <input type="date" class="form-control" name="date" placeholder="Date" autocomplete="off" required value="{{old('date',date('Y-m-d'))}}">
                             </div>
-                            <!-- <div class="form-group col-md-3"> -->
-                                <!-- <label>Exchange Rate</label> -->
-                                <input class="form-control" type="hidden" name="customize_exchange_rate" id="custom_rate_input" placeholder="Exchange Rate" value='48'>
-                            <!-- </div> -->
+                        </div>
+                        <div class=form-row>
+                             <div class="form-group col-md-4">
+                               <label>Exchange Rate</label>
+                                <input class="form-control" type="text" name="customize_exchange_rate" id="custom_rate_input" placeholder="Exchange Rate" value='50' require>
+                            </div>
                         </div>
                         <div class="form-row">
                             <div class="col-md-12 form-group">
@@ -135,28 +137,16 @@
                             <thead>
                                 <tr>
                                     <th class="text-center">Charge Description</th>
+                                    @if(!isset($detentionAmount))
+                                    <th class="text-center">Container Type</th>
+                                    <th class="text-center">Qty</th>
+                                    @endif
                                     <th class="text-center">Amount</th>
                                     <th class="text-center">Total Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @if(!isset($detentionAmount))
-                                    <tr>
-                                        <td>
-                                            <select class="selectpicker form-control" id="Charge Description" data-live-search="true" name="invoiceChargeDesc[0][charge_description]" data-size="10" title="{{trans('forms.select')}}">
-                                                @foreach ($charges as $item)
-                                                    <option value="{{$item->name}}" {{$item->name == old($item->charge_description)? 'selected':''}}>{{$item->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </td> 
-                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" value="" placeholder="Amount" autocomplete="off"  style="background-color: white;" disabled></td>
-                                        <td><input type="text" class="form-control" id="ofr" name="invoiceChargeDesc[0][total_amount]" value="" placeholder="Total Amount" autocomplete="off" style="background-color: white;" disabled></td>
-                                    
-                                        <td style="display: none;"><input type="hidden" class="form-control" id="calculated_amount" name="invoiceChargeDesc[0][egy_amount]"></td>
-                                        <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount" name="invoiceChargeDesc[0][total_egy]"></td>
-                                        <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount_vat" name="invoiceChargeDesc[0][egp_vat]"></td>
-                                    </tr>
-                                @else
+                                @if(isset($detentionAmount))
                                     <tr>
                                         <td>
                                             <select class="selectpicker form-control" id="Charge Description" data-live-search="true" name="invoiceChargeDesc[0][charge_description]" data-size="10" title="{{trans('forms.select')}}" required>
@@ -166,20 +156,44 @@
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" value="{{$detentionAmount  / $qty}} " placeholder="Weight" autocomplete="off" disabled style="background-color: white;"></td>
+                                        <td><input type="text" class="form-control" id="size_small" name="invoiceChargeDesc[0][size_small]" value="{{$detentionAmount  / $totalqty}} " placeholder="Weight" autocomplete="off" disabled style="background-color: white;"></td>
                                         <td><input type="text" class="form-control" id="ofr" name="invoiceChargeDesc[0][total_amount]" value="{{$detentionAmount}}" placeholder="Ofr" autocomplete="off" disabled style="background-color: white;"></td>
+                                        <td style="display: none;"><input type="hidden" class="form-control" name="invoiceChargeDesc[0][qty]" value="{{ $totalqty }}"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_amount" name="invoiceChargeDesc[0][egy_amount]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount" name="invoiceChargeDesc[0][total_egy]"></td>
                                         <td style="display: none;"><input type="hidden" class="form-control" id="calculated_total_amount_vat" name="invoiceChargeDesc[0][egp_vat]"></td>
                                         
-                                        
-                                        
-                                        
                                     </tr>
+                                    @else
+                                        @foreach($containerDetails as $index => $detail)
+                                        <tr>
+                                            <td>
+                                                <select class="selectpicker form-control" name="invoiceChargeDesc[{{ $index }}][charge_description]" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" required>
+                                                    @foreach ($charges as $item)
+                                                        <option value="{{ $item->name }}" {{ $item->name == old('charge_description') ? 'selected':'' }}>{{ $item->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </td> 
+                                            <td><input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][container_type]" value="{{ $detail['type'] }}" readonly></td>
+                                            <td><input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][qty]" value="{{ $detail['qty'] }}" readonly></td>
+                                    
+                                            <!-- OFR Value from QuotationDes -->
+                                            <td>
+                                                <input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][size_small]" value="{{ $detail['amount'] }}" placeholder="Amount" autocomplete="off" 
+                                                    {{ $detail['amount'] != null ? 'readonly' : '' }}>
+                                            </td>
+                                            
+                                            <td><input type="text" class="form-control" name="invoiceChargeDesc[{{ $index }}][total_amount]" value="" placeholder="Total Amount" autocomplete="off"></td>
+                                
+                                            <td style="display: none;"><input type="hidden" class="form-control" name="invoiceChargeDesc[{{ $index }}][egy_amount]"></td>
+                                            <td style="display: none;"><input type="hidden" class="form-control" name="invoiceChargeDesc[{{ $index }}][total_egy]"></td>
+                                            <td style="display: none;"><input type="hidden" class="form-control" name="invoiceChargeDesc[{{ $index }}][egp_vat]"></td>
+                                        </tr>
+                                        @endforeach
                                     @endif
-                                </tbody>
-                            </table>
+                            </tbody>
                             <input type="hidden" class="form-control" name="bookingDetails" value="{{ $bookingDetails??[] }}"></td>
+                        </table>
                         <div class="row">
                             <div class="col-md-12 text-center">
                                 <button type="submit" class="btn btn-primary mt-3">{{trans('forms.create')}}</button>
@@ -217,28 +231,37 @@
     });
 
     function calculateAmounts() {
-        let exchangeRate = parseFloat($('#custom_rate_input').val());
-        let sizeSmall = parseFloat($('input[name="invoiceChargeDesc[0][size_small]"]').val());
-        let totalAmount = parseFloat($('input[name="invoiceChargeDesc[0][total_amount]"]').val());
-        let qty = parseFloat($('input[name="qty"]').val());
+        $('tbody tr').each(function() {
+            let qty = parseFloat($(this).find('input[name$="[qty]"]').val()) || 0;
+            let amount = parseFloat($(this).find('input[name$="[size_small]"]').val()) || 0;
+            let total = qty * amount;
 
-        let totalUsd = sizeSmall * qty;
-        let egyAmount = sizeSmall * exchangeRate;
-        let totalEgy = totalUsd * exchangeRate;
-        let totalEgyaftervat = totalUsd * exchangeRate;
+            $(this).find('input[name$="[total_amount]"]').val(total.toFixed(2));
 
-        $('input[name="invoiceChargeDesc[0][total_amount]"]').val(totalUsd.toFixed(2));
-        $('input[name="invoiceChargeDesc[0][egy_amount]"]').val(egyAmount.toFixed(2));
-        $('input[name="invoiceChargeDesc[0][total_egy]"]').val(totalEgy.toFixed(2));
-        $('input[name="invoiceChargeDesc[0][egp_vat]"]').val(totalEgy.toFixed(2));
+            // Calculate EGP values based on exchange rate
+            let exchangeRate = parseFloat($('#custom_rate_input').val()) || 1;
+            let egyAmount = amount * exchangeRate;
+            let totalEgy = total * exchangeRate;
+            let totalEgyAfterVat = totalEgy; // Adjust if VAT needs to be applied
+
+            // Update the respective fields with calculated values
+            $(this).find('input[name$="[egy_amount]"]').val(egyAmount.toFixed(2));
+            $(this).find('input[name$="[total_egy]"]').val(totalEgy.toFixed(2));
+            $(this).find('input[name$="[egp_vat]"]').val(totalEgyAfterVat.toFixed(2));
+        });
     }
 
-    $(document).on('input', '#custom_rate_input, input[name="invoiceChargeDesc[0][size_small]"], input[name="invoiceChargeDesc[0][total_amount]"]', function() {
+    $(document).on('input', '#custom_rate_input, input[name$="[qty]"], input[name$="[size_small]"], input[name$="[total_amount]"]', function() {
         calculateAmounts();
     });
 
     $(document).ready(function() {
         calculateAmounts();
+    });
+
+    $('#createForm').submit(function() {
+        $('input').removeAttr('disabled');
+        $('select').removeAttr('disabled');
     });
 </script>
 @endpush

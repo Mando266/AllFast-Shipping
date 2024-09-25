@@ -229,7 +229,7 @@ class InvoiceController extends Controller
             $bldraft = BlDraft::where('id', $blId)->with('blDetails')->first();
             $qty = $bldraft->blDetails->count();
         } elseif ($invoice->booking_ref != 0) {
-            $blId = $request->input('booking_ref');
+            $blId = $invoice->booking_ref;
             $bldraft = Booking::where('id', $blId)->with('bookingContainerDetails')->first();
             $qty = $bldraft->bookingContainerDetails->count();
         }
@@ -328,20 +328,74 @@ class InvoiceController extends Controller
     {
         $this->authorize(__FUNCTION__,Invoice::class);
         $ofrs = null;
+        $containerDetails = [];
         $charges = ChargesDesc::where('type','0')->orderBy('id')->get();
-        if ($request->has('bldraft_id')) {
+        if(request('bldraft_id') == "customize"){
+            $cons = Customers::where('company_id',Auth::user()->company_id)->whereHas('CustomerRoles', function ($query) {
+                return $query->where('role_id', 2);
+            })->with('CustomerRoles.role')->get();
+            $shippers = Customers::where('company_id',Auth::user()->company_id)->whereHas('CustomerRoles', function ($query) {
+                return $query->where('role_id', 1);
+            })->with('CustomerRoles.role')->get();
+            $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
+            $ports = Ports::where('company_id',Auth::user()->company_id)->orderBy('id')->get();
+            $bookings  = Booking::orderBy('id','desc')->where('company_id',Auth::user()->company_id)->get();
+
+            return view('invoice.invoice.create_customize_debit',[
+                'shippers'=>$shippers,
+                'cons'=>$cons,
+                'voyages'=>$voyages,
+                'ports'=>$ports,
+                'bookings'=>$bookings,
+                'charges'=>$charges,
+            ]);
+
+        }elseif ($request->has('bldraft_id')) {
             $blId = $request->input('bldraft_id');
-            $bldraft = BlDraft::where('id', $blId)->with('blDetails')->first();
+            $bldraft = BlDraft::where('id', $blId)->with(['blDetails', 'booking.quotation.quotationDesc'])->first();
             $totalqty = $bldraft->booking->bookingContainerDetails->count();
 
+            // Assuming similar logic is needed for bldraft_id as for booking_ref
+            $containerDetails = $bldraft->booking->bookingContainerDetails
+                ->groupBy('container_type')
+                ->map(function ($group) use ($bldraft) {
+                    // Retrieve the matching QuotationDes entry
+                    $quotationDesc = $bldraft->booking->quotation->quotationDesc
+                        ->where('equipment_type_id', $group->first()->container_type)
+                        ->first();
+                    return [
+                        'type' => $group->first()->containerType->name,
+                        'qty' => $group->sum('qty'),
+                        'amount' => $quotationDesc ? $quotationDesc->ofr : 0,
+                    ];
+                });
         } elseif ($request->has('booking_ref')) {
             $blId = $request->input('booking_ref');
-            $bldraft = Booking::where('id', $blId)->with('bookingContainerDetails')->first();
-            $totalqty = $bldraft->bookingContainerDetails->count();
-        }
+            $bldraft = Booking::where('id', $blId)->with(['bookingContainerDetails', 'quotation.quotationDesc'])->first();
+            $containerDetails = $bldraft->bookingContainerDetails
+            ->groupBy('container_type')
+            ->map(function ($group) use ($bldraft) {
+                // Check if the quotation and quotationDesc are available
+                $quotationDesc =$bldraft->quotation 
+                    ? $bldraft->quotation->quotationDesc
+                        ->where('equipment_type_id', $group->first()->container_type)
+                        ->first()
+                    : null;
+                    
+                return [
+                    'type'   => $group->first()->containerType->name,
+                    'qty'    => $group->sum('qty'),
+                    'amount' => $quotationDesc ? $quotationDesc->ofr : null, 
+                ];
+            });
+        
+        $totalqty = $containerDetails->sum('qty');
+        } 
 
         $voyages    = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $cartData = json_decode(request('cart_data_for_invoice'));
+
+        // Pass the data to your view
         return view('invoice.invoice.create_debit',[
             'cartData' => $cartData ?? null,
             'totalqty'=>$totalqty,
@@ -349,8 +403,49 @@ class InvoiceController extends Controller
             'bldraft'=>$bldraft,
             'voyages'=>$voyages,
             'charges' => $charges,
+            'containerDetails' => $containerDetails, // Pass the grouped container details
         ]);
     }
+
+    public function getBookingDetails($booking_ref)
+    {
+        $booking = Booking::with([
+            'customer', 
+            'forwarder', 
+            'consignee', 
+            'customerNotify', 
+            'loadPort', 
+            'dischargePort', 
+            'voyage', 
+            'equipmentsType'
+        ])->where('id', $booking_ref)->first();
+
+        if (!$booking) {
+            return response()->json(['error' => 'Booking not found'], 404);
+        }
+
+        $customerId = $booking->shipment_type === 'Import' 
+        ? $booking->customer_consignee_id 
+        : $booking->customer_id;
+
+        // Calculate the total quantity based on the equipment type
+        $totalQty = $booking->bookingContainerDetails->sum('qty');
+
+        return response()->json([
+            'customer_id' => $customerId,
+            'customer_name' => $booking->shipment_type === 'Export' 
+                ? ($booking->consignee ? $booking->consignee->name : null) 
+                : ($booking->customer ? $booking->customer->name : null),
+            'load_port_id' => $booking->load_port_id,
+            'load_port_name' => $booking->loadPort ? $booking->loadPort->name : null,
+            'discharge_port_id' => $booking->discharge_port_id,
+            'discharge_port_name' => $booking->dischargePort ? $booking->dischargePort->name : null,
+            'voyage_id' => $booking->voyage_id,
+            'voyage_name' => $booking->voyage ? $booking->voyage->voyage_no : null,
+            'total_qty' => $totalQty,
+        ]);
+    }
+
 
     public function store(Request $request)
     {
@@ -403,6 +498,8 @@ class InvoiceController extends Controller
                     'charge_description'=>$chargeDesc['charge_description'],
                     'size_small'=>$chargeDesc['size_small'],
                     'total_amount'=>$chargeDesc['total_amount'],
+                     'qty'=>$chargeDesc['qty']??null,
+                    'container_type'=>$chargeDesc['container_type']??null,
                 ]);
             }
 

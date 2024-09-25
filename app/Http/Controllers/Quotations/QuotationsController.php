@@ -36,6 +36,7 @@ class QuotationsController extends Controller
     
     private function getQuotationsData($shipmentType)
     {
+
         $quotations = Quotation::filter(new QuotationIndexFilter(request()))
             ->where('company_id', Auth::user()->company_id)
             ->where('shipment_type', $shipmentType)
@@ -48,7 +49,7 @@ class QuotationsController extends Controller
         ->where('shipment_type', $shipmentType)->get();
         $customers = Customers::where('company_id', Auth::user()->company_id)->orderBy('id')->get();
         $ports = Ports::orderBy('id')->get();
-    
+     
         return [
             'items' => $quotations,
             'exportQuotations' => $exportQuotations,
@@ -235,7 +236,7 @@ class QuotationsController extends Controller
                 'nor' => $quotationDis['nor'] ?? 0,
             ]);
         }  
-        $route = $quotation->shipment_type == "Export" ? 'quotations.index' : 'quotations.import';
+        $route = $quotation->shipment_type == "Export" ? 'quotations.index' : 'quotation.import';
         return redirect()->route($route)->with('success', trans('Quotation.Created'));        
     }
     
@@ -358,7 +359,8 @@ class QuotationsController extends Controller
         }
 
         $quotation->createOrUpdateDesc($request->quotationDis);
-        return redirect()->route('quotations.index')->with('success', trans('Quotation.updated.success'));
+        $route = $quotation->shipment_type == "Export" ? 'quotations.index' : 'quotation.import';
+        return redirect()->route($route)->with('success', trans('Quotation.Updated.Success'));        
     }
 
     public function approve($id)
