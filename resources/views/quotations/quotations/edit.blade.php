@@ -310,7 +310,7 @@
                                             </select>
                                         </td>  
                                         <td>
-                                            <select class="selectpicker form-control equipment-type" id="equipments_type" data-live-search="true" name="quotationDis[{{ $key }}][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" readonly>
+                                            <select class="selectpicker form-control equipment-type" id="equipments_type" data-live-search="true" name="quotationDis[{{ $key }}][equipment_type_id]" data-size="10" title="{{trans('forms.select')}}" disabled>
                                                 @foreach ($equipment_types as $item)
                                                     <option value="{{$item->id}}" {{$item->id == old('equipment_type_id', $desc->equipment_type_id) ? 'selected':''}}>{{$item->name}}</option>
                                                 @endforeach
@@ -329,7 +329,7 @@
                                             </select>
                                         </td>
                                         <td>
-                                            <input type="text" id="dayes" name="quotationDis[{{$key}}][ofr]" class="form-control" autocomplete="off" value="{{old('ofr',$desc->ofr)}}" readonly>
+                                            <input type="text" id="dayes" name="quotationDis[{{$key}}][ofr]" class="form-control" autocomplete="off" value="{{old('ofr',$desc->ofr)}}" >
                                         </td>
                                         <td>
                                             <input type="text" id="dayes" name="quotationDis[{{$key}}][free_time]" placeholder="Free Time"  class="form-control" autocomplete="off" value="{{old('free_time',$desc->free_time)}}"  required>

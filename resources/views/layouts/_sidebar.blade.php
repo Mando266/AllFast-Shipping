@@ -334,8 +334,7 @@
                                 @endpermission -->
                                 @permission('Demurrage-List')
                                 <li>
-                                        <a href="{{route('dententions.index')}}"> {{ trans('menu.dentention') }} </a>
-                                </li>
+                                  </li>
                                 <li>
                                     <a href="{{route('storage.index')}}"> {{ trans('menu.storage') }} </a>
                                 </li>
@@ -414,11 +413,11 @@
                                 </li>
                                 @endpermission
 
-                                <!-- @permission('XML-List')
+                                @permission('XML-List')
                                 <li>
                                     <a href="{{route('xml.index')}}"> Manifest XML Gates </a>
                                 </li>
-                                @endpermission -->
+                                @endpermission
                                 </ul>
                         </li>
                         @endpermission
