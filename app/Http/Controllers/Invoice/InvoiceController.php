@@ -2,25 +2,26 @@
 
 namespace App\Http\Controllers\Invoice;
 
-use App\Filters\Invoice\InvoiceIndexFilter;
-use App\Http\Controllers\Controller;
-use App\Models\Bl\BlDraft;
-use App\Models\Booking\Booking;
-use App\Models\Containers\Demurrage;
-use App\Models\Invoice\ChargesDesc;
-use App\Models\Invoice\Invoice;
-use App\Models\Invoice\InvoiceChargeDesc;
-use App\Models\Master\ContainersTypes;
-use App\Models\Master\Customers;
-use App\Models\Master\Ports;
-use App\Models\Quotations\LocalPortTriff;
-use App\Models\Voyages\VoyagePorts;
-use App\Models\Voyages\Voyages;
 use App\Setting;
 use Carbon\Carbon;
+use App\Models\Bl\BlDraft;
+use App\Models\Master\Ports;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
+use App\Models\Booking\Booking;
+use App\Models\Invoice\Invoice;
+use App\Models\Voyages\Voyages;
+use App\Models\Master\Customers;
+use App\Models\Invoice\ChargesDesc;
+use App\Models\Voyages\VoyagePorts;
+use App\Http\Controllers\Controller;
+use App\Models\Containers\Demurrage;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Invoice\InvoiceBooking;
+use App\Models\Master\ContainersTypes;
+use App\Models\Invoice\InvoiceChargeDesc;
+use App\Models\Quotations\LocalPortTriff;
+use App\Filters\Invoice\InvoiceIndexFilter;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class InvoiceController extends Controller
 {
@@ -34,7 +35,6 @@ class InvoiceController extends Controller
 
         $exportinvoices = Invoice::filter(new InvoiceIndexFilter(request()))->orderBy('id','desc')
         ->where('company_id',Auth::user()->company_id)->with('chargeDesc','bldraft','receipts')->get();
-        //dd($exportinvoices);
         session()->flash('invoice',$exportinvoices);
         $invoiceRef = Invoice::orderBy('id','desc')->where('company_id',Auth::user()->company_id)->get();
         $bldrafts = BlDraft::where('company_id',Auth::user()->company_id)->get();
@@ -149,7 +149,6 @@ class InvoiceController extends Controller
     
     public function storeInvoice(Request $request)
     {
-        //dd($request->input());
             request()->validate([
                 'customer' => ['required'],
                 'customer_id' => ['required'],
@@ -463,7 +462,6 @@ class InvoiceController extends Controller
             if($totalAmount == 0){
                 return redirect()->back()->with('error','Invoice Total Amount Can not be Equal Zero')->withInput($request->input());
             }
-             
             $invoice = Invoice::create([
                 'booking_ref'=>$request->booking_ref,
                 'customer'=>$request->customer,
@@ -479,7 +477,12 @@ class InvoiceController extends Controller
                 'notes'=>$request->notes,
                 'customize_exchange_rate'=>$request->customize_exchange_rate, 
             ]);
-        
+            $bookingDetails = json_decode($request->bookingDetails, true);
+            foreach ($bookingDetails as &$array) {
+                unset($array['periods'], $array['status']);
+                $array['invoice_id'] = $invoice->id;
+            }    
+            InvoiceBooking::insert($bookingDetails);
             $setting = Setting::find(1);
     
             $invoice_no = 'DRAFTD';
@@ -495,8 +498,8 @@ class InvoiceController extends Controller
                     'charge_description'=>$chargeDesc['charge_description'],
                     'size_small'=>$chargeDesc['size_small'],
                     'total_amount'=>$chargeDesc['total_amount'],
-                    'qty'=>$chargeDesc['qty'],
-                    'container_type'=>$chargeDesc['container_type'],
+                     'qty'=>$chargeDesc['qty']??null,
+                    'container_type'=>$chargeDesc['container_type']??null,
                 ]);
             }
 
