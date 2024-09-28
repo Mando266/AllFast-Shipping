@@ -24,14 +24,17 @@ class ExtentionDententionController extends Controller
     public function __invoke(Request $request)
     {
         $codes=['SNTC'];
-        $charges = ChargesDesc::orderBy('id')->get();
-        $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
-        $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
-        $selectedCode=40;
         $containers=json_decode($request->data,true);
         $containers = array_filter($containers, function($container) use ($codes) {
             return in_array($container['to_code'],$codes);
         });
+        if (empty($containers)) {
+            return back()->with(['warning'=>trans('home.extention_msg'), 'input' => $request->input()]);
+        }
+        $charges = ChargesDesc::orderBy('id')->get();
+        $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
+        $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
+        $selectedCode=40;
         $invoice = Invoice::with('invoiceBooking')->where('booking_ref',$request->booking_no)
                     ->where('type','debit')
                     ->latest('date')->first();
