@@ -11,4 +11,6 @@ return array (
   'no_movement' => 'No Next Move',
   'c_invoice' => 'Create Invoive',
   'extention' => 'Create Extention',
+  'extention_msg' => 'No containers need to Extented.',
+  
 );
