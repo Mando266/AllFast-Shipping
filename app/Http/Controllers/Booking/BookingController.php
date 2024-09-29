@@ -16,6 +16,8 @@ use App\Models\Master\Ports;
 use App\Models\Master\Suppliers;
 use App\Models\Master\Terminals;
 use App\Models\Master\Vessels;
+use App\Models\Master\VesselType;
+use App\Models\Master\VesselOperators;
 use App\Models\Quotations\Quotation;
 use App\Models\Voyages\VoyagePorts;
 use App\Models\Voyages\Voyages;
@@ -134,8 +136,20 @@ class BookingController extends Controller
     {
         $this->authorize(__FUNCTION__, Booking::class);
         $this->validateQuotation();
+        
+        // Fetch additional data required for the form
+        $quotations = Quotation::all(); // Fetch quotations
+        $vessel_types = VesselType::all(); // Fetch vessel types
+        $vessel_operators = VesselOperators::all(); // Fetch vessel operators
     
-        return view('booking.booking.create', $this->getBookingCreateData('discharge_port_id'));
+        // Merge additional data with existing data fetched by getBookingCreateData()
+        $data = $this->getBookingCreateData('discharge_port_id'); // Fetch all required data
+        $data['quotations'] = $quotations;
+        $data['vessel_types'] = $vessel_types;
+        $data['vessel_operators'] = $vessel_operators;
+    
+        // Return the view with the merged data
+        return view('booking.booking.create', $data);
     }
     
     public function exportcreate()
@@ -451,6 +465,13 @@ class BookingController extends Controller
         }else{
             $booking->ref_no = $request->input('ref_no');
         }
+
+         // Handle optional Transhipment fields
+        if ($request->input('is_transhipment')) {
+            $booking->transhipment_port = $request->input('transhipment_port', null);
+            $booking->final_destination = $request->input('final_destination', null);
+        }
+
         $booking->save();
 
         if ($request->hasFile('certificat')) {

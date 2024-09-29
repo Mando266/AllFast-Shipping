@@ -16,8 +16,8 @@
                 <div class="widget-content widget-content-area">
                     <form id="createForm" action="{{route('booking.create')}}" method="get">
                             @csrf
-                        <div class="form-row">
-                            <div class="form-group col-md-8">
+                        <div class="form-row align-items-center">
+                            <div class="form-group col-md-7">
                                 <label for="quotation">Quotation</label>
                                 <select class="selectpicker form-control" id="quotation_id" name="quotation_id" data-live-search="true" data-size="10"
                                     title="{{trans('forms.select')}}">
@@ -32,7 +32,13 @@
                                 </div>
                                 @enderror
                             </div>
-                               
+                            <div class="col-2"></div>
+                        
+                            <!-- Transhipment Checkbox -->
+                            <div class="form-group col-md-3">
+                                <label for="is_transhipment" class="mr-2 mb-0">Is Transhipment</label>
+                                <input type="checkbox" id="is_transhipment" name="is_transhipment">
+                            </div>
                         </div>
 
                         <div class="row">
