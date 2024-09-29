@@ -7,9 +7,9 @@
                     <div class="widget-heading">
                         <nav class="breadcrumb-two" aria-label="breadcrumb">
                             <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="javascript:void(0);">Triffs</a></li>
+                                <li class="breadcrumb-item"><a href="javascript:void(0);">Tariffs</a></li>
                                 <li class="breadcrumb-item"><a href="{{route('demurrage.index')}}">Demurrage & Dentention</a></li>
-                                <li class="breadcrumb-item active"><a href="javascript:void(0);">Add New Demurrage & Dentention</a></li>
+                                <li class="breadcrumb-item active"><a href="javascript:void(0);">Add New Tariff</a></li>
                                 <li class="breadcrumb-item"></li>
                             </ol>
                         </nav>
@@ -19,7 +19,7 @@
                             @csrf
                             <!-- Existing form fields -->
                             <div class="form-row">
-                                <div class="form-group col-md-4">
+                                <!-- <div class="form-group col-md-4">
                                     <label for="countryInput">{{trans('company.country')}} <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="country" data-live-search="true" name="country_id" data-size="10" title="{{trans('forms.select')}}" required>
                                         @foreach ($countries as $item)
@@ -31,11 +31,11 @@
                                         {{$message}}
                                     </div>
                                     @enderror
-                                </div>
-                                <div class="form-group col-md-4">
+                                </div> -->
+                                <div class="form-group col-md-12">
                                     <label for="port">Port <span class="text-warning"> * </span></label>
-                                    <select class="selectpicker form-control" id="port" data-live-search="true" name="port_id" data-size="10" required>
-                                                                                 @foreach ($ports as $item)
+                                    <select class="selectpicker form-control" id="port" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" name="port_id[]" data-size="10" required multiple>
+                                        @foreach ($ports as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('port_id') ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -45,7 +45,7 @@
                                     </div>
                                     @enderror
                                 </div>
-                                <div class="form-group col-md-4">
+                                <!-- <div class="form-group col-md-4">
                                     <label for="terminal">Terminal <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="terminal" data-live-search="true" name="terminal_id" data-size="10" required>
                                                                                  @foreach ($terminals as $item)
@@ -57,10 +57,10 @@
                                         {{$message}}
                                     </div>
                                     @enderror
-                                </div>
+                                </div> -->
                             </div>
                             <div class="form-row">
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-6">
                                     <label for="validity_from">Validity From <span class="text-warning"> * </span></label>
                                     <input type="date" class="form-control" id="validity_from" name="validity_from" value="{{old('validity_from')}}" placeholder="Validity From" autocomplete="off" required>
                                     @error('validity_from')
@@ -69,7 +69,7 @@
                                     </div>
                                     @enderror
                                 </div>
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-6">
                                     <label for="validity_from">Validity to <span class="text-warning"> * </span></label>
                                     <input type="date" class="form-control" id="validity_to" name="validity_to" value="{{old('validity_to')}}" placeholder="Validity To" autocomplete="off" required>
                                     @error('validity_to')
@@ -78,8 +78,8 @@
                                     </div>
                                     @enderror
                                 </div>
-                                <div class="form-group col-md-4">
-                                    <label for="Triffs">Triff</label>
+                                <!-- <div class="form-group col-md-4">
+                                    <label for="Triffs">Tariff</label>
                                     <select class="selectpicker form-control" id="triff_kind" data-live-search="true" name="tariff_id" data-size="10" title="{{trans('forms.select')}}" autofocus>
                                         @foreach ($triffs as $item)
                                             <option value="{{$item->name}}" {{$item->name == old('tariff_id') ? 'selected':''}}>{{$item->name}}</option>
@@ -90,10 +90,10 @@
                                         {{$message}}
                                     </div>
                                     @enderror
-                                </div>
+                                </div> -->
                             </div>
                             <div class="form-row">
-                                <div class="form-group col-md-4">
+                                <!-- <div class="form-group col-md-4">
                                     <label for="currency">Currency <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="currency" data-live-search="true" name="currency" data-size="10" title="{{trans('forms.select')}}" required>
                                         @foreach ($currency as $item)
@@ -105,11 +105,10 @@
                                         {{$message}}
                                     </div>
                                     @enderror
-                                </div>
-                                <div class="form-group col-md-8">
+                                </div> -->
+                                <div class="form-group col-md-12">
                                     <label for="tariff_type_id">Tariff Type</label>
-                                    <select class="selectpicker form-control" id="tariff_type_id" name="tariff_type_id" required>
-                                        <option value="" selected hidden>Select Tariff Type...</option>
+                                    <select class="selectpicker form-control" id="tariff_type_id" name="tariff_type_id" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" required>
                                         @foreach ($tariffTypes as $tariffType)
                                             <option value="{{ $tariffType->id }}">{{ $tariffType->code }} - {{ $tariffType->description }}</option>
                                         @endforeach
@@ -141,8 +140,8 @@
                             <div class="form-row">
                                 <div class="form-group col-md-12">
                                     <label for="containersTypesInput">Container Types</label>
-                                    <select class="selectpicker form-control" id="containersTypesInput" data-live-search="true" data-size="10">
-                                                                                 @foreach ($containersTypes as $item)
+                                    <select class="selectpicker form-control" id="containersTypesInput" data-live-search="true" data-size="10" title="{{trans('forms.select')}}">
+                                        @foreach ($containersTypes as $item)
                                             <option value="{{$item->id}}">{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -328,20 +327,20 @@
                 }
             }
 
-            document.getElementById('country').addEventListener('change', function (e) {
-                const value = e.target.value;
-                fetch(`/api/master/ports/${value}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const ports = data.ports || '';
-                        const list = [`<option value=''>Select...</option>`];
-                        for (let i = 0; i < ports.length; i++) {
-                            list.push(`<option value='${ports[i].id}'>${ports[i].name} </option>`);
-                        }
-                        document.getElementById('port').innerHTML = list.join('');
-                        $('.selectpicker').selectpicker('refresh');
-                    });
-            });
+            // document.getElementById('country').addEventListener('change', function (e) {
+            //     const value = e.target.value;
+            //     fetch(`/api/master/ports/${value}`)
+            //         .then(response => response.json())
+            //         .then(data => {
+            //             const ports = data.ports || '';
+            //             const list = [`<option value=''>Select...</option>`];
+            //             for (let i = 0; i < ports.length; i++) {
+            //                 list.push(`<option value='${ports[i].id}'>${ports[i].name} </option>`);
+            //             }
+            //             document.getElementById('port').innerHTML = list.join('');
+            //             $('.selectpicker').selectpicker('refresh');
+            //         });
+            // });
 
             document.getElementById('port').addEventListener('change', function (e) {
                 const value = e.target.value;

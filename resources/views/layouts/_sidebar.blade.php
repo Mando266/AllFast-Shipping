@@ -334,7 +334,8 @@
                                 @endpermission -->
                                 @permission('Demurrage-List')
                                 <li>
-                                  </li>
+                                        <a href="{{route('dententions.index')}}"> {{ trans('menu.dentention') }} </a>
+                                </li>
                                 <li>
                                     <a href="{{route('storage.index')}}"> {{ trans('menu.storage') }} </a>
                                 </li>

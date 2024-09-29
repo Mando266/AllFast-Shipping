@@ -18,18 +18,18 @@
                         <h5><span style='color:#1b55e2'>Tariff Ref No:</span> {{{optional($demurrages->tarriffType)->code}}} - {{{optional($demurrages->ports)->code}}} - {{$demurrages->tariff_id}}</h5>
 
                         <div class="form-row">
-                            <div class="form-group col-md-4">
+                            <!-- <div class="form-group col-md-4">
                                 <label for="countryInput">{{trans('company.country')}}</label>
                                 <input type="text" class="form-control" value="{{optional($demurrages->country)->name}}" readonly>
-                            </div>
-                            <div class="form-group col-md-4">
+                            </div> -->
+                            <div class="form-group col-md-12">
                                 <label for="port">Port</label>
                                 <input type="text" class="form-control" value="{{optional($demurrages->ports)->name}}" readonly>
                             </div>
-                            <div class="form-group col-md-4">
+                            <!-- <div class="form-group col-md-4">
                                 <label for="terminal">Terminal</label>
                                 <input type="text" class="form-control" value="{{optional($demurrages->terminal)->name}}" readonly>
-                            </div>
+                            </div> -->
                         </div>
 
                         <div class="form-row">
@@ -42,17 +42,13 @@
                                 <input type="text" class="form-control" value="{{$demurrages->validity_to}}" readonly>
                             </div>
                             <div class="form-group col-md-4">
-                                <label for="Triffs">Triff</label>
+                                <label for="Triffs">Tariff</label>
                                 <input type="text" class="form-control" value="{{$demurrages->tariff_id}}" readonly>
                             </div>
                         </div>
 
                         <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label for="currency">Currency</label>
-                                <input type="text" class="form-control" value="{{$demurrages->currency}}" readonly>
-                            </div>
-                            <div class="form-group col-md-8">
+                            <div class="form-group col-md-12">
                                 <label for="tariff_type_id">Tariff Type</label>
                                 <input type="text" class="form-control" id="tariff_type_id" value="{{$demurrages->tarriffType->code }} - {{ $demurrages->tarriffType->description }}" readonly>
                             </div>
