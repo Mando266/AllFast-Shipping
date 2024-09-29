@@ -47,8 +47,6 @@ class ExtentionDententionController extends Controller
                 // ->whereIn('to_code',$codes)
                 // ->where('booking_id',$request->booking_no)
                 // ->get();
-        
-        $containerDetails=[];
         $grandTotal=0;
         $note=[];
         foreach ($containers as $container) {
