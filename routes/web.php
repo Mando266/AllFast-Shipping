@@ -280,6 +280,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('debit-invoice',DebitInvoiceController::class)->name('debit-invoice');
         Route::get('storage-invoice',StorageInvoiceController::class)->name('storage-invoice');
         Route::get('extention-dententions',ExtentionDententionController::class)->name('extention-dententions');
+        Route::get('extention-storage',ExtentionStorageController::class)->name('extention-storage');
     });
     Route::get('export_dentention_calculation',[DententionCalculationPeriodController::class,'export'])->name('export_dentention_calculation');
     Route::get('export_storage_calculation',[StorageCalculationPeriodController::class,'export'])->name('export_storage_calculation');
