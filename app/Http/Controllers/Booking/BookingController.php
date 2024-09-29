@@ -433,13 +433,13 @@ class BookingController extends Controller
         // check if quotation Export create serial No else will not create serial No
         $quotation = Quotation::find($request->input('quotation_id'));
 
-        if (Auth::user()->company_id == 1 && optional($booking)->shipment_type == "Import"){
+        if (Auth::user()->company_id == 3 && optional($booking)->shipment_type == "Import"){
             $booking->ref_no = $request->input('ref_no');
             $setting = Setting::find(1);
             $booking->delivery_no = substr($booking->dischargePort->code , -3).'IMP / ' .$setting->delivery_no . '/ 24';
             $setting->delivery_no += 1;
             $setting->save();
-        }elseif (Auth::user()->company_id == 1 && optional($quotation)->shipment_type == "Export") {
+        }elseif (Auth::user()->company_id == 3 && optional($quotation)->shipment_type == "Export") {
             $setting = Setting::find(1);
             $booking->ref_no = 'WIN' . substr($booking->loadPort->code, -3) . substr($booking->dischargePort->code, -3)
             . sprintf(

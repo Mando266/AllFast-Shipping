@@ -29,10 +29,10 @@ class DemurageController extends Controller
 
         $demurrage = Demurrage::where('company_id', Auth::user()->company_id)->get();
         $demurrages = Demurrage::where('company_id', Auth::user()->company_id)->filter(new ContainersIndexFilter(request()))->get();
-        $countries = Country::orderBy('name')->get();
+        $ports = Ports::where('country_id',61)->get();
 
         return view('containers.demurrage.index', [
-            'countries' => $countries,
+            'ports' => $ports,
             'items' => $demurrages->sortByDesc('id'),
             'demurrage' => $demurrage->sortByDesc('id'),
         ]);
@@ -45,7 +45,7 @@ class DemurageController extends Controller
         $countries = Country::orderBy('id')->get();
         $bounds = Bound::orderBy('id')->get();
         $containersTypes = ContainersTypes::orderBy('id')->get();
-        $ports = [];
+        $ports = Ports::where('country_id',61)->get();
         $triffs = Triff::get();
         $currency = Currency::all();
         $terminals = [];
@@ -66,17 +66,18 @@ class DemurageController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-
+        $ports = $request->input('port_id'); 
+    foreach ($ports as $port_id) {
         // Create the demurrage entry
         $demurrage = Demurrage::create([
-            'country_id' => $request->input('country_id'),
+            'country_id' => 61,
             'terminal_id' => $request->input('terminal_id'),
-            'port_id' => $request->input('port_id'),
+            'port_id' => $port_id,//$request->input('port_id'),
             'validity_from' => $request->input('validity_from'),
             'validity_to' => $request->input('validity_to'),
-            'currency' => $request->input('currency'),
+            'currency' => 'USD',
             'container_status' => $request->input('container_status'),
-            'tariff_id' => $request->input('tariff_id'),
+            'tariff_id' => 'Standard Tariff',
             'bound_id' => $request->input('bound_id'),
             'company_id' => $user->company_id,
             'tariff_type_id' => $request->input('tariff_type_id'),
@@ -108,7 +109,7 @@ class DemurageController extends Controller
                 ]);
             }
         }
-
+    }
         return redirect()->route('demurrage.index')->with('success', trans('Demurrage.created'));
     }
 
@@ -150,7 +151,7 @@ class DemurageController extends Controller
         $countries = Country::orderBy('id')->get();
         $bounds = Bound::orderBy('id')->get();
         $containersTypes = ContainersTypes::orderBy('id')->get();
-        $ports = Ports::orderBy('id')->where('company_id', Auth::user()->company_id)->get();
+        $ports = Ports::where('country_id',61)->get();
         $triffs = Triff::get();
         $currency = Currency::all();
         $terminals = Terminals::where('company_id', Auth::user()->company_id)->get();
@@ -177,16 +178,17 @@ class DemurageController extends Controller
 
         // Define the demurrage data that can be updated
         $demurrageData = [
-            'country_id' => $request->country_id,
-            'terminal_id' => $request->terminal_id,
+            // 'country_id' => $request->country_id,
+            // 'terminal_id' => $request->terminal_id,
             'port_id' => $request->port_id,
             'bound_id' => $request->bound_id,
-            'currency' => $request->currency,
+            // 'currency' => $request->currency,
             'validity_from' => $request->validity_from,
             'validity_to' => $request->validity_to,
-            'tariff_id' => $request->tariff_id,
+            // 'tariff_id' => $request->tariff_id,
             'is_storge' => $request->is_storge,
             'container_status' => $request->container_status,
+            'tariff_type_id' => $request->tariff_type_id,
         ];
 
         // Update the Demurrage model with the data

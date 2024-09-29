@@ -8,6 +8,7 @@ use App\Http\Controllers\PortChargeController;
 use App\Http\Controllers\BlDraft\PDFController;
 use App\Http\Controllers\ImportExportController;
 use App\Http\Controllers\BlDraft\WinPDFController;
+use App\Http\Controllers\BlDraft\WinPDFCopyController; 
 use App\Http\Controllers\Update\RefreshController;
 use App\Http\Controllers\BlDraft\BlDraftController;
 use App\Http\Controllers\Booking\BookingController;
@@ -212,7 +213,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('showCstar/{bldraft}', [BlDraftController::class, 'showCstar'])->name('bldraft.showCstar');
         Route::get('pdf', [PDFController::class, 'showPDF'])->name('bldraft.showPDF');
         Route::get('winpdf', [WinPDFController::class, 'showWinPDF'])->name('bldraft.showWinPDF');
-
+        Route::get('wincopypdf', [WinPDFCopyController::class, 'showWinCopyPDF'])->name('bldraft.showWinCopyPDF');
     });
 
     /*
