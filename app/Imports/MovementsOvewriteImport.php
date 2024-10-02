@@ -52,6 +52,37 @@ class MovementsOvewriteImport implements ToModel,WithHeadingRow
         $row['leg'] = Legs::where('name',$row['leg'])->pluck('id')->first();
         $row['voyage_id'] = Voyages::where('company_id',Auth::user()->company_id)->where('voyage_no',$row['voyage_id'])->where('leg_id',$row['leg'])->pluck('id')->first();
         $row['port_location_id'] = Ports::where('company_id',Auth::user()->company_id)->where('code',$row['port_location_id'])->pluck('id')->first();
+
+        // ETA/ETD validation logic starts here
+        $voyagePort = VoyagePorts::where('voyage_id', $row['voyage_id'])
+        ->where('port_from_name', $row['port_location_id'])
+        ->first();
+
+        if ($voyagePort) {
+        $eta = new \DateTime($voyagePort->eta);
+        $etd = new \DateTime($voyagePort->etd);
+        $movementDate = new \DateTime($row['movement_date']);
+
+        // Compare only dates
+        $etaDate = $eta->format('Y-m-d');
+        $etdDate = $etd->format('Y-m-d');
+        $movementDateOnly = $movementDate->format('Y-m-d');
+
+        if (!($movementDateOnly >= $etaDate && $movementDateOnly <= $etdDate)) {
+            MovementImportErrors::create([
+                'container_id' => $row['container_id'],
+                'date' => $row['movement_date'],
+                'error_code' => 'Date out of ETA/ETD range',
+                'allowed_code' => 'Allowed between ' . $etaDate . ' and ' . $etdDate
+            ]);
+
+            return Session::flash('message', "Container: {$row['container_id']} has movement date {$movementDateOnly} which is not within ETA: {$etaDate} and ETD: {$etdDate}");
+        }
+        } else {
+        return Session::flash('message', "No ETA and ETD found for Voyage: {$row['voyage_id']} and Port: {$row['port_location_id']}");
+        }
+
+
         $row['pol_id'] = Ports::where('company_id',Auth::user()->company_id)->where('code',$row['pol_id'])->pluck('id')->first();
         $row['pod_id'] = Ports::where('company_id',Auth::user()->company_id)->where('code',$row['pod_id'])->pluck('id')->first();
 

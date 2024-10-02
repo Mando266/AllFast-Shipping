@@ -1,5 +1,11 @@
 @extends('layouts.app')
 @section('content')
+
+<style>
+  #addVoyageModal .modal-dialog {
+      max-width: 90%;
+  }
+</style>
 <div class="layout-px-spacing">
     <div class="row layout-top-spacing">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
@@ -252,6 +258,18 @@
                                     {{$message}}
                                 </div>
                                 @enderror
+                        </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="terminal_id">Discharge Terminal <span class="text-warning"> * </span></label>
+                                <select class="selectpicker form-control" id="terminal" data-live-search="true" name="terminal_id" data-size="10" title="{{trans('forms.select')}}" required>
+                                              @foreach ($terminals as $item)
+                                        <option value="{{$item->id}}" {{$item->id == old('terminal_id') ? 'selected' : ''}}>{{$item->name}}</option>
+                                    @endforeach
+                                </select>
+                                @error('terminal_id')
+                                    <div style="color: red;">{{$message}}</div>
+                                @enderror
                             </div>
                         </div>
 
@@ -260,29 +278,7 @@
                                     $isDraft = request()->input('quotation_id') == "0";
                                 @endphp
                                 <div class="form-group col-md-4">
-                                    <label for="Transhipment">Transhipment Port</label>
-                                    <select class="selectpicker form-control" id="transhipment_port" data-live-search="true" name="transhipment_port" data-size="10" title="{{trans('forms.select')}}">
-                                                                                 @foreach ($ports as $item)
-                                            <option value="{{$item->id}}" {{$item->id == old('transhipment_port') ? 'selected' : ''}}>{{$item->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('transhipment_port')
-                                        <div style="color: red;">{{$message}}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="terminal_id">Discharge Terminal <span class="text-warning"> * </span></label>
-                                    <select class="selectpicker form-control" id="terminal" data-live-search="true" name="terminal_id" data-size="10" title="{{trans('forms.select')}}" required>
-                                                  @foreach ($terminals as $item)
-                                            <option value="{{$item->id}}" {{$item->id == old('terminal_id') ? 'selected' : ''}}>{{$item->name}}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('terminal_id')
-                                        <div style="color: red;">{{$message}}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="voyage_id">Vessel / Voyage <span class="text-warning"> * </span></label>
+                                    <label for="voyage_id">Load Vessel / Voyage <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="voyage_id" data-live-search="true" name="voyage_id" data-size="10" title="{{trans('forms.select')}}" required>
                                                   @foreach ($voyages as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('voyage_id') ? 'selected' : ''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
@@ -292,7 +288,35 @@
                                         <div style="color: red;">{{$message}}</div>
                                     @enderror
                                 </div>
-                            </div>
+                                @if(request()->input('is_transhipment'))
+                                    <div class="form-group col-md-4">
+                                        <label for="transhipment_port">Transhipment Port</label>
+                                        <select class="selectpicker form-control" id="transhipment_port" data-live-search="true" name="transhipment_port" data-size="10" title="{{trans('forms.select')}}">
+                                            @foreach ($ports as $item)
+                                                <option value="{{$item->id}}" {{$item->id == old('transhipment_port') ? 'selected' : ''}}>{{$item->name}}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('transhipment_port')
+                                        <div style="color: red;">{{$message}}</div>
+                                        @enderror
+                                    </div>
+                                
+                                    <div class="form-group col-md-4">
+                                        <label for="final_destination">Final Destination</label>
+                                        <select class="selectpicker form-control" id="final_destination" data-live-search="true" name="final_destination" data-size="10" title="Select...">
+                                            <option value="add_new">Add New</option>
+                                            @foreach ($voyages as $item)
+                                                <option value="{{ $item->id }}" {{ $item->id == old('final_destination') ? 'selected' : '' }}>
+                                                    {{ $item->vessel->name }} / {{ $item->voyage_no }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('final_destination')
+                                        <div style="color: red;">{{ $message }}</div>
+                                        @enderror
+                                    </div>                                    
+                                @endif
+                        </div>
                         <div class="form-row">
                             <div class="form-group col-md-3">
                                 <label for="status">Movement</label>
@@ -542,6 +566,115 @@
         </div>
     </div>
 </div>
+
+<!-- Modal for adding new Vessel and Voyage -->
+<div class="modal fade" id="addVoyageModal" tabindex="-1" role="dialog" aria-labelledby="voyageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="voyageModalLabel">Add New Vessel & Voyage</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Vessel Details -->
+                <h5>Vessel Information</h5>
+                <div class="d-flex flex-row col-12">
+                    <div class="form-group col-3">
+                        <label for="vessel_name">Vessel Name</label>
+                        <input type="text" class="form-control" id="vessel_name" name="vessel_name" placeholder="e.g., Sea Queen">
+                    </div>
+                    <div class="form-group col-3">
+                        <label for="vessel_code">Vessel Code</label>
+                        <input type="text" class="form-control" id="vessel_code" name="vessel_code" placeholder="e.g., SQ123">
+                    </div>
+                    <div class="form-group col-3">
+                        <label for="vessel_type">Vessel Type</label>
+                        <select class="form-control selectpicker" id="vessel_type" name="vessel_type" data-live-search="true" data-size="5" title="Select Type">
+                            @foreach ($vessel_types as $type)
+                                <option value="{{ $type->id }}">{{ $type->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group col-3">
+                        <label for="vessel_operator">Vessel Operator</label>
+                        <select class="form-control selectpicker" id="vessel_operator" name="vessel_operator" data-live-search="true" data-size="5" title="Select Operator">
+                            @foreach ($vessel_operators as $operator)
+                                <option value="{{ $operator->id }}">{{ $operator->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Voyage Details -->
+                <h5>Voyage Information</h5>
+                <div class="d-flex flex-row col-12">
+                    <div class="form-group col-6">
+                        <label for="voyage_name">Voyage Name</label>
+                        <input type="text" class="form-control" id="voyage_name" name="voyage_name" placeholder="e.g., Pacific Route">
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="voyage_no">Voyage Number</label>
+                        <input type="text" class="form-control" id="voyage_no" name="voyage_no" placeholder="e.g., VR456">
+                    </div>
+                </div>
+
+                <!-- Ports Table for Dynamic Port Entry -->
+                <h5>Ports</h5>
+                <table id="portsTable" class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Port</th>
+                            <th>Terminal</th>
+                            <th>Road No</th>
+                            <th>ETA</th>
+                            <th>ETD</th>
+                            <th class="text-center">
+                                <button type="button" class="btn btn-info" id="addPort"><i class="fa fa-plus"></i></button>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- First row for adding ports -->
+                        <tr>
+                            <td>
+                                <select class="form-control" name="port[0][port_id]" required>
+                                    @foreach ($ports as $port)
+                                        <option value="{{ $port->id }}">{{ $port->name }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="port[0][terminal]" placeholder="Terminal" required>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="port[0][road_no]" placeholder="Road No" required>
+                            </td>
+                            <td>
+                                <input type="datetime-local" class="form-control" name="port[0][eta]" required>
+                            </td>
+                            <td>
+                                <input type="datetime-local" class="form-control" name="port[0][etd]" required>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger remove-port"><i class="fa fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveVoyageData">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 @endsection
 @push('scripts')
 @include('booking.booking._validate&AddContainer')
@@ -579,6 +712,157 @@ $(document).ready(function() {
     // Ensure the selectpicker is initialized on page load
     $('.selectpicker').selectpicker();
 });
+</script>
+
+<script>
+$(document).ready(function () {
+
+
+    $('#final_destination').change(function() {
+        if ($(this).val() == 'add_new') {
+            $('#addVoyageModal').modal('show');
+        }
+    });
+
+    let portCounter = 0;
+    let savedVoyageData = null;
+
+    // Add a new row to the Ports table
+    $('#addPort').click(function() {
+        let rowCount = $('#portsTable tbody tr').length;
+        let newRow = `
+            <tr>
+                <td>
+                    <select class="form-control" name="port[${rowCount}][port_id]" required>
+                        @foreach ($ports as $port)
+                            <option value="{{ $port->id }}">{{ $port->name }}</option>
+                        @endforeach
+                    </select>
+                </td>
+                <td>
+                    <input type="text" class="form-control terminal" name="port[${rowCount}][terminal]" required>
+                </td>
+                <td>
+                    <input type="text" class="form-control road_no" name="port[${rowCount}][road_no]" required>
+                </td>
+                <td>
+                    <input type="datetime-local" class="form-control eta" name="port[${rowCount}][eta]" required>
+                </td>
+                <td>
+                    <input type="datetime-local" class="form-control etd" name="port[${rowCount}][etd]" required>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger remove-port">Remove</button>
+                </td>
+            </tr>
+        `;
+        $('#portsTable tbody').append(newRow);
+        portCounter++;
+    });
+
+    // Remove a port row
+    $('#portsTable').on('click', '.remove-port', function() {
+        $(this).closest('tr').remove();
+    });
+
+    // Save voyage data when "Save" is clicked
+    $('#saveVoyageData').click(function() {
+        let vesselData = {
+            vessel_name: $('#vessel_name').val(),
+            vessel_code: $('#vessel_code').val(),
+            vessel_type: $('#vessel_type').val(),
+            vessel_operator: $('#vessel_operator').val(),
+            voyage_name: $('#voyage_name').val(),
+            voyage_no: $('#voyage_no').val(),
+            ports: []
+        };
+
+        // Loop through each row in the Ports table
+        $('#portsTable tbody tr').each(function() {
+            let port_id = $(this).find('select[name^="port"]').val();
+            let terminal = $(this).find('input.terminal').val(); // Fixed selector for terminal
+            let road_no = $(this).find('input.road_no').val(); // Fixed selector for road_no
+            let eta = $(this).find('input.eta').val(); // Fixed selector for ETA
+            let etd = $(this).find('input.etd').val(); // Fixed selector for ETD
+
+            if (port_id && terminal && road_no && eta && etd) {
+                let portData = {
+                    port_id: port_id,
+                    terminal: terminal,
+                    road_no: road_no,
+                    eta: eta,
+                    etd: etd
+                };
+                vesselData.ports.push(portData);
+            } else {
+                alert('Please ensure all fields for each port are filled.');
+                return false; // Stop execution if validation fails
+            }
+        });
+
+        if (vesselData.ports.length > 0) {
+            savedVoyageData = vesselData; // Store the data temporarily
+            console.log('Saved Voyage Data:', savedVoyageData);
+            $('#addVoyageModal').modal('hide'); // Close the modal
+        } else {
+            alert('Please ensure at least one port is added with all required details.');
+        }
+    });
+
+    // Reopen the modal with saved data
+    $('#addVoyageModal').on('show.bs.modal', function () {
+        if (savedVoyageData) {
+            $('#vessel_name').val(savedVoyageData.vessel_name);
+            $('#vessel_code').val(savedVoyageData.vessel_code);
+            $('#vessel_type').selectpicker('val', savedVoyageData.vessel_type);
+            $('#vessel_operator').selectpicker('val', savedVoyageData.vessel_operator);
+            $('#voyage_name').val(savedVoyageData.voyage_name);
+            $('#voyage_no').val(savedVoyageData.voyage_no);
+
+            // Clear the ports table and repopulate it with saved ports
+            $('#portsTable tbody').empty();
+            savedVoyageData.ports.forEach((port, index) => {
+                let newRow = `
+                    <tr>
+                        <td>
+                            <select class="form-control" name="port[${index}][port_id]" required>
+                                @foreach ($ports as $portOption)
+                                    <option value="{{ $portOption->id }}" ${(port.port_id == {{ $portOption->id }}) ? 'selected' : ''}>{{ $portOption->name }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" name="port[${index}][terminal]" value="${port.terminal}" required>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" name="port[${index}][road_no]" value="${port.road_no}" required>
+                        </td>
+                        <td>
+                            <input type="datetime-local" class="form-control" name="port[${index}][eta]" value="${port.eta}" required>
+                        </td>
+                        <td>
+                            <input type="datetime-local" class="form-control" name="port[${index}][etd]" value="${port.etd}" required>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger remove-port">Remove</button>
+                        </td>
+                    </tr>
+                `;
+                $('#portsTable tbody').append(newRow);
+            });
+        } else {
+            // Reset modal fields if no saved data
+            $('#vessel_name').val('');
+            $('#vessel_code').val('');
+            $('#vessel_type').val('').selectpicker('refresh');
+            $('#vessel_operator').val('').selectpicker('refresh');
+            $('#voyage_name').val('');
+            $('#voyage_no').val('');
+            $('#portsTable tbody').empty();
+        }
+    });
+});
+
 </script>
 
 <script>

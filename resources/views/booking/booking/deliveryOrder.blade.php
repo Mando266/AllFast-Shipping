@@ -261,9 +261,11 @@
                             </tbody>
                         </table>
                     </div>
-                        <div class="col-md-12 text-center">
-                            <button onclick="window.print()" class="btn btn-primary hide  mt-3">Print</button>
-                        </div>
+                    <div class="col-md-12 text-center">
+                        <input type="hidden" id="printCount" value="{{ $booking->print_count }}">
+                        <button id="printButton" onclick="handlePrint()" class="btn btn-primary mt-3" {{ $booking->print_count >= $booking->max_print ? 'disabled' : '' }}>Print</button>                        
+                    </div>
+
                 </div>
         </div>
     </div>
@@ -277,6 +279,69 @@
         textarea.style.height = 'auto'; // Reset height to calculate scrollHeight
         textarea.style.height = textarea.scrollHeight + 'px'; // Set height based on content
     });
+
+    document.addEventListener("DOMContentLoaded", function() {
+    const printButton = document.getElementById('printButton');
+    let printCount = {{ $booking->print_count }};
+    const maxPrint = {{ $booking->max_print }};
+
+    // Disable the print button if the print count is at max
+    if (printCount >= maxPrint) {
+        printButton.disabled = true;
+    }
+
+    // Disable printing using Ctrl+P or Cmd+P only if print count is max
+    document.addEventListener('keydown', function(event) {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'p') {
+            if (printCount >= maxPrint) {
+                event.preventDefault();
+                alert('Print limit reached.');
+            }
+        }
+    });
+
+    // Disable right-click context menu for printing only if print count is max
+    document.addEventListener('contextmenu', function(event) {
+        if (printCount >= maxPrint) {
+            event.preventDefault();
+            alert('Print limit reached.');
+        }
+    });
+
+    // Handle after print event
+    window.onafterprint = function() {
+        if (!printButton.disabled) {
+            // Update the print count in the database only if print is successful
+            fetch('/booking/incrementPrintCount/{{ $booking->id }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    printCount += 1;
+                    if (printCount >= maxPrint) {
+                        printButton.disabled = true;
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    };
+    });
+
+    function handlePrint() {
+        if ({{ $booking->print_count }} < {{ $booking->max_print }}) {
+            window.print();
+        } else {
+            alert('Print limit reached.');
+        }
+    }
+
 </script>
 @endpush
 
