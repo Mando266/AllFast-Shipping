@@ -16,7 +16,7 @@
                 <div class="widget-content widget-content-area">
                     <div class="row">
                         <div class="col-md-6 text-center">
-                            <img src="{{asset('assets/img/allfastLogo.jpeg')}}" style="width: 400px;" alt="logo">
+                            <img src="{{asset('assets/img/msl-logo.png')}}" style="width: 400px;" alt="logo">
                         </div>
                         <div class="col-md-6 tableStyle text-right underline" style="font-size: 30px; font-weight:bold !important">
                             {{optional($booking->principal)->name}}

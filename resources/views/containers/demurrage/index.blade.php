@@ -7,7 +7,7 @@
                     <div class="widget-heading">
                         <nav class="breadcrumb-two" aria-label="breadcrumb">
                             <ol class="breadcrumb">
-                                <li class="breadcrumb-item"><a href="javascript:void(0);">Triffs</a></li>
+                                <li class="breadcrumb-item"><a href="javascript:void(0);">Tariffs</a></li>
                                 <li class="breadcrumb-item active"><a href="javascript:void(0);">Demurrage & Dentention</a></li>
                                 <li class="breadcrumb-item"></li>
                             </ol>
@@ -23,7 +23,7 @@
                     <form>
                         <div class="form-row">
                                 <div class="form-group col-md-6">
-                                    <label for="countryInput">Select Triff</label>
+                                    <label for="countryInput">Tariffs</label>
                                     <select class="selectpicker form-control" id="id" data-live-search="true" name="id" data-size="10"
                                      title="{{trans('forms.select')}}">
                                         @foreach ($demurrage as $item)
@@ -37,11 +37,11 @@
                                     @enderror
                                 </div>
                                 <div class="form-group col-md-3">
-                                    <label for="countryInput">{{trans('company.country')}}</label>
-                                    <select class="selectpicker form-control" id="countryInput" data-live-search="true" name="country_id" data-size="10"
+                                    <label for="countryInput">Ports</label>
+                                    <select class="selectpicker form-control" id="countryInput" data-live-search="true" name="port_id" data-size="10"
                                         title="{{trans('forms.select')}}">
-                                        @foreach ($countries as $item)
-                                            <option value="{{$item->id}}" {{$item->id == old('country_id',request()->input('country_id')) ? 'selected':''}}>{{$item->name}}</option>
+                                        @foreach ($ports as $item)
+                                            <option value="{{$item->id}}" {{$item->id == old('port_id',request()->input('port_id')) ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -49,9 +49,10 @@
                                     <label for="is_storge">Detention OR Storage</label>
                                     <select class="selectpicker form-control" id="is_storge" data-live-search="true" name="is_storge" data-size="10"
                                     title="{{trans('forms.select')}}" autofocus>
-                                            <option value="EXPORT/DETENTION">Detention</option>
-                                            <option value="Storage">Storage</option>
-                                            <option value="power charges">power charges</option>
+                                            <option value="EXPORT/DETENTION">EXPORT/DETENTION</option>
+                                            <option value="IMPORT/DETENTION">IMPORT/DETENTION</option>
+                                            <option value="EXPORT/STORAGE">EXPORT/STORAGE</option>
+                                            <option value="IMPORT/STORAGE">IMPORT/STORAGE</option>
                                     </select>
                                     @error('is_storge')
                                     <div class="invalid-feedback">

@@ -2,25 +2,27 @@
 
 namespace App\Models\Invoice;
 
-use App\Models\Bl\BlDraft;
+use App\User;
+use Carbon\Carbon;
 use App\Traits\HasFilter;
-use App\Models\Master\Ports;
-use App\Models\Booking\Booking;
-use App\Models\Master\ContainersTypes;
-use App\Models\Voyages\Voyages;
-use Bitwise\PermissionSeeder\PermissionSeederContract;
-use Bitwise\PermissionSeeder\Traits\PermissionSeederTrait;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Master\Customers;
-use App\Models\Receipt\Receipt;
-use App\ViewModel\Address;
-use App\ViewModel\Invoice as TaxInvoice;
 use App\ViewModel\Issuer;
+use App\Models\Bl\BlDraft;
+use App\ViewModel\Address;
 use App\ViewModel\Payment;
 use App\ViewModel\Reciver;
+use App\Models\Master\Ports;
+use App\Models\Booking\Booking;
+use App\Models\Receipt\Receipt;
+use App\Models\Voyages\Voyages;
+use App\Models\Master\Customers;
 use App\ViewModel\ReceiverAddress;
-use Carbon\Carbon;
-use App\User;
+use App\Models\Invoice\InvoiceBooking;
+use App\Models\Master\ContainersTypes;
+use Illuminate\Database\Eloquent\Model;
+use App\ViewModel\Invoice as TaxInvoice;
+use App\Models\Invoice\InvoiceChargeDesc;
+use Bitwise\PermissionSeeder\PermissionSeederContract;
+use Bitwise\PermissionSeeder\Traits\PermissionSeederTrait;
 
 class Invoice extends Model implements PermissionSeederContract
 {
@@ -80,6 +82,15 @@ class Invoice extends Model implements PermissionSeederContract
     public function customerShipperOrFfw(){
         return $this->belongsTo(Customers::class,'customer_id','id');
     }
+
+        public function bookings()
+        {
+        return $this->belongsToMany(Booking::class, 'invoice_booking', 'invoice_id', 'booking_id');
+        }
+            public function invoiceBooking()
+            {
+            return $this->hasMany(InvoiceBooking::class ,'invoice_id','id');
+            }
 
     public function createOrUpdateInvoiceChargeDesc($inputs)
     {

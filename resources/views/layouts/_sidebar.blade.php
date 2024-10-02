@@ -4,13 +4,13 @@
 
         <ul class="navbar-nav theme-brand flex-row  text-center">
             <li class="nav-item theme-logo">
-            @if(Auth::user()->company_id == 1)
+            @if(Auth::user()->company_id == 3)
                 <a href="{{route('home')}}">
-                    <img src="{{asset('assets/img/dahnay.png')}}" style="width: 90%; height: 75px;" class="navbar-logo" alt="logo">
+                    <img src="{{asset('assets/img/winwin_maritime.png')}}" style="width: 90%; height: 80px;" class="navbar-logo" alt="logo">
                 </a>
-                @elseif(Auth::user()->company_id == 2)
+                @else
                 <a href="{{route('home')}}">
-                    <img src="{{asset('assets/img/MSM.png')}}" style="width: 100%; height: 100px;" class="navbar-logo" alt="logo">
+                    <img src="{{asset('assets/img/logo2.png')}}" style="width: 100%; height: 100px;" class="navbar-logo" alt="logo">
                 </a>
             @endif
             </li>
@@ -343,6 +343,7 @@
                                     <a href="{{route('calculation-dentention-period.index')}}"> {{ trans('menu.exp_dentention_cal') }} </a>
                                 </li>
                                 <li>
+                                    {{-- <a href="{{route('calculation-storage-period.index')}}"> {{ trans('menu.exp_storage_cal') }} </a> --}}
                                     <a href="{{route('calculation-storage-period.index')}}"> {{ trans('menu.exp_storage_cal') }} </a>
                                 </li>
                                 @endif
@@ -414,11 +415,11 @@
                                 </li>
                                 @endpermission
 
-                                <!-- @permission('XML-List')
+                                @permission('XML-List')
                                 <li>
                                     <a href="{{route('xml.index')}}"> Manifest XML Gates </a>
                                 </li>
-                                @endpermission -->
+                                @endpermission
                                 </ul>
                         </li>
                         @endpermission

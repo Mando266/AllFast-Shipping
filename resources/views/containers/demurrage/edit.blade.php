@@ -20,7 +20,7 @@
                             @method('put')
                             <!-- Existing form fields -->
                             <div class="form-row">
-                                <div class="form-group col-md-4">
+                                <!-- <div class="form-group col-md-4">
                                     <label for="countryInput">{{trans('company.country')}} <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="country" data-live-search="true" name="country_id" data-size="10" title="{{trans('forms.select')}}" required>
                                         @foreach ($countries as $item)
@@ -32,11 +32,11 @@
                                         {{$message}}
                                     </div>
                                     @enderror
-                                </div>
-                                <div class="form-group col-md-4">
+                                </div> -->
+                                <div class="form-group col-md-12">
                                     <label for="port">Port <span class="text-warning"> * </span></label>
-                                    <select class="selectpicker form-control" id="port" data-live-search="true" name="port_id" data-size="10" required>
-                                                                                 @foreach ($ports as $item)
+                                    <select class="selectpicker form-control" id="port" name="port_id" data-live-search="true" data-size="10" title="{{trans('forms.select')}}" required>
+                                        @foreach ($ports as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('port_id',$demurrage->port_id) ? 'selected':''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -46,7 +46,7 @@
                                     </div>
                                     @enderror
                                 </div>
-                                <div class="form-group col-md-4">
+                                <!-- <div class="form-group col-md-4">
                                     <label for="currency">Currency <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="currency" data-live-search="true" name="currency" data-size="10" title="{{trans('forms.select')}}" required>
                                         @foreach ($currency as $item)
@@ -58,10 +58,10 @@
                                         {{$message}}
                                     </div>
                                     @enderror
-                                </div>
+                                </div> -->
                             </div>
                             <div class="form-row">
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-6">
                                     <label for="validity_from">Validity From <span class="text-warning"> * </span></label>
                                     <input type="date" class="form-control" id="validity_from" name="validity_from" value="{{old('validity_from',$demurrage->validity_from)}}" placeholder="Validity From" autocomplete="off" required>
                                     @error('validity_from')
@@ -70,7 +70,7 @@
                                     </div>
                                     @enderror
                                 </div>
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-6">
                                     <label for="validity_to">Validity to <span class="text-warning"> * </span></label>
                                     <input type="date" class="form-control" id="validity_to" name="validity_to" value="{{old('validity_to',$demurrage->validity_to)}}" placeholder="Validity To" autocomplete="off" required>
                                     @error('validity_to')
@@ -79,7 +79,7 @@
                                     </div>
                                     @enderror
                                 </div>
-                                <div class="form-group col-md-4">
+                                <!-- <div class="form-group col-md-4">
                                     <label for="Triffs">Triff</label>
                                     <select class="selectpicker form-control" id="triff_kind" data-live-search="true" name="tariff_id" data-size="10" title="{{trans('forms.select')}}" autofocus>
                                         @foreach ($triffs as $item)
@@ -91,10 +91,10 @@
                                         {{$message}}
                                     </div>
                                     @enderror
-                                </div>
+                                </div> -->
                             </div>
                             <div class="form-row">
-                                <div class="form-group col-md-4">
+                                <!-- <div class="form-group col-md-4">
                                     <label for="currency">Terminal <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="terminal" data-live-search="true" name="terminal_id" data-size="10" required>
                                         @foreach ($terminals as $item)
@@ -106,8 +106,8 @@
                                         {{$message}}
                                     </div>
                                     @enderror
-                                </div>
-                                <div class="form-group col-md-8">
+                                </div> -->
+                                <div class="form-group col-md-12">
                                     <label for="tariff_type_id">Tariff Type</label>
                                     <select class="selectpicker form-control" id="tariff_type_id" name="tariff_type_id" required>
                                         <option value="" selected hidden>Select Tariff Type...</option>
@@ -140,8 +140,8 @@
                             <div class="form-row">
                                 <div class="form-group col-md-12">
                                     <label for="containersTypesInput">Container Types</label>
-                                    <select class="selectpicker form-control" id="containersTypesInput" data-live-search="true" data-size="10">
-                                                                                 @foreach ($containersTypes as $item)
+                                    <select class="selectpicker form-control" id="containersTypesInput" data-size="10" title="{{trans('forms.select')}}" data-live-search="true">
+                                        @foreach ($containersTypes as $item)
                                             <option value="{{$item->id}}">{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -240,7 +240,7 @@
 @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.0/sweetalert.min.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-{{--    <script>--}}
+<!-- {{--    <script>--}}
 {{--        $("#createForm").on('submit', e => functionName(e))--}}
 {{--        const functionName = async e => {--}}
 {{--            e.preventDefault();--}}
@@ -259,7 +259,7 @@
 {{--                $("#createForm").off('submit').submit();--}}
 {{--            }--}}
 {{--        }--}}
-{{--    </script>--}}
+{{--    </script>--}} -->
     <script>
         $(document).ready(function () {
             // Function to update inputs based on the selected tariff type
@@ -324,42 +324,9 @@
                 $('.selectpicker').selectpicker('refresh');
             });
         });
-
-        $(function () {
-            let country = $('#country');
-            $('#country').on('change', function (e) {
-                let value = e.target.value;
-                let response = $.get(`/api/master/ports/${country.val()}`).then(function (data) {
-                    let ports = data.ports || '';
-                    let list2 = [`<option value=''>Select...</option>`];
-                    for (let i = 0; i < ports.length; i++) {
-                        list2.push(`<option value='${ports[i].id}'>${ports[i].name} </option>`);
-                    }
-                    let port = $('#port');
-                    port.html(list2.join(''));
-                    $('.selectpicker').selectpicker('refresh');
-                });
-            });
-        });
+      
     </script>
-    <script>
-        $(function () {
-            let port = $('#port');
-            $('#port').on('change', function (e) {
-                let value = e.target.value;
-                let response = $.get(`/api/master/terminals/${port.val()}`).then(function (data) {
-                    let terminals = data.terminals || '';
-                    let list2 = [`<option value=''>Select...</option>`];
-                    for (let i = 0; terminals.length > i; i++) {
-                        list2.push(`<option value='${terminals[i].id}'>${terminals[i].name} </option>`);
-                    }
-                    let terminal = $('#terminal');
-                    terminal.html(list2.join(''));
-                    $('.selectpicker').selectpicker('refresh');
-                });
-            });
-        });
-    </script>
+    
     <script>
         $(document).ready(function() {
             let periodDataStore = {};
@@ -517,31 +484,7 @@
                 this.submit();
             });
 
-            // Load ports and terminals based on selected country
-            $('#country').on('change', function(e) {
-                let value = e.target.value;
-                $.get(`/api/master/ports/${value}`).then(function(data) {
-                    let ports = data.ports || '';
-                    let list = [`<option value=''>Select...</option>`];
-                    for (let i = 0; ports.length > i; i++) {
-                        list.push(`<option value='${ports[i].id}'>${ports[i].name} </option>`);
-                    }
-                    $('#port').html(list.join('')).selectpicker('refresh');
-                });
-            });
-
-            $('#port').on('change', function(e) {
-                let value = e.target.value;
-                $.get(`/api/master/terminals/${value}`).then(function(data) {
-                    let terminals = data.terminals || '';
-                    let list = [`<option value=''>Select...</option>`];
-                    for (let i = 0; terminals.length > i; i++) {
-                        list.push(`<option value='${terminals[i].id}'>${terminals[i].name} </option>`);
-                    }
-                    $('#terminal').html(list.join('')).selectpicker('refresh');
-                });
-            });
-
+    
             // Pre-fill period data store with existing periods
             @foreach($slabs as $slab)
                 periodDataStore['{{ $slab->container_type_id }}'] = [];
@@ -554,8 +497,5 @@
             @endforeach
             @endforeach
         });
-
-
-
     </script>
 @endpush

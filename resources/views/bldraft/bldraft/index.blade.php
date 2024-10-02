@@ -18,6 +18,7 @@
                             <div class="col-md-12 text-right mb-5">
                             @permission('BlDraft-Create')
                                 <a href="{{route('bldraft.selectbooking')}}" class="btn btn-primary">New Bl Draft</a>
+                                <a href="{{route('bookingContainersRefresh')}}" class="btn btn-warning">Refresh Booking Containers</a>
                             @endpermission
                             @permission('BlDraft-List')
                                 <a class="btn btn-info" href="{{ route('export.BLExport') }}">BL Export</a> 
@@ -249,37 +250,24 @@
                                                             <i class="far fa-edit text-success"></i>
                                                         </a>
                                                     </li>
-                                                    @endpermission
+                                                    @endpermission  
                                                     
                                                     @permission('Booking-Show')
-                                                    <li>
-                                                    @if(optional(optional($item->booking)->principal)->code == 'Cstar' || optional(optional($item->booking)->principal)->code  == 'Winwin' )
-                                                            @if((in_array($user->id, $usersToCheck)))
-                                                                <a href="{{ route('bldraft.showCstar', ['bldraft' => $item->id]) }}" data-toggle="tooltip" data-placement="top" title="" data-original-title="show">
-                                                                    <i class="far fa-eye text-primary"></i>
-                                                                </a>
-                                                            @elseif(($paymentstautsPaid > 0) && ($paymentstautsUnPaid == 0) || ($paymentstautsPaid == 0) && ($paymentstautsUnPaid > 0) || ($paymentstautsPaid == 0) && ($paymentstautsUnPaid == 0))  
-                                                                <a href="{{ route('bldraft.showCstar', ['bldraft' => $item->id]) }}" data-toggle="tooltip" data-placement="top" title="" data-original-title="show">
-                                                                    <i class="far fa-eye text-primary"></i>
-                                                                </a>
-                                                            @elseif(($paymentstautsPaid > 0) && ($paymentstautsUnPaid > 0) )
-                                                            <a href="{{ route('bldraft.showCstar', ['bldraft' => $item->id]) }}" data-toggle="tooltip" data-placement="top" title="" data-original-title="show">
-                                                                    <i class="far fa-eye text-primary"></i>
-                                                                </a>
+                                                    <li>   	                                                         
+                                                        @if(optional(optional($item->booking)->principal)->code == 'Winwin' && $paymentstautsPaid > 0 && $paymentstautsUnPaid == 0)
+                                                        <a href="{{ route('bldraft.showWinPDF', ['bldraft' => $item->id]) }}" data-toggle="tooltip" data-placement="top" title="" data-original-title="show" target="_blank">
+                                                            <i class="fa fa-print text-danger"></i>
+                                                        </a>
                                                         @endif
-                                                    @else
-                                                        @if(($paymentstautsPaid > 0) && ($paymentstautsUnPaid == 0) || ($paymentstautsPaid == 0) && ($paymentstautsUnPaid > 0) || ($paymentstautsPaid == 0) && ($paymentstautsUnPaid == 0))  
-                                                            <a href="{{ route('bldraft.show', ['bldraft' => $item->id]) }}" data-toggle="tooltip" data-placement="top" title="" data-original-title="show">
-                                                                <i class="far fa-eye text-primary"></i>
-                                                            </a>
-                                                        @elseif(($paymentstautsPaid > 0) && ($paymentstautsUnPaid > 0))
-                                                            <a href="{{ route('bldraft.showCstar', ['bldraft' => $item->id]) }}" data-toggle="tooltip" data-placement="top" title="" data-original-title="show">
-                                                                        <i class="far fa-eye text-primary"></i>
-                                                            </a>
-                                                        @endif
-                                                    @endif
                                                     </li>
                                                     @endpermission 
+                                                    @if(optional(optional($item->booking)->principal)->code  == 'Winwin')
+                                                    <li>                                                    
+                                                        <a href="{{ route('bldraft.showWinCopyPDF', ['bldraft' => $item->id]) }}" data-toggle="tooltip" data-placement="top" title="" data-original-title="show" target="_blank">
+                                                                        <i class="fas fa-file-pdf text-primary"></i>
+                                                        </a>
+                                                    </li>
+                                                    @endif
                                                     @permission('BlDraft-Delete')
                                                     @if($item->has_bl == 0)
                                                     <li>

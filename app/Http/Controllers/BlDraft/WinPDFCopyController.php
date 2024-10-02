@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 use setasign\Fpdi\Fpdi;
 use TCPDF;
 
-class WinPDFController extends Controller
+class WinPDFCopyController extends Controller
 {
-    public function showWinPDF(Request $request)
+    public function showWinCopyPDF(Request $request)
     {
         $blDraft = BlDraft::where('id', $request->bldraft)->with('blDetails')->first();
         $etdvoayege = VoyagePorts::where('voyage_id', $blDraft->voyage_id)
@@ -19,7 +19,7 @@ class WinPDFController extends Controller
                         ->first();
 
         // Get the path to the PDF form template
-        $templatePath = public_path('bl_template.pdf');
+        $templatePath = public_path('DraftBlWin.pdf');
 
         // Create a new instance of FPDI
         $pdf = new Fpdi();
@@ -76,10 +76,10 @@ class WinPDFController extends Controller
         $pdf->SetXY(150, 20); // bl no
         $pdf->MultiCell(100, 3, $blDraft->ref_no, 0, 'L');
 
-        $pdf->SetXY(16, 103); // vessel voyage
+        $pdf->SetXY(16, 102); // vessel voyage
         $pdf->MultiCell(100, 3, optional($blDraft->voyage->vessel)->name . '  ' . optional($blDraft->voyage)->voyage_no, 0, 'L');
 
-        $pdf->SetXY(56, 103); // port of load
+        $pdf->SetXY(56, 102); // port of load
         $pdf->MultiCell(100, 3, optional($blDraft->loadPort)->name, 0, 'L');
 
         $pdf->SetXY(16, 112); // port of discharge
@@ -117,10 +117,10 @@ class WinPDFController extends Controller
             $pdf->cell(0, 0, 'Total  ' . $measurement, 0, 'L');
         }
 
-        $pdf->SetXY(131, 269); // place
+        $pdf->SetXY(131, 268); // place
         $pdf->cell(0, 0, optional(optional($blDraft->booking)->agent)->city, 0, 'L');
 
-        $pdf->SetXY(155, 269); // date of issue
+        $pdf->SetXY(155, 268); // date of issue
         $pdf->cell(0, 0, optional($etdvoayege)->etd, 0, 'L');
 
         $pdf->SetXY(90, 258); // freight charges
@@ -135,7 +135,6 @@ class WinPDFController extends Controller
 
         $pdf->SetXY(16, 258); // freight charges
         $pdf->MultiCell(150, 3, str_replace('<br />', '', nl2br($blDraft->agent_details)), 0, 'L');
-
     }
 
     private function fillContainerDetails($pdf, $blDraft)
@@ -178,7 +177,7 @@ class WinPDFController extends Controller
 
     // Headers
     $headers = ['CONTAINER', 'TYPE', 'SEAL No', 'PACKAGES', 'Measurement', 'GR WT(KGS)'];
-    $headerWidths = [30, 30, 30, 35, 30, 35]; // Adjusted widths for proper spacing
+    $headerWidths = [45, 25, 27, 27, 27, 27]; // Adjusted widths for proper spacing
 
     // Function to print the title
     $printTitle = function() use ($pdf) {
@@ -236,5 +235,19 @@ class WinPDFController extends Controller
             $y += $lineHeight; // Move to the next row
         }
     }
-}        
+    
+    // $buttonUrl = route('bldraft.showWinPDF', ['bldraft' => $blDraft]);
+    // $buttonX = 20; 
+    // $buttonY = 260; 
+    // $buttonWidth = 50;
+    // $buttonHeight = 10;
+    // $buttonText = 'Print';
+    // $pdf->SetFillColor(0, 102, 204); 
+    // $pdf->Rect($buttonX, $buttonY, $buttonWidth, $buttonHeight, 'DF'); 
+    // $pdf->SetTextColor(255, 255, 255); 
+    // $pdf->SetFont('Helvetica', '', 12);
+    // $pdf->SetXY($buttonX, $buttonY);
+    // $pdf->Cell($buttonWidth, $buttonHeight, $buttonText, 0, 0, 'C', false, $buttonUrl);
+    // $pdf->Output('filled_form.pdf', 'I');
+}
 }

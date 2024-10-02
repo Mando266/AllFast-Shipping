@@ -32,7 +32,7 @@
 
                 <div class="col-md-12 text-center">
 
-                <img src="{{asset('assets/img/allfastLogo.png')}}" style="width: 350px;" alt="logo">
+                <img src="{{asset('assets/img/msl-logo.png')}}" style="width: 350px;" alt="logo">
 
                 </div>
 </br>

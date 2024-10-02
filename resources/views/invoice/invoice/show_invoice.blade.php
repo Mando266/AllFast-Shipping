@@ -16,7 +16,7 @@
                 <div class="widget-content widget-content-area">
                     <div class="row">
                         <div class="col-md-6 text-left">
-                            <img src="{{asset('assets/img/allfastLogo.png')}}" style="width: 350px;" alt="logo">
+                            <img src="{{asset('assets/img/msl-logo.png')}}" style="width: 350px;" alt="logo">
                         </div>
                     </div>
                 <br>

@@ -12,5 +12,7 @@ class ContainersIndexFilter extends AbstractFilter{
         'container_ownership_id'=>ContainerOwnershipFilter::class,
         'is_storge'=>IsStorageFilter::class,
         'code'=>CodeFilter::class,
+        'port_id'=>PortFilter::class,
+
     ];
 }

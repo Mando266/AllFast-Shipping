@@ -1,5 +1,4 @@
-@extends('layouts.bldraft') 
-
+@extends('layouts.app') 
 @section('content')
 <div class="layout-px-spacing">
     <div class="row layout-top-spacing">
@@ -9,10 +8,10 @@
                     <div class="container" style="border:none;">
                         <div class="row">
                             <div class="col-md-3 text-left">
-                                <img src="{{asset('assets/img/allfastLogo.png')}}" style="width: 250px;" alt="logo">
+                                <img src="{{asset('assets/img/msl-logo.png')}}" style="width: 250px;" alt="logo">
                             </div>
                             <div class="col-md-6 text-center title" style="color:black">
-                            {{$booking->delivery_no}} &nbsp  اذن تسليم رقم 
+                            {{$booking->win_delivery_no}} &nbsp  اذن تسليم رقم 
                                 <br>
                                 رقم الطريق {{optional(optional($booking->voyage->voyagePorts)->where('port_from_name',$booking->discharge_port_id)->first())->road_no}}
                             </div>
@@ -67,7 +66,11 @@
                     use Carbon\Carbon;
                     $importFreeTime = optional($booking)->free_time ?? 0;
                     $eta = optional($voyagePort)->etd;
-                    $resultDate = $eta ? Carbon::parse($eta)->addDays($importFreeTime)->toDateString() : 'No ETA available';
+                    $resultDate = $eta ? Carbon::parse($eta)->addDays($importFreeTime)->subDay()->toDateString() : 'No ETA available';
+                @endphp
+                @php
+                    $containerTypes = $booking->bookingContainerDetails->pluck('containerType.name')->unique();
+                    $qoutationcontainerTypes = $booking->quotation->quotationDesc->pluck('equipmentsType.name')->unique();
                 @endphp
                     <div class="myDiv">
                         <table class="col-md-12 tableStyle">
@@ -108,15 +111,20 @@
                                 </tr>
                                 <tr>
                                     <td class="col-md-4 text-left">Freight</td>
-                                    <td class="col-md-4 text-center">{{ optional($booking)->payment_kind }}</td>
+                                    <td class="col-md-4 text-center">
+                                        @foreach($booking->quotation->quotationDesc as $detail)
+                                        @if($qoutationcontainerTypes->count() > 1)
+                                            {{ optional($detail->equipmentsType)->name }} - {{ $detail->ofr }}
+                                        @else
+                                            {{ $detail->ofr }} 
+                                        @endif
+                                    @endforeach
+                                    </td>
                                     <td class="col-md-4 text-right">النولون</td>
                                 </tr>
                                 <tr>
                                     <td class="col-md-4 text-left">No Of Containers</td>
                                     <td class="col-md-4 text-center">
-                                        @php
-                                            $containerTypes = $booking->bookingContainerDetails->pluck('containerType.name')->unique();
-                                        @endphp
                                         @if($containerTypes->count() > 1)
                                             @foreach($booking->bookingContainerDetails as $detail)
                                                 {{ $detail->qty }} X {{ optional($detail->containerType)->name }} <br>
@@ -136,9 +144,17 @@
                                     <td class="col-md-4 text-center">{{ $packages }}</td>
                                     <td class="col-md-4 text-right">عدد الطرود</td>
                                 </tr>
+
                                 <tr>
                                     <td class="col-md-4 text-left">Free Time</td>
-                                    <td class="col-md-4 text-center">{{ optional($booking)->free_time }}</td>
+                                    <td class="col-md-4 text-center">
+                                    @foreach($booking->quotation->quotationDesc as $detail)
+                                        @if($qoutationcontainerTypes->count() > 1)
+                                            {{ optional($detail->equipmentsType)->name }} - {{ $detail->free_time }} Day
+                                        @else
+                                            {{ $detail->free_time }} Day
+                                        @endif
+                                    @endforeach
                                     <td class="col-md-4 text-right">السماح</td>
                                 </tr>
                                 <tr>
@@ -236,7 +252,11 @@
                         <table class="col-md-12 tableStyle">
                             <tbody>
                                 <tr>
-                                    <td class="col-md-12 text-right">شركة أوول فاست شيبينج اجينسى غير مسؤلة عن الوزن و المقاس المبين بعاليه و البضاعة تم تعبئتها و تفريغها تحت مسؤلية الشاحن و المستلم دون ادنى مسؤلية على الخط الملاحى او الوكيل الملاحى وعلى الجهات الرقابية والجمركيه اخذ كافة الاجراءات الجمركية والقانونية اللازمة. ومراجعة المشمول ومحتوياته و الخط الملاحى باعتباره مالك الحاوية فقط</td>
+                                    <td class="col-md-12 text-right">
+                                        شركة ميدل أيست غير مسئولة عن الوزن والمقاس المبين بعالية والبضاعة تم تعبئتها  وتفريغها تحت مسئولية الشاحن والمستلم
+                                        دون اجنى مسئولية علي الخط الملاحي أو الوكيل الملاحي وعلي الجهات الرقابية والجمركية أخذ كافة الأجراءات الجمركية والقانونية اللازمة
+                                        ومراجعة المشمول ومحتوباته ويعتبر الخط الملاحي ناقل للحاوية  فقط  بأعتباره مالك الحاوية</td>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -245,6 +265,7 @@
                         <input type="hidden" id="printCount" value="{{ $booking->print_count }}">
                         <button id="printButton" onclick="handlePrint()" class="btn btn-primary mt-3" {{ $booking->print_count >= $booking->max_print ? 'disabled' : '' }}>Print</button>                        
                     </div>
+
                 </div>
         </div>
     </div>

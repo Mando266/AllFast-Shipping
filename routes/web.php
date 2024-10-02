@@ -8,6 +8,7 @@ use App\Http\Controllers\PortChargeController;
 use App\Http\Controllers\BlDraft\PDFController;
 use App\Http\Controllers\ImportExportController;
 use App\Http\Controllers\BlDraft\WinPDFController;
+use App\Http\Controllers\BlDraft\WinPDFCopyController; 
 use App\Http\Controllers\Update\RefreshController;
 use App\Http\Controllers\BlDraft\BlDraftController;
 use App\Http\Controllers\Booking\BookingController;
@@ -18,8 +19,8 @@ use App\Http\Controllers\PortChargeInvoiceController;
 use App\Http\Controllers\Trucker\TruckerGateController;
 use App\Http\Controllers\Quotations\QuotationsController;
 use App\Http\Controllers\Quotations\LocalPortTriffDetailesController;
-use App\Http\Controllers\DententionStorageCalculation\DententionCalculationPeriodController;
 use App\Http\Controllers\DententionStorageCalculation\StorageCalculationPeriodController;
+use App\Http\Controllers\DententionStorageCalculation\DententionCalculationPeriodController;
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', 'HomeController@index')->name('home');
@@ -214,7 +215,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('showCstar/{bldraft}', [BlDraftController::class, 'showCstar'])->name('bldraft.showCstar');
         Route::get('pdf', [PDFController::class, 'showPDF'])->name('bldraft.showPDF');
         Route::get('winpdf', [WinPDFController::class, 'showWinPDF'])->name('bldraft.showWinPDF');
-
+        Route::get('wincopypdf', [WinPDFCopyController::class, 'showWinCopyPDF'])->name('bldraft.showWinCopyPDF');
     });
 
     /*
@@ -281,6 +282,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('calculation-storage-period','StorageCalculationPeriodController');
         Route::get('debit-invoice',DebitInvoiceController::class)->name('debit-invoice');
         Route::get('storage-invoice',StorageInvoiceController::class)->name('storage-invoice');
+        Route::get('extention-dententions',ExtentionDententionController::class)->name('extention-dententions');
+        Route::get('extention-storage',ExtentionStorageController::class)->name('extention-storage');
     });
     Route::get('export_dentention_calculation',[DententionCalculationPeriodController::class,'export'])->name('export_dentention_calculation');
     Route::get('export_storage_calculation',[StorageCalculationPeriodController::class,'export'])->name('export_storage_calculation');

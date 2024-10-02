@@ -137,6 +137,10 @@ class Booking extends Model implements PermissionSeederContract
     {
         return $this->hasMany(TruckerGates::class, 'booking_id', 'id');
     }
+        public function invoices()
+        {
+        return $this->belongsToMany(Invoice::class, 'invoice_booking', 'booking_id', 'invoice_id');
+        }
 
     public function createOrUpdateContainerDetails($inputs)
     {
