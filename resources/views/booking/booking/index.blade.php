@@ -313,7 +313,7 @@
                                             @endif
                                         </td>
                       
-                                        <td class="text-center">
+                                        <td class="text-center" style="background-color: {{ $item->print_count >= $item->max_print ? '#D3D3D3' : 'transparent' }};">
                                             @permission('Booking-Show')
                                             <ul class="table-controls">
                                                 @if($item->booking_confirm == 1)
@@ -323,6 +323,9 @@
                                                                 <i class="fas fa-file-pdf text-primary"
                                                                    style='font-size:large;'></i>
                                                             </a>
+                                                        <div class="mt-2">
+                                                            <small>{{$item->print_count}}/{{$item->max_print}}</small>
+                                                        </div>
                                                     </li>
                                                 @endif
                                             </ul>
