@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\DententionStorageCalculation;
 
-use App\Models\Bl\BlDraft;
 use Illuminate\Http\Request;
 use App\Models\Booking\Booking;
 use App\Models\Invoice\Invoice;
@@ -23,7 +22,7 @@ class ExtentionDententionController extends Controller
      */
     public function __invoke(Request $request)
     {
-        $codes=['SNTC'];
+        $codes=['SNTC','No Next Move'];
         $containers=json_decode($request->data,true);
         $containers = array_filter($containers, function($container) use ($codes) {
             return in_array($container['to_code'],$codes);
@@ -35,18 +34,20 @@ class ExtentionDententionController extends Controller
         $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
         $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $selectedCode=40;
+        $invoiceBooking = new InvoiceBooking();
         $invoice = Invoice::with('invoiceBooking')->where('booking_ref',$request->booking_no)
                     ->where('type','debit')
                     ->latest('date')->first();
+        if($invoice){
+            $invoiceBooking = $invoice->invoiceBooking()->whereIn('to_code',$codes)->get();
+        }
+        // $invoiceBooking =InvoiceBooking::whereHas('invoice', function ($query) {
+            // $query->where('type','debit');
+        // })
+        // ->whereIn('to_code',$codes)
+        // ->where('booking_id',$request->booking_no)
+        // ->get();
         
-        $invoiceBooking = $invoice->invoiceBooking()->whereIn('to_code',$codes)->get();
-
-                // $invoiceBooking =InvoiceBooking::whereHas('invoice', function ($query) {
-                // $query->where('type','debit');
-                // })
-                // ->whereIn('to_code',$codes)
-                // ->where('booking_id',$request->booking_no)
-                // ->get();
         $grandTotal=0;
         $note=[];
         foreach ($containers as $container) {

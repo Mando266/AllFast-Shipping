@@ -376,7 +376,6 @@ class BookingCalculationService
         $cal_type = $is_storage ? 'STORAGE' : 'DETENTION';
         $type = strtoupper("{$booking->shipment_type}/{$cal_type}");
         $portId = $booking->shipment_type == 'Export' ? $booking->load_port_id : $booking->discharge_port_id;
-
         $demurrage = Demurrage::where('is_storge', $type)
             ->where('port_id', $portId)
             ->with('slabs.periods')->first();
@@ -416,11 +415,11 @@ class BookingCalculationService
             return null;
         }
         $quotation=optional(optional($booking->quotation)->quotationDesc)->firstWhere('equipment_type_id',$container->container_type_id);
-            if($quotation){
-                return $quotation->free_time;
-            }
+        if($quotation){
+            return $quotation->free_time;
+        }
         $bookingDetails=optional($booking->bookingContainerDetails)->firstWhere('container_id',$container->id);
-            if($bookingDetails){
+        if($bookingDetails){
             return $bookingDetails->free_time;
             }
         return null;
