@@ -27,6 +27,7 @@ class DetentionExportCalculationService extends BookingCalculationService
         $status = 'in_completed';
         $to_date=isset($payload['to_date'])?Carbon::parse($payload['to_date'])->endOfDay():null;
         $containerCalc = collect();
+        $demurrage= new Demurrage();
         foreach ($containers as $container) {
             $booking_no=$this->getBookingNoMovement($payload,$container->id)->booking_no;
             $movementId=$this->getBookingNoStartMovement($payload,$booking_no);

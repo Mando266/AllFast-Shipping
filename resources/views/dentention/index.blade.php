@@ -134,7 +134,7 @@
                                             </tr>
                                             </thead>
                                             <tbody>
-                                            @if($calculation['containers'])
+                                             @if(count($calculation['containers']) > 0)
                                                 <input type="hidden" id="calculation" value="{{$calculation['containers']}}">
                                                 <input type="hidden" id="periods" value="{{$calculation['containers'][0]['periods']}}">
                                             @endif
