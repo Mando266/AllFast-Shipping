@@ -27,10 +27,14 @@ class StorageInvoiceController extends Controller
         $qty = $bldraft->bookingContainerDetails->count();
         $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $containerDetails = [];
-        foreach (json_decode($request->periods,true) as $item) {
-                $formattedString = str_pad($item['name'], 12) . ' ' . $item['days'] . ' Days ' . $item['total'];
-                $containerDetails[] = $formattedString;
-            }                
+        foreach (json_decode($request->data,true) as $container) {
+            $containerDetails []= 'Container No: ' .str_pad($container['container_no'], 12)
+            .' To Code: ' .$container['to_code']
+            .' daysCount: ' .$container['daysCount']
+            .' freeTime: ' .$container['freeTime']
+            .' Total: ' .$container['total']
+            ;
+        }
         return view('invoice.invoice.create_invoice',[
             'qty'=>$qty,
             'bldraft'=>$bldraft,

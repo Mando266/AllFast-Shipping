@@ -122,9 +122,8 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @if($calculation['containers'])
+                                         @if(count($calculation['containers']) > 0)
                                         <input type="hidden" id="calculation" value="{{$calculation['containers']}}">
-
                                         <input type="hidden" id="periods" value="{{$calculation['containers'][0]['periods']}}">
                                         @endif
                                         @foreach($calculation['containers'] as $item)
@@ -292,24 +291,15 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
     <script>
+         let shipment_type='';
         let company_id = "{{auth()->user()->company_id}}";
-        let selectedCodes = '{{ implode('
-            , ',$input['
-        container_ids '] ??[]) }}'
+        let selectedCodes = '{{ implode(', ',$input['container_ids'] ??[]) }}'
         selectedCodes = selectedCodes.split(',').filter(item => item !== '')
         $(function() {
             if ($('#booking_no').val()) {
                 $('#booking_no').change();
-                $('#from_code').val({
-                    {
-                        old('from', isset($input) ? $input['from'] : '')
-                    }
-                }).trigger('change');
-                $('#to_code').val({
-                    {
-                        old('to', isset($input) ? $input['to'] : '')
-                    }
-                }).trigger('change');
+                $('#from_code').val({{old('from', isset($input) ? $input['from'] : '')}}).trigger('change');
+                $('#to_code').val({{old('to', isset($input) ? $input['to'] : '')}}).trigger('change');
             }
         });
 
@@ -317,7 +307,7 @@
             let targetText = 'DCHF';
             let container = $('#port');
             let booking_no = $('#booking_no').val();
-            let shipment_type = $('#booking_no').find(':selected').data('shipment_type');
+            shipment_type = $('#booking_no').find(':selected').data('shipment_type');
             container.empty();
             container.append(`<option value='all'  ${selectedCodes.includes( 'all') ? 'selected' : ''}>All</option>`);
             $.ajax({
@@ -368,14 +358,18 @@
 
     </script>
     <script>
+
         $('#create_invoive').click(function(e) {
             e.preventDefault();
+            let type=(shipment_type == 'Export')?'bldraft_id':'booking_ref';
             let formData = $('#invoiceForm').serialize();
             let grandTotalText = $('#grandTotal').text();
             let grandTotal = grandTotalText.match(/\d+/);
             grandTotal = grandTotal ? parseInt(grandTotal[0], 10) : 0;
             let periods = $('#periods').val();
-            formData += '&booking_ref=' + encodeURIComponent($('#booking_no').val());
+            let calculation = $('#calculation').val();
+            formData += '&data=' + encodeURIComponent(calculation);
+            formData +='&'+type+'=' + encodeURIComponent($('#booking_no').val());
             formData += '&grandTotal=' + encodeURIComponent(grandTotal);
             formData += '&periods=' + encodeURIComponent(periods);
             formData += '&add_egp=' + encodeURIComponent('USD');
@@ -383,10 +377,11 @@
         });
         $('#create_extention').click(function(e) {
             e.preventDefault();
+            let type=(shipment_type == 'Export')?'bldraft_id':'booking_ref';
             let formData = $('#invoiceForm').serialize();
             let calculation = $('#calculation').val();
             formData += '&data=' + encodeURIComponent(calculation);
-            formData += '&booking_ref=' + encodeURIComponent($('#booking_no').val());
+            formData += '&'+type+'=' + encodeURIComponent($('#booking_no').val());
             window.location.href = "{{ route('extention-storage') }}?" + formData;
         });
 
