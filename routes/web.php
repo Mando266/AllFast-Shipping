@@ -196,6 +196,9 @@ Route::group(['middleware' => 'auth'], function () {
         ->name('booking.clone');
 
         Route::post('incrementPrintCount/{id}', [BookingController::class, 'incrementPrintCount']);
+        Route::get('do-print-counter', [BookingController::class, 'doPrintCounter'])->name('booking.doPrintCounter');
+        Route::post('do-print-counter/update', [BookingController::class, 'updateDoPrintCounter'])->name('booking.updateDoPrintCounter');
+        Route::post('do-print-counter/update-max-print', [BookingController::class, 'updateDOMaxPrint'])->name('booking.updateDOMaxPrint');
     });
     /*
     |-------------------------------------------

@@ -404,16 +404,21 @@
                                     <a href="{{route('booking.export')}}">Export Booking</a>
                                 </li>
                                 @endpermission
+                                @permission('Booking-List')
+                                <li>
+                                    <a href="{{route('booking.doPrintCounter')}}">D.O Print Counter</a>
+                                </li>
+                                @endpermission
                                 @permission('BlDraft-List')
                                 <li>
                                     <a href="{{route('bldraft.index')}}"> Bl Gates </a>
                                 </li>
                                 @endpermission
-                                @permission('BlDraft-List')
+                                {{-- @permission('BlDraft-List')
                                 <li>
                                     <a href="{{route('bldraft.printcounter')}}"> Bl Prints Counter </a>
                                 </li>
-                                @endpermission
+                                @endpermission --}}
 
                                 @permission('XML-List')
                                 <li>

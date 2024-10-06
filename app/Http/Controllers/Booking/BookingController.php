@@ -544,6 +544,58 @@ class BookingController extends Controller
         return response()->json(['success' => false], 404);
     }
 
+    public function doPrintCounter(Request $request)
+    {
+        $query = $request->input('query');
+        $bookings = [];
+        $max_print = Booking::value('max_print');
+
+        if ($query) {
+            $bookings = Booking::where('ref_no', 'LIKE', "%{$query}%")
+                ->select('id', 'ref_no', 'print_count')
+                ->get();
+        }
+
+        return view('booking.booking.do_print_counter', [
+            'bookings' => $bookings,
+            'query' => $query,
+            'maxPrint'=>$max_print
+        ]);
+    }
+
+    public function updateDoPrintCounter(Request $request)
+    {
+        $printCounts = $request->input('print_count', []);
+        $query = $request->input('query');
+
+        foreach ($printCounts as $bookingId => $printCount) {
+            $booking = Booking::find($bookingId);
+
+            if ($booking) {
+                $booking->print_count = $printCount;
+                $booking->save();
+            }
+        }
+
+        return redirect()->route('booking.doPrintCounter', ['query' => $query])->with('success', 'Print counters updated successfully.');
+    }
+    
+
+    public function updateDOMaxPrint(Request $request)
+    {
+        // Validate the input
+        $request->validate([
+            'global_max_print' => 'required|integer|min:0',
+        ]);
+
+        // Update all bookings' max_print field
+        Booking::query()->update(['max_print' => $request->global_max_print]);
+
+        return redirect()->route('booking.doPrintCounter')->with('success', 'Global max print count updated successfully.');
+    }
+
+
+
 
     public function arrivalNotification($id)
     {
