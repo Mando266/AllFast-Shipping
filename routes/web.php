@@ -18,7 +18,8 @@ use App\Http\Controllers\PortChargeInvoiceController;
 use App\Http\Controllers\Trucker\TruckerGateController;
 use App\Http\Controllers\Quotations\QuotationsController;
 use App\Http\Controllers\Quotations\LocalPortTriffDetailesController;
-use App\Http\Controllers\DententionStorageCalculation\CalculationPeriodController;
+use App\Http\Controllers\DententionStorageCalculation\StorageCalculationPeriodController;
+use App\Http\Controllers\DententionStorageCalculation\DententionCalculationPeriodController;
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/', 'HomeController@index')->name('home');
@@ -93,6 +94,10 @@ Route::group(['middleware' => 'auth'], function () {
             'DetentionController@showTriffSelectWithBlno'
         )->name('detention.showTriffSelectWithBlno');
         Route::post('detention', 'DetentionController@showDetention')->name('detention.showDetention');
+
+        Route::get('/fetch-booking-details', 'MovementController@fetchBookingDetails')->name('booking.fetchDetails');
+        Route::get('/fetch-voyage-port-details', [MovementController::class, 'fetchVoyagePortDetails'])->name('fetchVoyagePortDetails');
+
     });
 
     /*Excel import export*/
@@ -135,6 +140,10 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('{quotation}/approve', [QuotationsController::class, 'approve'])->name('quotation.approve');
         Route::get('{quotation}/reject', [QuotationsController::class, 'reject'])->name('quotation.reject');
         Route::resource('localporttriff', 'LocalPortTriffController');
+        Route::get('import', [QuotationsController::class, 'import'])->name('quotation.import');
+
+        Route::get('importcreate', [QuotationsController::class, 'importcreate'])
+        ->name('quotation.importcreate');
         Route::get('localporttriffdetailes/{id}', [LocalPortTriffDetailesController::class, 'destroy'])->name(
             'LocalPortTriffDetailes.destroy'
         );
@@ -155,10 +164,7 @@ Route::group(['middleware' => 'auth'], function () {
         ->name('booking.selectExportQuotation');
         Route::get('exportcreate', [BookingController::class, 'exportcreate'])
         ->name('booking.exportcreate');
-
-        Route::get('export', [BookingController::class, 'export'])
-        ->name('booking.export');
-
+        Route::get('export', [BookingController::class, 'export'])->name('booking.export');
         Route::get('selectGateOut/{booking}', [BookingController::class, 'selectGateOut'])
             ->name('booking.selectGateOut');
         Route::get('showShippingOrder/{booking}', [BookingController::class, 'showShippingOrder'])
@@ -185,6 +191,8 @@ Route::group(['middleware' => 'auth'], function () {
             ->name('importBooking');
         Route::get('{booking}/temperatureDiscrepancy', [BookingController::class, 'temperatureDiscrepancy'])
             ->name('temperature-discrepancy');
+        Route::get('{booking}/clone', [BookingController::class, 'clone'])
+        ->name('booking.clone');
     });
     /*
     |-------------------------------------------
@@ -198,6 +206,9 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('serviceManifest/{bldraft}/{xml?}', [BlDraftController::class, 'serviceManifest'])->name(
             'bldraft.serviceManifest'
         );
+        Route::post('incrementPrintCount/{id}', [BlDraftController::class, 'incrementPrintCount'])->name('bldraft.incrementPrintCount');
+        Route::get('print-counter', [BlDraftController::class, 'printCounter'])->name('bldraft.printcounter');
+        Route::post('bldraft/update-print-counter', [BlDraftController::class, 'updatePrintCounter'])->name('bldraft.updatePrintCounter');
         Route::get('showCstar/{bldraft}', [BlDraftController::class, 'showCstar'])->name('bldraft.showCstar');
         Route::get('pdf', [PDFController::class, 'showPDF'])->name('bldraft.showPDF');
         Route::get('winpdf', [WinPDFController::class, 'showWinPDF'])->name('bldraft.showWinPDF');
@@ -239,6 +250,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('refund', 'RefundController');
         Route::resource('creditNote', 'CreditController');
         Route::get('get_invoice_json/{invoice}', 'InvoiceController@invoiceJson')->name('invoice.get_invoice_json');
+        Route::get('getBookingDetails/{booking_ref}', [InvoiceController::class, 'getBookingDetails'])->name('invoice.getBookingDetails');
     });
     /*
     |-------------------------------------------
@@ -263,10 +275,15 @@ Route::group(['middleware' => 'auth'], function () {
     Route::prefix('dentention-storage-calculation')->namespace('DententionStorageCalculation')->group(function () {
         Route::resource('dententions', 'DententionController');
         Route::resource('storage', 'StorageController');
-        Route::resource('calculation-period','CalculationPeriodController');
+        Route::resource('calculation-dentention-period','DententionCalculationPeriodController');
+        Route::resource('calculation-storage-period','StorageCalculationPeriodController');
         Route::get('debit-invoice',DebitInvoiceController::class)->name('debit-invoice');
+        Route::get('storage-invoice',StorageInvoiceController::class)->name('storage-invoice');
+        Route::get('extention-dententions',ExtentionDententionController::class)->name('extention-dententions');
+        Route::get('extention-storage',ExtentionStorageController::class)->name('extention-storage');
     });
-    Route::get('export_calculation_period',[CalculationPeriodController::class,'export'])->name('export_calculation_period');
+    Route::get('export_dentention_calculation',[DententionCalculationPeriodController::class,'export'])->name('export_dentention_calculation');
+    Route::get('export_storage_calculation',[StorageCalculationPeriodController::class,'export'])->name('export_storage_calculation');
     Route::prefix('lessor')->namespace('Master')->group(function () {
         Route::resource('seller', 'LessorSellerController');
     });

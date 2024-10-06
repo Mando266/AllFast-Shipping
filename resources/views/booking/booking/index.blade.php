@@ -140,11 +140,12 @@
                                 <label for="voyage_id_both">Vessel / Voyage </label>
                                 <select class="selectpicker form-control" id="voyage_id_both" data-live-search="true"
                                         name="voyage_id_both" data-size="10"
-                                        title="{{trans('forms.select')}}">
+                                        title="{{trans('forms.select')}}" multiple>
                                     @foreach ($voyages as $item)
-                                        <option
-                                            value="{{$item->id}}" {{$item->id == old('voyage_id_both',request()->input('voyage_id_both')) ? 'selected':''}}>{{optional($item->vessel)->name}}
-                                            / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
+                                        <option value="{{ $item->id }}" 
+                                            {{ in_array($item->id, old('voyage_id_both', request()->input('voyage_id_both', []))) ? 'selected' : '' }}>
+                                            {{ optional($item->vessel)->name }} / {{ $item->voyage_no }} - {{ optional($item->leg)->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 @error('voyage_id_both')
@@ -360,7 +361,7 @@
                                         </td>
 
                                         <td class="text-center">
-                                            <ul class="table-controls">
+                                            <ul class="table-controls d-flex flex-row justify-content-between">
                                                 @if($item->certificat == !null)
                                                     <li>
                                                         <a href='{{asset($item->certificat)}}' target="_blank">
@@ -372,7 +373,7 @@
                                                 @permission('Booking-Edit')
                                                 <li>
                                                     <a href="{{route('booking.edit',['booking'=>$item->id,'quotation_id'=>$item->quotation_id])}}"
-                                                       data-toggle="tooltip" data-placement="top" title=""
+                                                       data-toggle="tooltip" data-placement="top" title="Edit"
                                                        data-original-title="edit">
                                                         <i class="far fa-edit text-success"></i>
                                                     </a>
@@ -381,9 +382,16 @@
                                                     @permission('Booking-Show')
                                                     <li>
                                                     <a href="{{route('booking.arrivalNotification',['booking'=>$item->id])}}"
-                                                    data-toggle="tooltip" data-placement="top" title=""
+                                                    data-toggle="tooltip" data-placement="top" title="Show"
                                                            data-original-title="show">
-                                                            <i class="far fa-eye text-primary"></i>
+                                                            <i class="far fa-eye text-primary px-2"></i>
+                                                        </a>
+                                                    </li>
+                                                    @endpermission
+                                                    @permission('Booking-Edit')
+                                                    <li>
+                                                        <a href="{{ route('booking.clone', ['booking' => $item->id]) }}" data-toggle="tooltip" data-placement="top" title="Clone">
+                                                            <i class="far fa-copy text-warning"></i>
                                                         </a>
                                                     </li>
                                                     @endpermission
@@ -450,6 +458,7 @@
 
             searchForm.submit();
         });
+
         $('#search-btn').click(() => {
             searchForm.attr('method', 'get');
             searchForm.attr('action', '{{ route('booking.index') }}');

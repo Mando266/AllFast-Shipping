@@ -202,8 +202,7 @@
                             <label for="countryInput">Other Currency</label>
                             <select class="selectpicker form-control" id="othercurrency" data-live-search="true" name="othercurrency" data-size="10"
                             title="{{trans('forms.select')}}" autofocus>
-                            <option value="">Select...</option>
-                                @foreach ($currency as $item)
+                                                             @foreach ($currency as $item)
                                     <option value="{{$item->name}}" {{$item->name == old('othercurrency') ? 'selected':''}}>{{$item->name}}</option>
                                 @endforeach
                             </select>
@@ -291,7 +290,7 @@
      var counter  = 1;
         $("#add").click(function(){
                 var tr = '<tr>'+
-            '<td class="ports"><select class="selectpicker form-control port"  data-live-search="true" name="customerRole['+counter+'][role_id]" data-size="10" required><option value="">Select...</option>@foreach ($customer_roles as $item)<option value="{{$item->id}}" {{$item->id == old('role_id') ? 'selected':''}}>{{$item->name}}</option>@endforeach</select></td>'+
+            '<td class="ports"><select class="selectpicker form-control port"  data-live-search="true" name="customerRole['+counter+'][role_id]" data-size="10" required>  @foreach ($customer_roles as $item)<option value="{{$item->id}}" {{$item->id == old('role_id') ? 'selected':''}}>{{$item->name}}</option>@endforeach</select></td>'+
             '<td style="width:85px;"><button type="button" class="btn btn-danger remove"><i class="fa fa-trash"></i></button></td>'
             '</tr>';
             counter++;

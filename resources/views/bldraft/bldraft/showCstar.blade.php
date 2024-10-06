@@ -1,5 +1,7 @@
 @extends('layouts.bldraft')
 @section('content')
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <div class="layout-px-spacing" style="background-color: #fff;">
     <div class="row layout-top-spacing">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
@@ -335,7 +337,8 @@
                 @endif
                 <div class="row">
                         <div class="col-md-12 text-center">
-                <button onclick="window.print()" class="btn btn-primary hide mt-3">Print This Bl</button>
+                {{-- <button onclick="window.print()" class="btn btn-primary hide mt-3">Print This Bl</button> --}}
+                <button id="printButton" onclick="printBL({{ $blDraft->id }})" class="btn btn-primary hide mt-3" data-print-count="{{ $printCount }}" data-bldraft-id="{{ $blDraft->id }}">Print This BL</button>
                 @if(Auth::user()->company_id == 3)
                 <a href="{{route('bldraft.showWinPDF',['bldraft'=>$blDraft->id])}}" class="btn btn-success hide mt-3">Print Original</a>
                 @endif
@@ -356,6 +359,70 @@
     document.getElementsByName("maindesc")[0].value = d.trim()
     let e = document.getElementsByName("additional_notify_details")[0].value
     document.getElementsByName("additional_notify_details")[0].value = e.trim()
+
+    document.addEventListener('DOMContentLoaded', () => {
+    const printButton = document.querySelector('#printButton');
+    let printCount = parseInt(printButton.dataset.printCount, 10);
+
+    if (printCount >= 3) disablePrintButton(printButton);
+
+    printButton.addEventListener('click', (event) => {
+        if (printCount >= 3) {
+            alert('You have reached the print limit of 3 times.');
+            event.preventDefault();
+        }
+    });
+});
+
+function disablePrintButton(button) {
+    button.disabled = true;
+    button.style.pointerEvents = 'none';
+    button.style.cursor = 'not-allowed';
+}
+
+function printBL(blDraftId) {
+    let printSuccess = false;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    if (!csrfToken) return;
+
+    window.onbeforeprint = () => printSuccess = false;
+    window.onafterprint = () => {
+        printSuccess = true;
+        setTimeout(() => updatePrintCount(blDraftId, csrfToken), 1000);
+    };
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') printSuccess = true;
+    });
+
+    window.print();
+}
+
+function updatePrintCount(blDraftId, csrfToken) {
+    fetch(`/bldraft/incrementPrintCount/${blDraftId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify({ copies: 1 })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const printButton = document.querySelector('#printButton');
+            let printCount = parseInt(printButton.dataset.printCount, 10) + 1;
+            printButton.dataset.printCount = printCount;
+            if (printCount >= 3) {
+                disablePrintButton(printButton);
+                alert('You have reached the print limit of 3 times.');
+            }
+        }
+    })
+    .catch(error => console.error('Fetch error:', error));
+}
+
+
 </script>
 @endpush
 @push('styles')
@@ -391,3 +458,4 @@
             word-break: break-word;
         }
 </style>
+@endpush

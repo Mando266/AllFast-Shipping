@@ -28,14 +28,14 @@
                                     @if($quotation->id != 0)
                                         <input type="hidden" class="form-control" name="booking_type" value="{{$quotation->quotation_type}}">
                                     @else
-                                    <div class="form-group col-md-2">
+                                    <div class="form-group col-md-3">
                                         <label>Booking Type <span class="text-warning"> * </span></label>
                                         <select class="selectpicker form-control" data-live-search="true" name="booking_type" title="{{trans('forms.select')}}" required>
                                         <option value="Empty">Empty</option>
                                         <option value="Full">Full</option>
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-2">
+                                    <div class="form-group col-md-3">
                                         <label for="bl_release">BL Type <span class="text-warning"> * </span></label>
                                         <select class="selectpicker form-control" data-live-search="true" name="bl_kind" title="{{trans('forms.select')}}" required>
                                             <option value="Original" @isset($booking){{"Original" == $booking->bl_kind?? "selected"}} @endisset>Original</option>
@@ -45,7 +45,7 @@
                                         </select>
                                     </div>
                                     @endif
-                            <div class="form-group col-md-2">
+                            <div class="form-group col-md-3">
                                 <label for="status">Booking Status<span class="text-warning"> * </span></label>
                                 <select class="selectpicker form-control" data-live-search="true" name="booking_confirm" title="{{trans('forms.select')}}" required>
                                     <option value="1">Confirm</option>
@@ -58,22 +58,7 @@
                                 @enderror
                             </div>
                             
-                            @php
-                                $fields = ['coc' => 'COC', 'soc' => 'SOC', 'imo' => 'IMO', 'oog' => 'OOG', 'rf' => 'RF'];
-                                $isDraft = request('quotation_id') == '0';
-                            @endphp
-
-                            <div class="form-group col-md-3" style="padding-top: 30px;">
-                            <label for="special_requirements">Special Requirements</label>
-                                <div class="form-check">
-                                    @foreach ($fields as $field => $label)
-                                        <input type="checkbox" id="{{ $field }}" name="{{ $field }}" value="1"
-                                            {{ $quotation->$field == 1 ? 'checked' : 'disabled' }}
-                                            {{ $isDraft ? '' : '' }}>
-                                        <a style="font-size: 15px; color: #3b3f5c; letter-spacing: 1px; margin-right: 10px;"> {{ $label }} </a>
-                                    @endforeach
-                                </div>
-                            </div>
+                           
 
                         </div>
                         <div class="form-row">
@@ -111,8 +96,7 @@
                                 <label for="ffw_id">Forwarder Name</label>
                                 <select class="selectpicker form-control" id="ffw_id" data-live-search="true" name="ffw_id" data-size="10"
                                  title="{{trans('forms.select')}}">
-                                 <option value="">Select....</option>
-                                    @foreach ($ffw as $item)
+                                       @foreach ($ffw as $item)
                                         @if($quotation->customer_id != null)
                                             @if(in_array(6, optional($quotation->customer)->CustomerRoles->pluck('role_id')->toarray()))
                                             <option value="{{$item->id}}" {{$item->id == old('ffw_id',$quotation->customer_id) ? 'selected':'disabled'}}>{{$item->name}} @foreach($item->CustomerRoles as $itemRole) - {{optional($itemRole->role)->name}}@endforeach</option>
@@ -134,7 +118,6 @@
                                 <label for="customer_id">Shipper Name</label>
                                 <select class="selectpicker form-control" id="customer_id" data-live-search="true" name="customer_id" data-size="10"
                                  title="{{trans('forms.select')}}">
-                                 <option value="">Select....</option>
                                     @foreach ($customers as $item)
                                         @if($quotation->customer_id != null)
                                             @if(in_array(1, optional($quotation->customer)->CustomerRoles->pluck('role_id')->toarray()))
@@ -279,8 +262,7 @@
                                 <div class="form-group col-md-4">
                                     <label for="Transhipment">Transhipment Port</label>
                                     <select class="selectpicker form-control" id="transhipment_port" data-live-search="true" name="transhipment_port" data-size="10" title="{{trans('forms.select')}}">
-                                        <option value="">Select...</option>
-                                        @foreach ($ports as $item)
+                                                                                 @foreach ($ports as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('transhipment_port') ? 'selected' : ''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -291,8 +273,7 @@
                                 <div class="form-group col-md-4">
                                     <label for="terminal_id">Discharge Terminal <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="terminal" data-live-search="true" name="terminal_id" data-size="10" title="{{trans('forms.select')}}" required>
-                                        <option value="">Select..</option>
-                                        @foreach ($terminals as $item)
+                                                  @foreach ($terminals as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('terminal_id') ? 'selected' : ''}}>{{$item->name}}</option>
                                         @endforeach
                                     </select>
@@ -303,8 +284,7 @@
                                 <div class="form-group col-md-4">
                                     <label for="voyage_id">Vessel / Voyage <span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" id="voyage_id" data-live-search="true" name="voyage_id" data-size="10" title="{{trans('forms.select')}}" required>
-                                        <option value="">Select..</option>
-                                        @foreach ($voyages as $item)
+                                                  @foreach ($voyages as $item)
                                             <option value="{{$item->id}}" {{$item->id == old('voyage_id') ? 'selected' : ''}}>{{$item->vessel->name}} / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
                                         @endforeach
                                     </select>
@@ -346,7 +326,7 @@
                             </div>
                         </div>
                         <div class="form-row">
-                            @if($isDraft)
+                            @if(!$isDraft)
                                 <div class="form-group col-md-3">
                                     <label for="status">Bl Payment<span class="text-warning"> * </span></label>
                                     <select class="selectpicker form-control" data-live-search="true" name="payment_kind" title="{{trans('forms.select')}}" required>
@@ -354,14 +334,8 @@
                                         <option value="Collect">Collect</option>
                                     </select>
                                 </div>
-                                <div class="form-group col-md-3">
-                                    <label>Import Free Time <span class="text-warning"> * </span></label>
-                                    <input type="text" class="form-control" id="free_time" name="free_time" value="{{old('free_time')}}"
-                                        placeholder="Import Free Time" autocomplete="off">
-                                </div>
                                 @else
                                 <input type="hidden" name="payment_kind" class="form-control" autocomplete="off" value="{{optional($quotation)->payment_kind}}">
-                                <input type="hidden" name="free_time" class="form-control" autocomplete="off" value="{{optional($quotation)->import_detention}}">
                             @endif
                             <div class="form-group col-md-3">
                                 <label for="tariff_service">Tariff Service</label>
@@ -429,25 +403,42 @@
                         </div>
 
                         <h4>Container Details</h4>
+                        <div style="overflow-x: auto;">
+
                         <table id="containerDetails" class="table table-bordered">
                             <thead>
                             <tr>
+                                @if(request()->input('quotation_id') == "0")
+                                <th class="text-center">Request Type</th>
+                                @endif
                                 <th class="text-center">Container No</th>
                                 <th class="text-center">Container Type</th>
                                 <th class="text-center">QTY</th>
                                 <th class="text-center">Return Location</th>
                                 <th class="text-center">Seal No</th>
-                                <th class="text-center">HAZ / Reefer/ OOG Details / Haz Approval Ref</th>
+                                <th class="text-center">HAZ</th>
                                 <th class="text-center">Packs</th>
                                 <th class="text-center">Packs Type</th>
                                 <th class="text-center">Commodity Des</th>
-                                <th class="text-center">Gross Weight Kgs</th>
-                                <th class="text-center">Net Weight Kgs</th>
+                                <th class="text-center">Gross.W Kgs</th>
+                                <th class="text-center">Net.W Kgs</th>
+                                @if(request()->input('quotation_id') == "0")
+                                    <th class="text-center">Special Equipment</th>
+                                @endif
                                 <th class="text-center">Add Container</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr id="initialRow">
+                                @if(request()->input('quotation_id') == "0")
+                                <td id="request">
+                                    <select class="selectpicker form-control" id="requesttype" data-live-search="true" name="quotationDis[0][request_type]" data-size="10" title="{{trans('forms.select')}}" required>
+                                        <option value="Dry">Dry</option>
+                                        <option value="Reefer">Reefer</option>
+                                        <option value="Special Equipment">Special Equipment</option>
+                                    </select>
+                                </td>
+                                @endif
                                 <td>
                                     <input type="text" style="width: 155px;" name="containerDetails[0][container_number]" class="form-control container-number" placeholder="Container No" autocomplete="off" required>
                                     <input type="hidden" name="containerDetails[0][container_id]" class="container-id">
@@ -485,11 +476,42 @@
                                 <td>
                                     <input type="text" id="net_weight" name="containerDetails[0][net_weight]" class="form-control input"  autocomplete="off" placeholder="Net Weight">
                                 </td>
+
+                                @if(request()->input('quotation_id') == "0")
+                                <td>
+                                    <div class="checkbox-group d-flex flex-row">
+                                        <div style="display: inline-block; width: 50%;" class="mr-3">
+                                            <div style="margin-bottom: 5px;">
+                                                <label style="margin-right: 10px; width: 25px; display: inline-block;">SOC</label>
+                                                <input type="checkbox" id="soc" name="quotationDis[0][soc]" value="1">
+                                            </div>
+                                            <div style="margin-bottom: 5px;">
+                                                <label style="margin-right: 10px; width: 25px; display: inline-block;">IMO</label>
+                                                <input type="checkbox" value="1" name="quotationDis[0][imo]">
+                                            </div>
+                                            <div>
+                                                <label style="margin-right: 10px; width: 25px; display: inline-block;">OOG</label>
+                                                <input type="checkbox" value="1" name="quotationDis[0][oog]">
+                                            </div>
+                                        </div>
+                                        <div style="display: inline-block; width: 50%;">
+                                            <div style="margin-bottom: 5px;">
+                                                <label style="margin-right: 10px; width: 25px; display: inline-block;">RF</label>
+                                                <input type="checkbox" value="1" name="quotationDis[0][rf]">
+                                            </div>
+                                            <div>
+                                                <label style="margin-right: 10px; width: 25px; display: inline-block;">NOR</label>
+                                                <input type="checkbox" value="1" name="quotationDis[0][nor]">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            @endif
                                <td><button type="button" id="addContainerRow" class="btn btn-primary"><i class="fas fa-plus"></i></button></td>
                             </tr>
                             </tbody>
                         </table>
- 
+                        </div>
                         <!-- Modal for error messages -->
                         <div class="modal fade" id="containerErrorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
@@ -557,6 +579,17 @@ $(document).ready(function() {
     // Ensure the selectpicker is initialized on page load
     $('.selectpicker').selectpicker();
 });
+</script>
+
+<script>
+    $('#createForm').submit(function() {
+        $('select').removeAttr('disabled');
+    });
+</script>
+<script>
+    $('#createForm').submit(function() {
+        $('input').removeAttr('disabled');
+    });
 </script>
 @endpush
 

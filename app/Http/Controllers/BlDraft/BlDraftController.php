@@ -6,6 +6,7 @@ use App\Filters\BlDraft\BlDraftIndexFilter;
 use App\Http\Controllers\Controller;
 use App\Models\Bl\BlDraft;
 use App\Models\Bl\BlDraftDetails;
+use App\Models\Bl\BlPrintCounter;
 use App\Models\Booking\Booking;
 use App\Models\Booking\BookingContainerDetails;
 use App\Models\Master\Containers;
@@ -46,7 +47,10 @@ class BlDraftController extends Controller
 
     public function selectBooking()
     {
-        $booking  = Booking::orderBy('id','desc')->where('booking_confirm',1)->where('has_bl',0)->where('company_id',Auth::user()->company_id)->with('customer')->get();
+        $booking  = Booking::
+        where('shipment_type', 'Export')->orderBy('id','desc')->
+        where('booking_confirm',1)->where('has_bl',0)->
+        where('company_id',Auth::user()->company_id)->with('customer')->get();
         $transhipments = Booking::orderBy('id','desc')->where('booking_confirm',1)->where('is_transhipment',1)->where('company_id',Auth::user()->company_id)->with('customer')->get();
         return view('bldraft.bldraft.selectBooking',[
             'booking'=>$booking,
@@ -268,12 +272,70 @@ class BlDraftController extends Controller
     {
         $blDraft = BlDraft::where('id',$id)->with('blDetails')->first();
         $etdvoayege = VoyagePorts::where('voyage_id',$blDraft->voyage_id)->where('port_from_name',optional($blDraft->loadPort)->id)->first();
-            return view('bldraft.bldraft.showCstar',[
-                'blDraft'=>$blDraft,
-                'etdvoayege'=>$etdvoayege,
-                ]);
-    }
 
+        $blCounter = BlPrintCounter::firstOrCreate(['bl_draft_id' => $id]);
+        return view('bldraft.bldraft.showCstar', [
+            'blDraft' => $blDraft,
+            'etdvoayege' => $etdvoayege,
+            'printCount' => $blCounter->print_count,
+        ]);
+    }
+    
+    public function incrementPrintCount(Request $request, $blDraftId)
+    {
+        $blPrintCounter = BlPrintCounter::firstOrCreate(
+            ['bl_draft_id' => $blDraftId],
+            ['print_count' => 0]
+        );
+    
+        if ($blPrintCounter->print_count + 1 > 3) {
+            return response()->json(['success' => false, 'message' => 'Print limit exceeded']);
+        }
+    
+        $blPrintCounter->increment('print_count', 1);
+    
+        return response()->json(['success' => true]);
+    }
+    
+    public function printCounter(Request $request)
+    {
+        $query = $request->input('query');
+        $blDrafts = [];
+        
+        if ($query) {
+            $blDrafts = BlDraft::where('ref_no', 'LIKE', "%{$query}%")
+                ->leftJoin('bl_print_counter', 'bl_draft.id', '=', 'bl_print_counter.bl_draft_id')
+                ->select('bl_draft.id as bl_draft_id', 'bl_draft.ref_no', 'bl_print_counter.print_count')
+                ->get();
+        }
+        
+        return view('bldraft.bldraft.print_counter', [
+            'blDrafts' => $blDrafts,
+            'query' => $query,
+        ]);
+    }
+    
+    public function updatePrintCounter(Request $request)
+    {
+        $printCounts = $request->input('print_count', []);
+        $query = $request->input('query');
+        
+        foreach ($printCounts as $blDraftId => $printCount) {
+            $blPrintCounter = BlPrintCounter::where('bl_draft_id', $blDraftId)->first();
+    
+            if ($blPrintCounter) {
+                $blPrintCounter->print_count = $printCount;
+                $blPrintCounter->save();
+            } else {
+                BlPrintCounter::create([
+                    'bl_draft_id' => $blDraftId,
+                    'print_count' => $printCount,
+                ]);
+            }
+        }
+        
+        return redirect()->route('bldraft.printcounter', ['query' => $query])->with('success', 'Print counters updated successfully.');
+    }
 
     public function edit(BlDraft $bldraft)
     {

@@ -8,7 +8,7 @@
                         <nav class="breadcrumb-two" aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a a href="javascript:void(0);">Quotations</a></li>
-                                <li class="breadcrumb-item  active"><a href="javascript:void(0);">Quotations Gate</a>
+                                <li class="breadcrumb-item  active"><a href="javascript:void(0);">Export Quotations</a>
                                 </li>
                                 <li class="breadcrumb-item"></li>
                             </ol>
@@ -115,8 +115,8 @@
                                     <th>validity to</th>
                                     <th>Equipment Type</th>
                                     <th>Ofr</th>
+                                    <th>free time</th>
                                     <th>place of acceptence</th>
-                                    <th>place of delivery</th>
                                     <th>load port</th>
                                     <th>discharge port</th>
                                     <th>Status</th>
@@ -149,8 +149,12 @@
                                             {{ optional($desc)->ofr }}@if (!$loop->last)<br>@endif
                                             @endforeach
                                         </td>
+                                        <td>
+                                            @foreach($item->quotationDesc as $desc)
+                                            {{ optional($desc)->free_time }}@if (!$loop->last)<br>@endif
+                                            @endforeach
+                                        </td>
                                         <td>{{optional($item->placeOfAcceptence)->code}}</td>
-                                        <td>{{optional($item->placeOfDelivery)->code}}</td>
                                         <td>{{optional($item->loadPort)->code}}</td>
                                         <td>{{{optional($item->dischargePort)->code}}}</td>
 
@@ -166,8 +170,8 @@
                                         <td class="text-center">
                                             <ul class="table-controls">
                                                 @permission('Quotation-Edit')
-                                                @if( $item->status != 'approved' )
-                                                    <li>
+                                                @if($item->status == "pending")
+                                                <li>
                                                         <a href="{{route('quotations.edit',['quotation'=>$item->id])}}"
                                                            data-toggle="tooltip" data-placement="top" title=""
                                                            data-original-title="edit">

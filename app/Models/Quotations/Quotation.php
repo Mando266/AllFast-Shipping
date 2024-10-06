@@ -104,58 +104,36 @@ class Quotation extends Model implements PermissionSeederContract
                 // dd($des,$inputs);
                 $des->update([
                     'quotation_id'=>$input['quotation_id'],
-                    'charge_type'=>$input['charge_type'],
-                    'currency'=>$input['currency'],
-                    'unit'=>$input['unit'],
-                    'selling_price'=>$input['selling_price'],
-                    'payer'=>$input['payer'],
-                    'equipment_type_id'=>$input['equipments_type'],
+                    'request_type' => $input['request_type'],
+                    'ofr' => $input['ofr'],
+                    'currency' => $input['currency'],
+                    'equipment_type_id' => $input['equipment_type_id'],
+                    'free_time' => $input['free_time'],
+                    'thc_payment' => $input['thc_payment'],
+                    'soc' => $input['soc'] ?? 0,
+                    'imo' => $input['imo'] ?? 0,
+                    'oog' => $input['oog'] ?? 0,
+                    'rf' => $input['rf'] ?? 0,
+                    'nor' => $input['nor'] ?? 0,
                 ]);
             }
             else{
                 QuotationDes::create([
                     'quotation_id'=>$input['quotation_id'],
-                    'charge_type'=>$input['charge_type'],
-                    'currency'=>$input['currency'],
-                    'unit'=>$input['unit'],
-                    'selling_price'=>$input['selling_price'],
-                    'payer'=>$input['payer'],
-                    'equipment_type_id'=>$input['equipments_type'],
+                    'ofr' => $input['ofr'],
+                    'currency' => $input['currency'],
+                    'equipment_type_id' => $input['equipment_type_id'],
+                    'request_type' => $input['request_type'],
+                    'free_time' => $input['free_time'],
+                    'thc_payment' => $input['thc_payment'],
+                    'soc' => $input['soc'] ?? 0,
+                    'imo' => $input['imo'] ?? 0,
+                    'oog' => $input['oog'] ?? 0,
+                    'rf' => $input['rf'] ?? 0,
+                    'nor' => $input['nor'] ?? 0,
                 ]);
             }
         }
         }
     }
-    public function createOrUpdateLoad($inputs)
-    {
-        if($inputs != null){
-        foreach($inputs as $input){
-            $input['quotation_id'] = $this->id;
-            if( isset($input['id']) ){
-                $load = QuotationLoad::find($input['id']);
-                $load->update([
-                    'quotation_id'=>$input['quotation_id'],
-                    'charge_type'=>$input['charge_type'],
-                    'currency'=>$input['currency'],
-                    'unit'=>$input['unit'],
-                    'selling_price'=>$input['selling_price'],
-                    'payer'=>$input['payer'],
-                    'equipment_type_id'=>$input['equipments_type'],
-                ]);
-            }
-            else{
-                QuotationLoad::create([
-                    'quotation_id'=>$input['quotation_id'],
-                    'charge_type'=>$input['charge_type'],
-                    'currency'=>$input['currency'],
-                    'unit'=>$input['unit'],
-                    'selling_price'=>$input['selling_price'],
-                    'payer'=>$input['payer'],
-                    'equipment_type_id'=>$input['equipments_type'],
-                ]);
-            }
-        }
-    }
-    }
-
 }

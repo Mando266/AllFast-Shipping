@@ -51,10 +51,10 @@ class BookingCalculationService
 
     public function containersCalculation($containers,array $payload =[])
     {
-        
         $movementCompletedIds = $this->getMovementCompletedIds();
         $movementDCHFId = $this->getDCHFMovementId();
-        $movementId = $payload['from'] ?? $movementDCHFId;
+        
+        $main_movementId = isset($payload['from']) ? $payload['from'] : null;
         $applyDays = 0;
         $applyDays += isset($payload['apply_first_day']) ? 1 : 0;
         $applyDays -= isset($payload['apply_last_day']) ? 1 : 0;
@@ -63,18 +63,19 @@ class BookingCalculationService
         $status = 'in_completed';
         $to_date=isset($payload['to_date'])?Carbon::parse($payload['to_date'])->endOfDay():null;
         $containerCalc = collect();
+        $demurrage= new Demurrage();
         foreach ($containers as $container) {
-            $booking_no=$main_booking_no??$this->getRCVCBookingNoMovement($payload,$container->id)->booking_no;
+            $booking_no=$main_booking_no??$this->getBookingNoMovement($payload,$container->id)->booking_no;
+            $movementId=$main_movementId??$this->getBookingNoStartMovement($payload,$booking_no);
             $payload['booking_no']=$booking_no;
             $demurrage = $this->getDemurrageTriff($booking_no, isset($payload['is_storage']));
             if ($demurrage instanceof \Illuminate\Http\RedirectResponse) {
                     return $demurrage;
             }
-            
-            
             $periodCalc = collect();
             $containerTotal = 0;
-            $freeTime = isset($payload['is_storage']) ? 0 : $this->getBookingFreeTime($booking_no);
+
+            $freeTime = isset($payload['is_storage']) ? 0 : $this->getBookingFreeTime($booking_no,$container);
             $free_time = $freeTime ?? 0;
             $startMovement = $this->getStartMovement($container->id, $movementId, $booking_no);
             if ($startMovement instanceof \Illuminate\Http\RedirectResponse) {
@@ -113,10 +114,15 @@ class BookingCalculationService
             $daysCount = $daysCount + $applyDays;
             $tempDaysCount = $daysCount;
             $diffBetweenDates = 0;
-            $slab = $demurrage->slabs()->firstWhere('container_type_id', $container->container_type_id);
+            
+            $container_type_id=$container->container_type_id;
+            $container_type_id=$this->isReeferBooking($booking_no)?
+            $this->getDryContainerTypeId($container->container_type_id)
+            :$container->container_type_id;
+            $slab = $demurrage->slabs()->firstWhere('container_type_id', $container_type_id);
             if (!$slab) {
                 $containersType = ContainersTypes::find($container->container_type_id);
-                return back()->with('error', "There is No slabs to {$containersType->name}");
+                return back()->with('error', "There is No slabs to {$containersType->name} in port ".optional($demurrage->ports)->name);
             }
 
             foreach (optional($slab)->periods as $period) {
@@ -226,10 +232,13 @@ class BookingCalculationService
 
             $grandTotal = $grandTotal + $containerTotal;
             $tempCollection = collect([
+                'container_id' => $container->id,
+                'booking_id' => $booking_no,
                 'container_no' => $container->code,
                 'bl_no' => $startMovement->bl_no,
                 'status' => trans("home.$status"),
                 'container_type' => $container->containersTypes->name,
+                'container_type_id' => $container->container_type_id,
                 'from' => $startMovementDate,
                 'to' => $endMovementDate?? today(),
                 'from_code' => optional(optional($startMovement)->movementcode)->code,
@@ -249,12 +258,25 @@ class BookingCalculationService
 
     }
 
-    private function getRCVCBookingNoMovement(array $payload,$containerId)
+    private function getBookingNoStartMovement(array $payload,$booking_no)
+    {
+        $code='DCHF';
+        $booking = $this->getBooking($booking_no);
+        if (!$booking) { return null; }
+        if (isset($payload['is_storage']) && $booking->shipment_type == 'Export') {
+            $code = 'RCVS';
+        }
+        return ContainersMovement::where('code', $code)->first()->id;
+    }
+    
+    private function getBookingNoMovement(array $payload,$containerId)
     {
         $fromDate = Carbon::parse($payload['from_date'])->startOfDay();
         $toDate = Carbon::parse($payload['to_date'])->endOfDay();
+        $movement_id= isset($payload['is_storage'])? 4 : 6 ;
+
         return Movements::select('booking_no')
-                ->where('movement_id', 6)
+                ->where('movement_id', $movement_id)
                 ->where('container_id', $containerId)
                 ->where('company_id', Auth::user()->company_id)
                 ->whereBetween('movement_date', [$fromDate, $toDate])
@@ -317,7 +339,7 @@ class BookingCalculationService
      */
     private function getBooking($id)
     {
-        return Booking::find($id);
+        return Booking::with('quotation')->find($id);
     }
 
     /**
@@ -355,7 +377,6 @@ class BookingCalculationService
         $cal_type = $is_storage ? 'STORAGE' : 'DETENTION';
         $type = strtoupper("{$booking->shipment_type}/{$cal_type}");
         $portId = $booking->shipment_type == 'Export' ? $booking->load_port_id : $booking->discharge_port_id;
-
         $demurrage = Demurrage::where('is_storge', $type)
             ->where('port_id', $portId)
             ->with('slabs.periods')->first();
@@ -368,14 +389,41 @@ class BookingCalculationService
 
     }
 
-    private function getBookingFreeTime($booking_no)
+    public function getDryContainerTypeId($container_type_id)
+    {
+        $containersTypeCode = ContainersTypes::find($container_type_id)->code;
+        $containers_code=[
+            'RH'=>'HC',
+            'FR'=>'HC',
+            'TK'=>'DV',
+        ];
+        return ContainersTypes::where('code', $containers_code[$container_type_id])->first()->id;
+    }
+    public function isReeferBooking($booking_no)
     {
         $booking = $this->getBooking($booking_no);
         if (!$booking) {
             return null;
         }
-
-        return ($booking->free_time > 0) ? $booking->free_time : optional($booking->quotation)->import_detention;
+        $quotation=optional(optional($booking->quotation)->quotationDesc)->first();
+        return ($quotation->nor && $quotation->request_type == 'Reefer');
+    }
+    
+    private function getBookingFreeTime($booking_no,Containers $container)
+    {
+        $booking = $this->getBooking($booking_no);
+        if (!$booking) {
+            return null;
+        }
+        $quotation=optional(optional($booking->quotation)->quotationDesc)->firstWhere('equipment_type_id',$container->container_type_id);
+        if($quotation){
+            return $quotation->free_time;
+        }
+        $bookingDetails=optional($booking->bookingContainerDetails)->firstWhere('container_id',$container->id);
+        if($bookingDetails){
+            return $bookingDetails->free_time;
+            }
+        return null;
 
     }
 }

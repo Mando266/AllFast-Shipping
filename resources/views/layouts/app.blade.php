@@ -127,6 +127,17 @@
                     <strong>Error!</strong><span> {{ session()->get('error')}} </span>
                 </div>
             @endif
+            @if(session()->has('warning'))
+                <div class="alert alert-arrow-left alert-icon-left alert-light-warning  m-4 d-block"
+                role="alert">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <svg xmlns="http://www.w3.org/2000/svg" data-dismiss="alert" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x close"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bell"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <strong>Warning!</strong><span> {{ session()->get('warning')}} </span>
+
+                </div>
+            @endif
             @yield('content')
 
             <div class="footer-wrapper hide">
@@ -239,21 +250,63 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             'use strict';
-            var form = document.getElementById('createForm');
+            const form = document.getElementById('createForm');
+
+            function validateSelectpicker(selectpicker) {
+                const button = selectpicker.parentElement.querySelector('.dropdown-toggle');
+                const searchBox = selectpicker.parentElement.querySelector('.bs-searchbox input');
+                const dropdownItems = selectpicker.parentElement.querySelectorAll('.dropdown-item .check-mark');
+                const isValid = selectpicker.value && selectpicker.value.trim() !== '';
+
+                button.style.border = isValid ? '1px solid green' : '1px solid red';
+                button.style.boxShadow = 'none';
+
+                if (searchBox) {
+                    searchBox.style.border = isValid ? '1px solid green' : '1px solid red';
+                    searchBox.style.boxShadow = 'none';
+                }
+
+                selectpicker.style.borderColor = '';
+                selectpicker.style.backgroundImage = 'none';
+                selectpicker.style.boxShadow = 'none';
+
+                if (isValid) {
+                    dropdownItems.forEach(item => item.style.display = 'none');
+                }
+            }
+
+            form.querySelectorAll('.selectpicker[required]').forEach(selectpicker => {
+                selectpicker.addEventListener('change', () => validateSelectpicker(selectpicker));
+            });
+
             form.addEventListener('submit', function (event) {
-                if (form.checkValidity() === false) {
+                let isValid = true;
+                form.querySelectorAll('.selectpicker[required]').forEach(selectpicker => {
+                    if (!selectpicker.value || selectpicker.value.trim() === '') {
+                        isValid = false;
+                    }
+                    validateSelectpicker(selectpicker);
+                });
+
+                if (!isValid) {
                     event.preventDefault();
-                    event.stopPropagation();
                 }
 
                 form.classList.add('was-validated');
             });
 
-            // Initialize selectpicker after the document is fully loaded
             $('.selectpicker').selectpicker();
         });
     </script>
-
+    <script>
+        $(document).ready(function() {
+            $('.selectpicker').each(function() {
+                    $(this).prepend('<option value="">{{ trans("forms.select") }}</option>');
+                
+                $(this).selectpicker('refresh'); // Refresh the selectpicker to include the new option
+            });
+        });
+    </script>
     <script src="{{asset('assets/js/custom.js')}}"></script>
     <!-- END GLOBAL MANDATORY SCRIPTS -->
     <!-- BEGIN PAGE LEVEL PLUGINS/CUSTOM SCRIPTS -->

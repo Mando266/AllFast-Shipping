@@ -41,8 +41,8 @@
                                                 Shipper
                                             </option>
                                             @endif
-                                            @if(optional($bldraft->booking->forwarder)->name != null)
-                                                <option value="{{optional($bldraft)->ffw_id}}">{{ optional($bldraft->booking->forwarder)->name }}
+                                            @if(optional(optional($bldraft->booking)->forwarder)->name != null ||optional($bldraft->forwarder)->name != null)
+                                                <option value="{{optional($bldraft)->ffw_id}}">{{ optional(optional($bldraft->booking)->forwarder)->name??optional($bldraft->forwarder)->name }}
                                                     Forwarder
                                                 </option>
                                             @endif
@@ -406,7 +406,8 @@
                                             <input type="text" id="Charge Description"
                                                    name="invoiceChargeDesc[0][charge_description]"
                                                    class="form-control" autocomplete="off"
-                                                   placeholder="Charge Description" value="Storage">
+                                                   placeholder="Charge Description" value="{{ isset($code) ? $code->name : 'Storage' }}">
+                                             
                                         </td>
                                         <td><input type="text" class="form-control" id="size_small"
                                                    name="invoiceChargeDesc[0][size_small]"

@@ -8,7 +8,7 @@
                         <nav class="breadcrumb-two" aria-label="breadcrumb">
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a a href="javascript:void(0);">Booking</a></li>
-                                <li class="breadcrumb-item  active"><a href="javascript:void(0);">Import Booking</a></li>
+                                <li class="breadcrumb-item  active"><a href="javascript:void(0);">Export Booking</a></li>
                                 <li class="breadcrumb-item"></li>
                             </ol>
                         </nav>
@@ -140,18 +140,14 @@
                                 <label for="voyage_id_both">Vessel / Voyage </label>
                                 <select class="selectpicker form-control" id="voyage_id_both" data-live-search="true"
                                         name="voyage_id_both" data-size="10"
-                                        title="{{trans('forms.select')}}">
+                                        title="{{trans('forms.select')}}" multiple>
                                     @foreach ($voyages as $item)
-                                        <option
-                                            value="{{$item->id}}" {{$item->id == old('voyage_id_both',request()->input('voyage_id_both')) ? 'selected':''}}>{{optional($item->vessel)->name}}
-                                            / {{$item->voyage_no}} - {{ optional($item->leg)->name }}</option>
+                                        <option value="{{ $item->id }}" 
+                                            {{ in_array($item->id, old('voyage_id_both', request()->input('voyage_id_both', []))) ? 'selected' : '' }}>
+                                            {{ optional($item->vessel)->name }} / {{ $item->voyage_no }} - {{ optional($item->leg)->name }}
+                                        </option>
                                     @endforeach
                                 </select>
-                                @error('voyage_id_both')
-                                <div style="color: red;">
-                                    {{$message}}
-                                </div>
-                                @enderror
                             </div>
 
                             <div class="form-group col-md-3">
@@ -468,7 +464,7 @@
         });
         $('#search-btn').click(() => {
             searchForm.attr('method', 'get');
-            searchForm.attr('action', '{{ route('booking.index') }}');
+            searchForm.attr('action', '{{ route('booking.export') }}');
 
             searchForm.submit();
         });
