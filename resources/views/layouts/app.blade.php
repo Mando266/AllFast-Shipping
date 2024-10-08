@@ -297,6 +297,27 @@
 
             $('.selectpicker').selectpicker();
         });
+
+        function SetSession(key,value) {
+            $.ajax({
+                url: "{{ route('set-session') }}",
+                type: 'POST',
+                data: {
+                    key: key ,
+                    value: value
+                    },
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') // CSRF protection for Laravel
+                    },
+                success: function (response) {
+                    console.log('Session set successfully', key);
+                    },
+                error: function (error) {
+                    console.log('Error:', error);
+                    }});
+            };
+
+        
     </script>
     <script>
         $(document).ready(function() {

@@ -21,13 +21,13 @@ class StorageInvoiceController extends Controller
      */
     public function __invoke(Request $request)
     {
-
+        $data = session('storage_invoice');
         $charges = ChargesDesc::firstWhere('code','10007603');
         $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
         $qty = $bldraft->bookingContainerDetails->count();
         $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $containerDetails = [];
-        foreach (json_decode($request->data,true) as $container) {
+        foreach (json_decode($data,true) as $container) {
             $containerDetails []= 'Container No: ' .str_pad($container['container_no'], 12)
             .' To Code: ' .$container['to_code']
             .' daysCount: ' .$container['daysCount']

@@ -23,7 +23,8 @@ class ExtentionStorageController extends Controller
     {
 
         $codes=['SNTC','No Next Move'];
-        $containers=json_decode($request->data,true);
+        $data = session('storage_ext');
+        $containers=json_decode($data,true);
         $containers = array_filter($containers, function($container) use ($codes) {
             return in_array($container['to_code'],$codes);
         });

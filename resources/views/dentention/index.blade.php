@@ -297,23 +297,13 @@
 
     <script>
         let company_id = "{{auth()->user()->company_id}}";
-        let selectedCodes = '{{ implode('
-            , ',$input['
-        container_ids '] ??[]) }}'
+        let selectedCodes = '{{ implode(',',$input['container_ids'] ??[]) }}'
         selectedCodes = selectedCodes.split(',').filter(item => item !== '')
         $(function() {
             if ($('#booking_no').val()) {
                 $('#booking_no').change();
-                $('#from_code').val({
-                    {
-                        old('from', isset($input) ? $input['from'] : '')
-                    }
-                }).trigger('change');
-                $('#to_code').val({
-                    {
-                        old('to', isset($input) ? $input['to'] : '')
-                    }
-                }).trigger('change');
+                $('#from_code').val({{old('from', isset($input) ? $input['from'] : '')}}).trigger('change');
+                $('#to_code').val({{old('to', isset($input) ? $input['to'] : '')}}).trigger('change');
             }
         });
 
@@ -369,49 +359,20 @@
             let calculation = $('#calculation').val();
             formData += '&booking_ref=' + encodeURIComponent($('#booking_no').val());
             formData += '&grandTotal=' + encodeURIComponent(grandTotal);
-            formData += '&calculation=' + encodeURIComponent(calculation);
-            // window.location.href = "{{-- route('debit-invoice') --}}?" + formData;
-            $.ajax({
-                url: "{{ route('debit-invoice') }}"
-                , type: 'POST'
-                , data: formData
-                , headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-                , success: function(response) {
-                    // console.log(response);
-                    window.location.href = "{{ route('create-debit-invoice') }}?" + response;
-                }
-                , error: function(error) {
-                    console.log('Error:', error);
-                }
-            });
-
+            // formData += '&calculation=' + encodeURIComponent(calculation);
+            SetSession("detention_invoice",calculation);
+            window.location.href = "{{ route('debit-invoice') }}?" + formData;
         });
-
+        
         $('#create_extention').click(function(e) {
             e.preventDefault();
             let formData = $('#invoiceForm').serialize();
             let calculation = $('#calculation').val();
-            formData += '&data=' + encodeURIComponent(calculation);
+            // formData += '&data=' + encodeURIComponent(calculation);
+            SetSession("detention_ext",calculation);
+
             formData += '&booking_ref=' + encodeURIComponent($('#booking_no').val());
-            // window.location.href = "{{-- route('extention-dententions') --}}?" + formData;
-            $.ajax({
-                url: "{{ route('extention-dententions') }}"
-                , type: 'POST'
-                , data: formData
-                , headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-                , success: function(response) {
-                    window.location.href = "{{ route('create-extention-dententions') }}?" + response;
-
-                }
-                , error: function(error) {
-                    console.log('Error:', error);
-                }
-            });
-
+            window.location.href = "{{ route('extention-dententions') }}?" + formData;
         });
 
     </script>

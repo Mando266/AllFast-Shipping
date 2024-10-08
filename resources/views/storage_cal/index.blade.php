@@ -366,12 +366,11 @@
             let grandTotalText = $('#grandTotal').text();
             let grandTotal = grandTotalText.match(/\d+/);
             grandTotal = grandTotal ? parseInt(grandTotal[0], 10) : 0;
-            let periods = $('#periods').val();
             let calculation = $('#calculation').val();
-            formData += '&data=' + encodeURIComponent(calculation);
+            SetSession("storage_invoice",calculation);
+            // formData += '&data=' + encodeURIComponent(calculation);
             formData +='&'+type+'=' + encodeURIComponent($('#booking_no').val());
             formData += '&grandTotal=' + encodeURIComponent(grandTotal);
-            formData += '&periods=' + encodeURIComponent(periods);
             formData += '&add_egp=' + encodeURIComponent('USD');
             window.location.href = "{{ route('storage-invoice') }}?" + formData;
         });
@@ -380,7 +379,8 @@
             let type=(shipment_type == 'Export')?'bldraft_id':'booking_ref';
             let formData = $('#invoiceForm').serialize();
             let calculation = $('#calculation').val();
-            formData += '&data=' + encodeURIComponent(calculation);
+            SetSession("storage_ext",calculation);
+            // formData += '&data=' + encodeURIComponent(calculation);
             formData += '&'+type+'=' + encodeURIComponent($('#booking_no').val());
             window.location.href = "{{ route('extention-storage') }}?" + formData;
         });

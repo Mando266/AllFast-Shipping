@@ -20,16 +20,20 @@ class ExtentionDententionController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function handelExtentionDentention(Request $request)
+    public function __invoke(Request $request)
     {
         $codes=['SNTC','No Next Move'];
-        $containers=json_decode($request->data,true);
+        $data = session('detention_ext');
+        $containers=json_decode($data,true);
         $containers = array_filter($containers, function($container) use ($codes) {
             return in_array($container['to_code'],$codes);
         });
         if (empty($containers)) {
             return back()->with(['warning'=>trans('home.extention_msg'), 'input' => $request->input()]);
         }
+        $charges = ChargesDesc::orderBy('id')->get();
+        $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
+        $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $selectedCode=40;
         $invoiceBooking = new InvoiceBooking();
         $invoice = Invoice::with('invoiceBooking')->where('booking_ref',$request->booking_no)
@@ -38,8 +42,6 @@ class ExtentionDententionController extends Controller
         if($invoice){
             $invoiceBooking = $invoice->invoiceBooking()->whereIn('to_code',$codes)->get();
         }
-
-        
         $grandTotal=0;
         $note=[];
         foreach ($containers as $container) {
@@ -52,42 +54,19 @@ class ExtentionDententionController extends Controller
                     .' remain: '        .$rem ;
             $grandTotal+=$rem;
         }  
-        // return view('invoice.invoice.create_debit',[
-        //         'notes' => $note ?? null,
-        //         'totalqty'=>count($containers),
-        //         'detentionAmount'=>$grandTotal,
-        //         'bldraft'=>$bldraft,
-        //         'voyages'=>$voyages,
-        //         'charges' => $charges,
-        //         'selectedCode' => $selectedCode,
-        //         'bookingDetails'=>json_encode($containers),
-        //         ]);
-                
-                           return http_build_query([
-                           'notes' => $note ?? null,
-                           'totalqty'=>count($containers),
-                           'bookingDetails'=>json_encode($containers),
-                           'detentionAmount'=>$grandTotal,
-                           'booking_no' => $request->booking_no,
-                           'selectedCode' => $selectedCode,
-                           'booking_ref' => $request->booking_ref,
-                           'grandTotal' => $request->grandTotal,
-                           ]);
-        
+        return view('invoice.invoice.create_debit',[
+                'notes' => $note ?? null,
+                'totalqty'=>count($containers),
+                'detentionAmount'=>$grandTotal,
+                'bldraft'=>$bldraft,
+                'voyages'=>$voyages,
+                'charges' => $charges,
+                'selectedCode' => $selectedCode,
+                'bookingDetails'=>json_encode($containers),
+                ]);
     }
 
 
-    public function createExtentionDentention(Request $request)
-    {
-        $charges = ChargesDesc::orderBy('id')->get();
-        $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
-        $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
 
-        return view('invoice.invoice.create_debit',$request->all()+[
-        'charges'=>$charges,
-        'voyages'=>$voyages,
-        'bldraft' => $bldraft,
-        ]);
-    }
 
 }

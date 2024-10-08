@@ -18,8 +18,6 @@ use App\Http\Controllers\PortChargeInvoiceController;
 use App\Http\Controllers\Trucker\TruckerGateController;
 use App\Http\Controllers\Quotations\QuotationsController;
 use App\Http\Controllers\Quotations\LocalPortTriffDetailesController;
-use App\Http\Controllers\DententionStorageCalculation\DebitInvoiceController;
-use App\Http\Controllers\DententionStorageCalculation\ExtentionDententionController;
 use App\Http\Controllers\DententionStorageCalculation\StorageCalculationPeriodController;
 use App\Http\Controllers\DententionStorageCalculation\DententionCalculationPeriodController;
 
@@ -279,11 +277,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('storage', 'StorageController');
         Route::resource('calculation-dentention-period','DententionCalculationPeriodController');
         Route::resource('calculation-storage-period','StorageCalculationPeriodController');
-        Route::post('debit-invoice',[DebitInvoiceController::class,'handelDebitInvoiceData'])->name('debit-invoice');
-        Route::get('create-debit-invoice',[DebitInvoiceController::class,'createDebitInvoiceData'])->name('create-debit-invoice');
-        Route::post('extention-dententions',[ExtentionDententionController::class,'handelExtentionDentention'])->name('extention-dententions');
-        Route::get('create-extention-dententions',[ExtentionDententionController::class,'createExtentionDentention'])->name('create-extention-dententions');
-        
+        Route::get('debit-invoice',DebitInvoiceController::class)->name('debit-invoice');
+        Route::get('extention-dententions',ExtentionDententionController::class)->name('extention-dententions');
         Route::get('storage-invoice',StorageInvoiceController::class)->name('storage-invoice');
         Route::get('extention-storage',ExtentionStorageController::class)->name('extention-storage');
     });
@@ -332,3 +327,8 @@ Route::group(['middleware' => 'auth'], function () {
 Auth::routes(['register' => false]);
 require 'mail.php';
 require 'dev.php';
+
+Route::post('set-session', function () {
+    session([request('key') => request('value')]);
+    return response()->json();
+})->name('set-session');
