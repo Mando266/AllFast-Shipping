@@ -23,7 +23,8 @@ class ExtentionDententionController extends Controller
     public function __invoke(Request $request)
     {
         $codes=['SNTC','No Next Move'];
-        $containers=json_decode($request->data,true);
+        $data = session('detention_ext');
+        $containers=json_decode($data,true);
         $containers = array_filter($containers, function($container) use ($codes) {
             return in_array($container['to_code'],$codes);
         });
@@ -41,13 +42,6 @@ class ExtentionDententionController extends Controller
         if($invoice){
             $invoiceBooking = $invoice->invoiceBooking()->whereIn('to_code',$codes)->get();
         }
-        // $invoiceBooking =InvoiceBooking::whereHas('invoice', function ($query) {
-            // $query->where('type','debit');
-        // })
-        // ->whereIn('to_code',$codes)
-        // ->where('booking_id',$request->booking_no)
-        // ->get();
-        
         $grandTotal=0;
         $note=[];
         foreach ($containers as $container) {
@@ -70,7 +64,9 @@ class ExtentionDententionController extends Controller
                 'selectedCode' => $selectedCode,
                 'bookingDetails'=>json_encode($containers),
                 ]);
-        
     }
+
+
+
 
 }

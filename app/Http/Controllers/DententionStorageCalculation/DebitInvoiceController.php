@@ -21,24 +21,22 @@ class DebitInvoiceController extends Controller
      */
     public function __invoke(Request $request)
     {
+        $calculation = session('detention_invoice');
         $charges = ChargesDesc::orderBy('id')->get();
         $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
         $totalqty = $bldraft->bookingContainerDetails->count();
         $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $containerDetails = [];
         $selectedCode=40;
-        // foreach (json_decode($request->periods,true) as $item) {
-        //         $formattedString = str_pad($item['name'], 12) . ' ' . $item['days'] . ' Days ' . $item['total'];
-        //         $containerDetails[] = $formattedString;
-        //     }
-        foreach (json_decode($request->calculation,true) as $container) {
+
+        foreach (json_decode($calculation,true) as $container) {
             $containerDetails []= 'Container No: ' .str_pad($container['container_no'], 12)
             .' To Code: ' .$container['to_code']
             .' daysCount: ' .$container['daysCount']
             .' freeTime: ' .$container['freeTime']
             .' Total: ' .$container['total']
-                    ;
-            }
+            ;
+        }
         return view('invoice.invoice.create_debit',[
             'notes' => $containerDetails ?? null,
             'totalqty'=>$totalqty,
@@ -47,8 +45,9 @@ class DebitInvoiceController extends Controller
             'voyages'=>$voyages,
             'charges' => $charges,
             'selectedCode' => $selectedCode,
-            'bookingDetails'=>$request->calculation,
-        ]);
+            'bookingDetails'=>$calculation,
+            ]);
     }
+        
 
 }

@@ -284,8 +284,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('calculation-dentention-period','DententionCalculationPeriodController');
         Route::resource('calculation-storage-period','StorageCalculationPeriodController');
         Route::get('debit-invoice',DebitInvoiceController::class)->name('debit-invoice');
-        Route::get('storage-invoice',StorageInvoiceController::class)->name('storage-invoice');
         Route::get('extention-dententions',ExtentionDententionController::class)->name('extention-dententions');
+        Route::get('storage-invoice',StorageInvoiceController::class)->name('storage-invoice');
         Route::get('extention-storage',ExtentionStorageController::class)->name('extention-storage');
     });
     Route::get('export_dentention_calculation',[DententionCalculationPeriodController::class,'export'])->name('export_dentention_calculation');
@@ -333,3 +333,8 @@ Route::group(['middleware' => 'auth'], function () {
 Auth::routes(['register' => false]);
 require 'mail.php';
 require 'dev.php';
+
+Route::post('set-session', function () {
+    session([request('key') => request('value')]);
+    return response()->json();
+})->name('set-session');
