@@ -286,7 +286,6 @@ class MovementController extends Controller
                 'booking'
             )->orderBy('movement_date', 'desc')->orderBy('id', 'desc')->first();
             $container_type = $movement->container_type_id;
-            // dd($container_type);
             if ($movement->movementcode['code'] == 'RCVC' || $movement->movementcode['code'] == 'DCHE' || $movement->movementcode['code'] == 'RCVE') {
                 return view('containers.movements.create', [
                     'voyages' => $voyages,
@@ -713,13 +712,25 @@ class MovementController extends Controller
                 return response()->json(['success' => false, 'message' => 'Booking not found']);
             }
     
+            // Determine whether to use primary or second voyage based on transhipment flag
+            $isTranshipment = $booking->is_transhipment;
+    
+            // Default to primary voyage
             $voyage = $booking->voyage;
-            if (!$voyage) {
-                return response()->json(['success' => false, 'message' => 'Voyage not found for this booking']);
+            $vessel = $voyage->vessel ?? null;
+    
+            // Check if transhipment is enabled and second voyage ID exists
+            if ($isTranshipment == 1 && $booking->voyage_id_second) {
+                // Fetch the second voyage manually using the voyage_id_second
+                $secondVoyage = Voyages::find($booking->voyage_id_second);
+                if ($secondVoyage) {
+                    $voyage = $secondVoyage; // Overwrite the voyage with the second voyage
+                    $vessel = $secondVoyage->vessel ?? null;
+                }
             }
     
+            // Extract other details (same for both cases)
             $leg = $voyage->leg ?? null;
-            $vessel = $voyage->vessel ?? null;
             $loadPort = $booking->loadPort ?? null;
             $dischargePort = $booking->dischargePort ?? null;
     
