@@ -19,18 +19,10 @@ class DebitInvoiceController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function __invoke(Request $request)
+    public function handelDebitInvoiceData(Request $request)
     {
-        $charges = ChargesDesc::orderBy('id')->get();
-        $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
-        $totalqty = $bldraft->bookingContainerDetails->count();
-        $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $containerDetails = [];
-        $selectedCode=40;
-        // foreach (json_decode($request->periods,true) as $item) {
-        //         $formattedString = str_pad($item['name'], 12) . ' ' . $item['days'] . ' Days ' . $item['total'];
-        //         $containerDetails[] = $formattedString;
-        //     }
+        $selectedCode=40;   
         foreach (json_decode($request->calculation,true) as $container) {
             $containerDetails []= 'Container No: ' .str_pad($container['container_no'], 12)
             .' To Code: ' .$container['to_code']
@@ -39,16 +31,32 @@ class DebitInvoiceController extends Controller
             .' Total: ' .$container['total']
                     ;
             }
-        return view('invoice.invoice.create_debit',[
+           return http_build_query([
             'notes' => $containerDetails ?? null,
-            'totalqty'=>$totalqty,
-            'detentionAmount'=>$request->grandTotal,
-            'bldraft'=>$bldraft,
-            'voyages'=>$voyages,
-            'charges' => $charges,
+            'detentionAmount' => $request->grandTotal,
+            'booking_no' => $request->booking_no,
             'selectedCode' => $selectedCode,
-            'bookingDetails'=>$request->calculation,
-        ]);
-    }
+            'bookingDetails' => $request->calculation,
+            'booking_ref' => $request->booking_ref,
+            'grandTotal' => $request->grandTotal,
+            ]);
+    } 
+      
+    public function createDebitInvoiceData(Request $request)
+    {
+
+        $charges = ChargesDesc::orderBy('id')->get();
+        $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
+        $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
+        $totalqty = $bldraft->bookingContainerDetails->count();
+
+        return view('invoice.invoice.create_debit',$request->all()+[
+            'charges'=>$charges,
+            'voyages'=>$voyages,
+            'totalqty' => $totalqty,
+            'bldraft' => $bldraft,
+            ]);
+        }
+        
 
 }
