@@ -388,11 +388,6 @@ class BookingController extends Controller
             'tariff_service' => $request->input('tariff_service'),
             'commodity_code' => $request->input('commodity_code'),
             'commodity_description' => $request->input('commodity_description'),
-            'soc' => $request->input('soc') != null ? 1 : 0,
-            'imo' => $request->input('imo') != null ? 1 : 0,
-            'rf' => $request->input('rf') != null ? 1 : 0,
-            'oog' => $request->input('oog') != null ? 1 : 0,
-            'coc' => $request->input('coc') != null ? 1 : 0,
             'ffw_id' => $request->input('ffw_id'),
             'booking_confirm' => $request->input('booking_confirm'),
             'notes' => $request->input('notes'),
@@ -415,6 +410,11 @@ class BookingController extends Controller
                 $has_gate_in = 1;
             }
             BookingContainerDetails::create([
+                'soc' => $request->input('soc') != null ? 1 : 0,
+                'imo' => $request->input('imo') != null ? 1 : 0,
+                'rf' => $request->input('rf') != null ? 1 : 0,
+                'oog' => $request->input('oog') != null ? 1 : 0,
+                'coc' => $request->input('coc') != null ? 1 : 0,
                 'seal_no' => $details['seal_no'],
                 'qty' => $details['qty'] ?? 1,
                 'container_id' => $details['container_id'],
@@ -426,7 +426,7 @@ class BookingController extends Controller
                 'net_weight'=>$details['net_weight'],
                 'packs'=>$details['packs'],
                 'pack_type'=>$details['pack_type'], 
-                'descripion'=>$details['descripion'] ?? null,  
+                'description'=>$details['description'] ?? null,  
               ]);
         }
 
