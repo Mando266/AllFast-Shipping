@@ -24,11 +24,11 @@
                                 <select class="selectpicker form-control" id="booking_noInput" data-live-search="true" name="booking_no" data-size="10" title="{{trans('forms.select')}}">
                                       
                                     @foreach ($bookings as $item)
-                                        @if(isset($movement))
+                                        {{-- @if(isset($movement))
                                             <option value="{{$item->id}}" {{$item->id == old('booking_no') || $item->id == $movement->booking_no ? 'selected':''}}>{{$item->ref_no}}</option>
-                                        @else
+                                        @else --}}
                                             <option value="{{$item->id}}" {{$item->id == old('booking_no') ? 'selected':''}}>{{$item->ref_no}}</option>
-                                        @endif
+                                        {{-- @endif --}}
                                     @endforeach
                                 </select>
                                 @error('booking_no')
@@ -40,13 +40,13 @@
                             
                             <div class="form-group col-md-4">
                                 <label for="voyage">Voyage No</label>
-                                <input type="text" class="form-control" id="voyage" readonly>
+                                <input type="text" class="form-control" id="voyage" placeholder="Voyage No" readonly>
                                 <input type="hidden" id="voyage_id" name="voyage_id">
                             </div>
                             
                             <div class="form-group col-md-4">
                                 <label for="vessel_id">Vessel Name</label>
-                                <input type="text" class="form-control" id="vessel_name" readonly>
+                                <input type="text" class="form-control" id="vessel_name" placeholder="Vessel Name" readonly>
                                 <input type="hidden" id="vessel_id" name="vessel_id">
                             </div>                            
                                     
@@ -57,9 +57,15 @@
                             <label for="ContainerInput">Container Number <span class="text-warning"> * (Required.) </span></label>
                             <select class="selectpicker form-control" id="ContainerInput" data-live-search="true" name="movement[][container_id]" data-size="10"
                                 title="{{trans('forms.select')}}" multiple="multiple" required>
-                                <!-- Options will be populated by JavaScript -->
+                                @if(isset($container))
+                                    <option value="{{ $container->id }}" selected>{{ $container->code }}</option> <!-- Preselect container from URL -->
+                                @else
+                                    @foreach ($containers as $cont)
+                                        <option value="{{ $cont->id }}" {{ (old('container_id') == $cont->id) ? 'selected' : '' }}>{{ $cont->code }}</option>
+                                    @endforeach
+                                @endif
                             </select>
-                            <input type="hidden" id="containersTypesInput" class="form-control" name="container_type_id" placeholder="Container Type" autocomplete="off">
+                            <input type="hidden" id="containersTypesInput" class="form-control" name="container_type_id" value="{{ $container_type ?? '' }}" placeholder="Container Type" autocomplete="off">
                                 @error('container_id')
                                 <div class ="invalid-feedback">
                                     {{$message}}
@@ -304,7 +310,6 @@ $(document).ready(function(){
                 type: 'GET',
                 data: { booking_no: bookingNo },
                 success: function(response) {
-                    console.log(response); // Log the entire response for debugging
                     if(response.success) {
                         var voyageNo = response.data.voyage_no || '';
                         var legName = response.data.leg_name || '';
