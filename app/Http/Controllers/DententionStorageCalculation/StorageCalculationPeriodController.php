@@ -16,11 +16,11 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Requests\DententionRequest;
 use App\Models\Master\ContainersMovement;
 use App\Services\StorageExportCalculationService;
-use App\Exports\DetentionCalculationPeriodExport;
+use App\Exports\StorageCalculationPeriodExport;
 
 class StorageCalculationPeriodController extends Controller
 {
-  
+
     private StorageExportCalculationService $service;
 
     public function __construct(StorageExportCalculationService $service)
@@ -95,11 +95,11 @@ class StorageCalculationPeriodController extends Controller
     {
         return ContainersMovement::whereIn('code', $codes)->pluck('id')->toarray();
     }
-    
+
     private function downloadExcel($calculation)
     {
         $filename = 'ExportStorage_' . now()->timestamp . '.xls';
-        return Excel::download(new DetentionCalculationPeriodExport($calculation), $filename,\Maatwebsite\Excel\Excel::XLS);
+        return Excel::download(new StorageCalculationPeriodExport($calculation), $filename,\Maatwebsite\Excel\Excel::XLS);
     }
 
 }
