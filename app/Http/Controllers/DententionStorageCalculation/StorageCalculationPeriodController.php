@@ -66,7 +66,7 @@ class StorageCalculationPeriodController extends Controller
         if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
             return $calculation;
         }
-        return $this->downloadExcel($calculation);
+        return $this->downloadExcel($calculation,$payload);
     }
 
     private function getContainerIds(Request $request)
@@ -96,10 +96,11 @@ class StorageCalculationPeriodController extends Controller
         return ContainersMovement::whereIn('code', $codes)->pluck('id')->toarray();
     }
 
-    private function downloadExcel($calculation)
+    private function downloadExcel($calculation,$payload)
     {
         $filename = 'ExportStorage_' . now()->timestamp . '.xls';
-        return Excel::download(new StorageCalculationPeriodExport($calculation), $filename,\Maatwebsite\Excel\Excel::XLS);
+        return Excel::download(new StorageCalculationPeriodExport($calculation,$payload),
+        $filename,\Maatwebsite\Excel\Excel::XLS);
     }
 
 }

@@ -9,15 +9,14 @@ class StorageCalculationPeriodExport extends AbstractExport
 {
 
     protected $data;
-    protected $from_code;
-    protected $to_code;
+    protected $payroll;
 
 
-    public function __construct($data)
+    public function __construct($data,$payroll)
     {
         $this->data = $data['containers'];
-        $this->from_code =$this->data[0]['from_code'];
-        $this->to_code =$this->data[0]['to_code'];
+        $this->from_code = implode('/',$payroll['from_code']);
+        $this->to_code =implode('/',$payroll['to_code']);
     }
 
     public function collection()
