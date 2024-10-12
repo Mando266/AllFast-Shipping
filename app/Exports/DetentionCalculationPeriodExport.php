@@ -9,11 +9,11 @@ class DetentionCalculationPeriodExport extends AbstractExport
 {
 
     protected $data;
-
-
-    public function __construct($data)
+    public function __construct($data,$payroll)
     {
         $this->data = $data['containers'];
+                $this->from_code = implode('/',$payroll['from_code']);
+                $this->to_code =implode('/',$payroll['to_code']);
     }
 
     public function collection()
@@ -48,14 +48,14 @@ class DetentionCalculationPeriodExport extends AbstractExport
             'cntr',
             'type',
             'BL no',
-            'DCHF',
-            'RCVC',
+            "{$this->from_code}",
+            "{$this->to_code}",
             'Total days',
             'FREE DAYS',
             'DM days',
             'Slabs Details',
             'usd',
-           
+
         ];
     }
 }

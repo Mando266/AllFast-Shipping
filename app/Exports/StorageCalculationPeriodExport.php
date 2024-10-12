@@ -9,9 +9,6 @@ class StorageCalculationPeriodExport extends AbstractExport
 {
 
     protected $data;
-    protected $payroll;
-
-
     public function __construct($data,$payroll)
     {
         $this->data = $data['containers'];
