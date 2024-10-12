@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 class StorageExportCalculationService extends BookingCalculationService
 {
 
-  
+
     public function containersCalculation($containers,array $payload =[])
     {
         $movementCompletedIds = $this->getMovementCompletedIds();
@@ -44,11 +44,9 @@ class StorageExportCalculationService extends BookingCalculationService
             if ($startMovement instanceof \Illuminate\Http\RedirectResponse) {
                 return $startMovement;
             }
-            $startMovementDate = $startMovement->movement_date;
+            $startMovementDate = Carbon::parse($startMovement->movement_date)->startOfDay();
             $endMovement = $this->getEndMovement($payload, $container->id, $startMovementDate);
             $lastMovement = $this->getLastMovement($payload,$container->id);
-           
-
             if (in_array(optional($endMovement)->movement_id, $movementCompletedIds)) {
                 $status = 'completed';
             }
@@ -68,7 +66,7 @@ class StorageExportCalculationService extends BookingCalculationService
 
 
 
-            
+
             if ($endMovementDate) {
                 $daysCount = Carbon::parse($endMovementDate)->startOfDay()->diffInDays(Carbon::parse($startMovementDate)->startOfDay());
             } else {
@@ -218,7 +216,7 @@ class StorageExportCalculationService extends BookingCalculationService
         $code=$payload['from_code'];
         return ContainersMovement::where('code', $code)->first()->id;
     }
-    
+
     private function getBookingNoMovement(array $payload,$containerId)
     {
         $fromDate = Carbon::parse($payload['from_date'])->startOfDay();
@@ -231,33 +229,29 @@ class StorageExportCalculationService extends BookingCalculationService
                 ->whereBetween('movement_date', [$fromDate, $toDate])
                 ->latest('movement_date')->first();
     }
-    
+
     private function getLastMovement(array $payload,$containerId)
     {
         return  Movements::where('container_id', $containerId)
                 ->where('booking_no', $payload['booking_no'])
                 ->latest('movement_date')->first();
     }
-    
+
     private function getEndMovement(array $payload, $containerId, $startMovementDate)
     {
         $to_date=isset($payload['to_date'])?Carbon::parse($payload['to_date'])->endOfDay():null;
-        $to=isset($payload['to'])?$payload['to']:null;
+        $to=isset($payload['to'])?$payload['to'][0]:null;
         $booking_no=isset($payload['booking_no'])?$payload['booking_no']:null;
         $endMovement = Movements::where('container_id', $containerId)
             ->where('booking_no', $booking_no);
-
         if ($to_date == null && $to == null) {
-
             $endMovement->where('movement_date', '>', $startMovementDate);
-
         } elseif ($to_date != null && $to == null) {
             $endMovement->where('movement_date', '>', $startMovementDate)
                 ->where('movement_date', '<=', $to_date)
                 ;
         } elseif ($to_date == null && $to != null) {
-            $endMovement->where('movement_id', $to)
-                ;
+            $endMovement->where('movement_id', $to);
         } else {
             $endMovement->where('movement_id', $to)
                 ->where('movement_date', '>', $startMovementDate)
@@ -302,10 +296,10 @@ class StorageExportCalculationService extends BookingCalculationService
         $codes = ['TRFE','LODT','LODF','LODE','SNTS'];
         return $this->getMovementIds($codes);
     }
-    
+
     private function getMovementIds($codes)
     {
-        return ContainersMovement::whereIn('code', $codes)->pluck('id')->toarray();        
+        return ContainersMovement::whereIn('code', $codes)->pluck('id')->toarray();
     }
 
     /**

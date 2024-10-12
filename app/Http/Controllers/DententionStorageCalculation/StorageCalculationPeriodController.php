@@ -61,6 +61,7 @@ class StorageCalculationPeriodController extends Controller
             'shipment_type'=>$request->shipment_type,
             'apply_first_day'=>1,
             'is_storage'=>1,
+            'to'=>$this->getMovementIds($request->to_code)
             ];
         $calculation = $this->service->containersCalculation( $containers,$payload);
         if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
@@ -86,6 +87,7 @@ class StorageCalculationPeriodController extends Controller
             })
             ->whereIn('movement_id', $movementIds)
             ->where('company_id', Auth::user()->company_id)
+            ->where('booking_no',1178)
             ->whereBetween('movement_date', [$fromDate, $toDate])
             ->distinct('container_id')
             ->pluck('container_id',)->toArray();
