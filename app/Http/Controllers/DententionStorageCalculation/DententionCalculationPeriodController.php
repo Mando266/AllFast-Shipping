@@ -20,7 +20,7 @@ use App\Exports\DetentionCalculationPeriodExport;
 
 class DententionCalculationPeriodController extends Controller
 {
-  
+
     private DetentionExportCalculationService $service;
 
     public function __construct(DetentionExportCalculationService $service)
@@ -47,7 +47,7 @@ class DententionCalculationPeriodController extends Controller
     public function export(Request $request)
     {
         $containerIds = $this->getContainerIds($request);
-        
+
         if (empty($containerIds)) {
             $codes = implode('/',$this->getCodes($request->to_code));
             return back()->with('error', "No $codes Movement for in this Period $request->from_date to $request->to_date");
@@ -65,7 +65,7 @@ class DententionCalculationPeriodController extends Controller
         if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
             return $calculation;
         }
-        return $this->downloadExcel($calculation);
+        return $this->downloadExcel($calculation,$payload);
     }
 
     private function getContainerIds(Request $request)
@@ -99,11 +99,13 @@ class DententionCalculationPeriodController extends Controller
         $codes = $this->getCodes($codes);
         return ContainersMovement::whereIn('code', $codes)->pluck('id')->toarray();
     }
-        
-    private function downloadExcel($calculation)
+
+    private function downloadExcel($calculation,$payload)
     {
+        $payload['to_code']=$this->getCodes($payload['to_code']);
         $filename = 'ExportDentention_' . now()->timestamp . '.xls';
-        return Excel::download(new DetentionCalculationPeriodExport($calculation), $filename,\Maatwebsite\Excel\Excel::XLS);
+        return Excel::download(new DetentionCalculationPeriodExport($calculation,$payload),
+        $filename,\Maatwebsite\Excel\Excel::XLS);
     }
 
 }

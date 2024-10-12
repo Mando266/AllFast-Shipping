@@ -5,21 +5,20 @@ namespace App\Exports;
 use Carbon\Carbon;
 
 
-class DetentionCalculationPeriodExport extends AbstractExport
+class StorageCalculationPeriodExport extends AbstractExport
 {
 
     protected $data;
     public function __construct($data,$payroll)
     {
         $this->data = $data['containers'];
-                $this->from_code = implode('/',$payroll['from_code']);
-                $this->to_code =implode('/',$payroll['to_code']);
+        $this->from_code = implode('/',$payroll['from_code']);
+        $this->to_code =implode('/',$payroll['to_code']);
     }
 
     public function collection()
     {
         return $this->data->map(function ($item,$index) {
-
             $DM_days = max($item['daysCount'] - $item['freeTime'], 0);
             $days_slabs = $item['periods']->map(function ($period) {
                 return $period['name'].' =>'.$period['days'] . '| ';

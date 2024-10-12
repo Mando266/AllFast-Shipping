@@ -2,6 +2,7 @@
 @section('content')
 <div class="layout-px-spacing">
     <div class="row layout-top-spacing">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 layout-spacing">
             <div class="widget widget-one">
                 <div class="widget-heading">
@@ -366,9 +367,10 @@
             let grandTotalText = $('#grandTotal').text();
             let grandTotal = grandTotalText.match(/\d+/);
             grandTotal = grandTotal ? parseInt(grandTotal[0], 10) : 0;
+
             let calculation = $('#calculation').val();
             SetSession("storage_invoice",calculation);
-            // formData += '&data=' + encodeURIComponent(calculation);
+
             formData +='&'+type+'=' + encodeURIComponent($('#booking_no').val());
             formData += '&grandTotal=' + encodeURIComponent(grandTotal);
             formData += '&add_egp=' + encodeURIComponent('USD');
@@ -378,9 +380,11 @@
             e.preventDefault();
             let type=(shipment_type == 'Export')?'bldraft_id':'booking_ref';
             let formData = $('#invoiceForm').serialize();
+
             let calculation = $('#calculation').val();
+
             SetSession("storage_ext",calculation);
-            // formData += '&data=' + encodeURIComponent(calculation);
+
             formData += '&'+type+'=' + encodeURIComponent($('#booking_no').val());
             window.location.href = "{{ route('extention-storage') }}?" + formData;
         });
