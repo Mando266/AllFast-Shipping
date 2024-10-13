@@ -61,6 +61,7 @@ class StorageCalculationPeriodController extends Controller
             'shipment_type'=>$request->shipment_type,
             'apply_first_day'=>1,
             'is_storage'=>1,
+            'to'=>$this->getMovementIds($request->to_code)
             ];
         $calculation = $this->service->containersCalculation( $containers,$payload);
         if ($calculation instanceof \Illuminate\Http\RedirectResponse) {
