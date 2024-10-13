@@ -87,7 +87,6 @@ class StorageCalculationPeriodController extends Controller
             })
             ->whereIn('movement_id', $movementIds)
             ->where('company_id', Auth::user()->company_id)
-            ->where('booking_no',1178)
             ->whereBetween('movement_date', [$fromDate, $toDate])
             ->distinct('container_id')
             ->pluck('container_id',)->toArray();
