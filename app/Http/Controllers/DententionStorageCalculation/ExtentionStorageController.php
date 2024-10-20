@@ -37,6 +37,7 @@ class ExtentionStorageController extends Controller
         // $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
         if ($request->has('bldraft_id')) {
             $bldraft = BlDraft::where('booking_id', $request->booking_no)->with('blDetails')->first();
+            $request['bldraft_id']=$bldraft->id;
             $qty = $bldraft->blDetails->count();
         } elseif ($request->has('booking_ref')) {
             $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
