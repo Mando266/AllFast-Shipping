@@ -26,6 +26,7 @@ class StorageInvoiceController extends Controller
         if ($request->has('bldraft_id')) {
             $bldraft = BlDraft::where('booking_id', $request->booking_no)->with('blDetails')->first();
             $qty = $bldraft->blDetails->count();
+            $request['bldraft_id']=$bldraft->id;
         } elseif ($request->has('booking_ref')) {
             $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
             $qty = $bldraft->bookingContainerDetails->count();
