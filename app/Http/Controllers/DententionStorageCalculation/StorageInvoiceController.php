@@ -23,8 +23,14 @@ class StorageInvoiceController extends Controller
     {
         $data = session('storage_invoice');
         $charges = ChargesDesc::firstWhere('code','EG-560161093-MSL001');
-        $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
-        $qty = $bldraft->bookingContainerDetails->count();
+        if ($request->has('bldraft_id')) {
+            $bldraft = BlDraft::where('booking_id', $request->booking_no)->with('blDetails')->first();
+            $qty = $bldraft->blDetails->count();
+        } elseif ($request->has('booking_ref')) {
+            $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
+            $qty = $bldraft->bookingContainerDetails->count();
+        }
+                
         $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $containerDetails = [];
         foreach (json_decode($data,true) as $container) {
