@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 
 class StorageInvoiceController extends Controller
 {
-  
+
     /**
      * Store a newly created resource in storage.
      *
@@ -22,7 +22,7 @@ class StorageInvoiceController extends Controller
     public function __invoke(Request $request)
     {
         $data = session('storage_invoice');
-        $charges = ChargesDesc::firstWhere('code','10007603');
+        $charges = ChargesDesc::firstWhere('code','EG-560161093-MSL001');
         $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
         $qty = $bldraft->bookingContainerDetails->count();
         $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
