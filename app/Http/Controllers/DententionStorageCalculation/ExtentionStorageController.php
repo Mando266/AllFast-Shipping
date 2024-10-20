@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\DententionStorageCalculation;
 
+use App\Models\Bl\BlDraft;
 use Illuminate\Http\Request;
 use App\Models\Booking\Booking;
+use App\Models\Invoice\Invoice;
 use App\Models\Voyages\Voyages;
 use App\Models\Invoice\ChargesDesc;
 use App\Http\Controllers\Controller;
@@ -31,8 +33,15 @@ class ExtentionStorageController extends Controller
         if (empty($containers)) {
             return back()->with(['warning'=>trans('home.extention_msg'), 'input' => $request->input()]);
         }
-        $charges = ChargesDesc::firstWhere('code','10007603');
-        $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
+        $charges = ChargesDesc::firstWhere('code','EG-560161093-MSL001');
+        // $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
+        if ($request->has('bldraft_id')) {
+            $bldraft = BlDraft::where('booking_id', $request->booking_no)->with('blDetails')->first();
+            $qty = $bldraft->blDetails->count();
+        } elseif ($request->has('booking_ref')) {
+            $bldraft = Booking::where('id', $request->booking_no)->with('bookingContainerDetails')->first();
+            $qty = $bldraft->bookingContainerDetails->count();
+        }
         $voyages = Voyages::with('vessel')->where('company_id',Auth::user()->company_id)->get();
         $invoiceBooking = new InvoiceBooking();
         
